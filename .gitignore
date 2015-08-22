@@ -1,0 +1,17 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+[Bb]in/
+[Oo]bj/
+
+*.userprefs
+*.suo
+*.pidb
+Thumbs.db
+
+# Nuget packages
+packages/*
+!packages/repositories.config
+
