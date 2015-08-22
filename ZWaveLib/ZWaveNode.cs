@@ -150,6 +150,14 @@ namespace ZWaveLib
 
         #region Public members
 
+        public void UpdateData(string fieldId, object value)
+        {
+            if (Data.ContainsKey(fieldId))
+                Data[fieldId] = value;
+            else
+                Data.Add(fieldId, value);
+        }
+
         /// <summary>
         /// Gets the supported command classes.
         /// </summary>
@@ -268,8 +276,8 @@ namespace ZWaveLib
 
         internal bool SendMessage(byte[] message)
         {
-            var msg = new ZWaveMessage(message);
-            return controller.SendMessage(msg, true);
+            var msg = new ZWaveMessage(message, MessageDirection.Outbound, true);
+            return controller.SendMessage(msg);
         }
 
         internal virtual void OnNodeUpdated(NodeEvent zevent)

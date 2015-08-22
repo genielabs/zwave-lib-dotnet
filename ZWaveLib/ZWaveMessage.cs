@@ -43,6 +43,12 @@ namespace ZWaveLib
         CAN = 0x18
     }
 
+    public enum MessageDirection : byte
+    {
+        Inbound = 0x00,
+        Outbound = 0x01
+    }
+
     public enum MessageType : byte
     {
         Request = 0x00,
@@ -81,15 +87,27 @@ namespace ZWaveLib
         public readonly DateTime Timestamp = DateTime.UtcNow;
         public readonly int ResendCount = 0;
 
+        public readonly MessageDirection Direction = MessageDirection.Outbound;
         public readonly MessageType Type = MessageType.NotSet;
         public readonly ZWaveFunction Function = ZWaveFunction.NotSet;
         public readonly CommandClass CommandClass = CommandClass.NotSet;
         public readonly CallbackStatus CallbackStatus = CallbackStatus.NotSet;
 
-        public ZWaveMessage(byte[] message)
+        public ZWaveMessage(byte[] message, MessageDirection direction = MessageDirection.Outbound, bool generateCallback = false)
         {
+            Direction = direction;
             Header = (FrameHeader)message[0];
             RawData = message;
+            if (direction == MessageDirection.Outbound)
+            {
+                if (generateCallback)
+                {
+                    CallbackId = GenerateCallbackId();
+                    RawData[RawData.Length - 2] = CallbackId;
+                }
+                // Insert checksum
+                RawData[RawData.Length - 1] = GenerateChecksum(RawData);
+            }
             if (Header == FrameHeader.SOF)
             {
                 if (message.Length > 4)
@@ -124,16 +142,24 @@ namespace ZWaveLib
                         Enum.TryParse<CommandClass>(message[7].ToString(), out CommandClass);
                     }
                     else if ((Function == ZWaveFunction.RequestNodeNeighborsUpdate || Function == ZWaveFunction.RequestNodeNeighborsUpdateOptions)
-                             && message.Length == 7)
+                             && message.Length >= 6)
                     {
-                        CallbackId = message[4];
+                        if (Direction == MessageDirection.Outbound)
+                        {
+                            NodeId = message[4];
+                            CallbackId = (Function == ZWaveFunction.RequestNodeNeighborsUpdate) ? message[5] : message[6];
+                        }
+                        else
+                        {
+                            CallbackId = message[4];
+                        }
                     }
                     else if ((Function == ZWaveFunction.NodeAdd || Function == ZWaveFunction.NodeRemove)
                              && message.Length == 9)
                     {
                         CallbackId = message[4];
                     }
-                    else if (Function == ZWaveFunction.GetNodeProtocolInfo || Function == ZWaveFunction.GetRoutingInfo || Function == ZWaveFunction.RequestNodeNeighborsUpdate || Function == ZWaveFunction.RequestNodeNeighborsUpdateOptions)
+                    else if (Function == ZWaveFunction.GetNodeProtocolInfo || Function == ZWaveFunction.GetRoutingInfo)
                     {
                         NodeId = message[4];
                     }
@@ -166,17 +192,6 @@ namespace ZWaveLib
             System.Array.Copy(footer, 0, message, message.Length - footer.Length, footer.Length);
 
             return message;
-        }
-
-        public void Prepare(bool generateCallback)
-        {
-            if (generateCallback)
-            {
-                CallbackId = GenerateCallbackId();
-                RawData[RawData.Length - 2] = CallbackId;
-            }
-            // Insert checksum
-            RawData[RawData.Length - 1] = GenerateChecksum(RawData);
         }
 
         public static bool VerifyChecksum(byte[] data)

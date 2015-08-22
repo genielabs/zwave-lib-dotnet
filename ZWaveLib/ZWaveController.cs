@@ -162,6 +162,10 @@ namespace ZWaveLib
             }
         }
 
+        /// <summary>
+        /// Gets the status.
+        /// </summary>
+        /// <value>The status.</value>
         public ControllerStatus Status
         {
             get { return controllerStatus; }
@@ -185,7 +189,7 @@ namespace ZWaveLib
         /// <returns>The message.</returns>
         /// <param name="message">Message.</param>
         /// <param name="enableCallback">If set to <c>true</c> enable callback.</param>
-        public bool SendMessage(ZWaveMessage message, bool enableCallback)
+        public bool SendMessage(ZWaveMessage message)
         {
             #region Debug 
             Utility.logger.Trace("[[[ BEGIN REQUEST ]]]");
@@ -195,8 +199,8 @@ namespace ZWaveLib
             lock (sendLock)
             {
                 SetQueryStage(QueryStage.WaitAck);
-                message.Prepare(enableCallback);
                 pendingRequest = message;
+                sendMessageAck.Reset();
                 if (serialPort.SendMessage(message.RawData))
                 {
                     if (!sendMessageAck.WaitOne(sendMessageTimeoutMs))
@@ -212,7 +216,6 @@ namespace ZWaveLib
                     SetQueryStage(QueryStage.Error);
                     Utility.logger.Warn("Serial port error (CallbackId={0}, Function={1}, CommandClass={2})", pendingRequest.CallbackId, pendingRequest.Function, pendingRequest.CommandClass);
                 }
-                sendMessageAck.Reset();
                 pendingRequest = null;
             }
             #region Debug 
@@ -237,7 +240,7 @@ namespace ZWaveLib
                 0xff,
                 0x00
             };
-            SendMessage(new ZWaveMessage(message), true);
+            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
             Utility.logger.Trace("END");
         }
 
@@ -255,7 +258,7 @@ namespace ZWaveLib
                 0xff,
                 0x00
             };
-            SendMessage(new ZWaveMessage(message), false);
+            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, false));
             Utility.logger.Trace("END");
         }
 
@@ -267,7 +270,11 @@ namespace ZWaveLib
         {
             Utility.logger.Trace("BEGIN");
             OnControllerStatusChanged(new ControllerStatusEventArgs(ControllerStatus.Initializing));
-            var initialized = SendMessage(new ZWaveMessage(new byte[] { 0x01, 0x03, 0x00, (byte)ZWaveFunction.GetInitData, 0xFE }), false);
+            var initialized = SendMessage(new ZWaveMessage(
+                new byte[] { 0x01, 0x03, 0x00, (byte)ZWaveFunction.GetInitData, 0xFE },
+                MessageDirection.Outbound,
+                false)
+            );
             if (initialized)
                 OnControllerStatusChanged(new ControllerStatusEventArgs(ControllerStatus.Ready));
             else
@@ -283,9 +290,6 @@ namespace ZWaveLib
             OnDiscoveryProgress(new DiscoveryProgressEventArgs(DiscoveryStatus.DiscoveryStart));
             foreach (ZWaveNode zn in nodes)
             {
-                // i = 0x01 is the controller itself, so we don't add it to the nodelist
-                if (zn.Id == 0x01)
-                    continue;
                 GetNodeProtocolInfo(zn.Id);
                 GetNodeInformationFrame(zn.Id);
                 GetNeighborsRoutingInfo(zn.Id);
@@ -310,7 +314,7 @@ namespace ZWaveLib
                 nodeId,
                 0x00
             };
-            SendMessage(new ZWaveMessage(message), false);
+            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, false));
         }
 
         /// <summary>
@@ -328,7 +332,7 @@ namespace ZWaveLib
                 nodeId,
                 0x00
             };
-            SendMessage(new ZWaveMessage(message), false);
+            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, false));
         }
 
         /// <summary>
@@ -373,7 +377,7 @@ namespace ZWaveLib
             System.Array.Copy(header, 0, message, 0, header.Length);
             System.Array.Copy(footer, 0, message, message.Length - footer.Length, footer.Length);
 
-            SendMessage(new ZWaveMessage(message), true);
+            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
             Utility.logger.Trace("END");
         }
 
@@ -396,7 +400,7 @@ namespace ZWaveLib
             System.Array.Copy(header, 0, message, 0, header.Length);
             System.Array.Copy(footer, 0, message, message.Length - footer.Length, footer.Length);
 
-            SendMessage(new ZWaveMessage(message), true);
+            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
             Utility.logger.Trace("END");
         }
 
@@ -419,7 +423,7 @@ namespace ZWaveLib
             System.Array.Copy(header, 0, message, 0, header.Length);
             System.Array.Copy(footer, 0, message, message.Length - footer.Length, footer.Length);
 
-            SendMessage(new ZWaveMessage(message), true);
+            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
             Utility.logger.Trace("END");
         }
 
@@ -442,7 +446,7 @@ namespace ZWaveLib
             System.Array.Copy(header, 0, message, 0, header.Length);
             System.Array.Copy(footer, 0, message, message.Length - footer.Length, footer.Length);
 
-            SendMessage(new ZWaveMessage(message), true);
+            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
             Utility.logger.Trace("END");
         }
 
@@ -467,7 +471,7 @@ namespace ZWaveLib
                 0x00,
                 0x00
             };
-            SendMessage(new ZWaveMessage(msg), true);
+            SendMessage(new ZWaveMessage(msg, MessageDirection.Outbound, true));
         }
 
         /// <summary>
@@ -486,7 +490,7 @@ namespace ZWaveLib
                 0x00,
                 0x00    
             };
-            SendMessage(new ZWaveMessage(msg), true);
+            SendMessage(new ZWaveMessage(msg, MessageDirection.Outbound, true));
         }
 
         /// <summary>
@@ -507,7 +511,7 @@ namespace ZWaveLib
                 0x03,
                 0x00    
             };
-            SendMessage(new ZWaveMessage(msg), false);
+            SendMessage(new ZWaveMessage(msg, MessageDirection.Outbound, false));
         }
 
         #endregion
@@ -791,7 +795,7 @@ namespace ZWaveLib
                         var routedNode = GetNode(msg.NodeId);
                         if (routedNode != null)
                         {
-                            routedNode.Data.Add("RoutingInfo", routingInfo);
+                            routedNode.UpdateData("RoutingInfo", routingInfo);
                             routedNode.OnNodeUpdated(new NodeEvent(routedNode, EventParameter.RoutingInfo, String.Join(" ", routingInfo), 0));
                         }
                     }
@@ -1011,7 +1015,7 @@ namespace ZWaveLib
                 {
                     byte[] msg = new byte[message.Length - 1];
                     Array.Copy(message, 1, msg, 0, msg.Length);
-                    ProcessMessage(new ZWaveMessage(msg));
+                    ProcessMessage(new ZWaveMessage(msg, MessageDirection.Inbound));
                 }
                 return;
             }
@@ -1033,7 +1037,7 @@ namespace ZWaveLib
 
             try
             {
-                ProcessMessage(new ZWaveMessage(message));
+                ProcessMessage(new ZWaveMessage(message, MessageDirection.Inbound));
             }
             catch (Exception e)
             {
@@ -1072,8 +1076,7 @@ namespace ZWaveLib
                 // i = 0x01 is the controller itself, so we don't add it to the nodelist
                 if (i == 0x01)
                     continue;
-                var node = GetNode(i);
-                if (node == null)
+                if (GetNode(i) == null)
                     nodes.Add(AddNode(i, 0x00));
             }
         }
