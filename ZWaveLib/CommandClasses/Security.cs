@@ -375,11 +375,7 @@ namespace ZWaveLib.CommandClasses
 
         public static SecurityData GetSecurityData(ZWaveNode node)
         {
-            if (!node.Data.ContainsKey("SecurityData"))
-            {
-                node.Data.Add("SecurityData", new SecurityData(node));
-            }
-            return (SecurityData)node.Data["SecurityData"];
+            return (SecurityData)node.GetData("SecurityData", new SecurityData(node));
         }
 
         #endregion

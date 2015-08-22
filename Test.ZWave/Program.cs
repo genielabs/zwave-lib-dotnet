@@ -126,9 +126,9 @@ namespace Test.ZWave
                 {
                     Console.WriteLine("        {0}", cclass);
                 }
-                if (node.Data.ContainsKey("RoutingInfo"))
+                if (node.GetData("RoutingInfo") != null)
                 {
-                    Console.WriteLine("    Routing Info {0}", BitConverter.ToString((byte[])node.Data["RoutingInfo"]));
+                    Console.WriteLine("    Routing Info {0}", BitConverter.ToString((byte[])node.GetData("RoutingInfo")));
                 }
             }
             Console.WriteLine("\n");

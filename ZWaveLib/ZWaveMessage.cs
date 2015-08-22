@@ -85,7 +85,7 @@ namespace ZWaveLib
         public readonly byte[] RawData;
 
         public readonly DateTime Timestamp = DateTime.UtcNow;
-        public readonly int ResendCount = 0;
+        public int ResendCount { get; internal set; }
 
         public readonly MessageDirection Direction = MessageDirection.Outbound;
         public readonly MessageType Type = MessageType.NotSet;

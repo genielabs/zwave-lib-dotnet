@@ -52,9 +52,9 @@ namespace ZWaveLib.CommandClasses
                 byte[] productId = new byte[2] { message[6], message[7] };
 
                 var manufacturerSpecs = new ManufacturerSpecificInfo() {
-                    TypeId = BitConverter.ToString(typeId).Replace(" ", ""),
-                    ProductId = BitConverter.ToString(productId).Replace(" ", ""),
-                    ManufacturerId = BitConverter.ToString(manufacturerId).Replace(" ", "")
+                    TypeId = BitConverter.ToString(typeId).Replace("-", ""),
+                    ProductId = BitConverter.ToString(productId).Replace("-", ""),
+                    ManufacturerId = BitConverter.ToString(manufacturerId).Replace("-", "")
                 };
                 node.ManufacturerId = manufacturerSpecs.ManufacturerId;
                 node.TypeId = manufacturerSpecs.TypeId;

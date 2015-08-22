@@ -93,11 +93,7 @@ namespace ZWaveLib.CommandClasses
 
         public static ZWaveValue GetSetPointData(ZWaveNode node)
         {
-            if (!node.Data.ContainsKey("SetPoint"))
-            {
-                node.Data.Add("SetPoint", new ZWaveValue());
-            }
-            return (ZWaveValue)node.Data["SetPoint"];
+            return (ZWaveValue)node.GetData("SetPoint", new ZWaveValue());
         }
 
     }

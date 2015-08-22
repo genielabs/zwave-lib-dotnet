@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>ZWaveLib</id>
+        <version>1.0.1</version>
+        <title>ZWaveLib</title>
+        <authors>Generoso Martello</authors>
+        <owners>G-Labs</owners>
+        <licenseUrl>https://github.com/genielabs/zwave-lib-dotnet/blob/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/genielabs/zwave-lib-dotnet/</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Z-Wave Home Automation library (.NET / Mono)
+Features
+- Works with most Z-Wave serial controllers
+- 100% managed code implementation
+- Event driven
+- Hot plug
+- Automatically restabilish connection on error/disconnect
+- Compatible with Mono</description>
+        <summary>Z-Wave library for Home Automation (.NET / Mono)</summary>
+        <releaseNotes>Added message queue and resend on error.</releaseNotes>
+        <copyright>G-Labs</copyright>
+        <tags>zwave z-wave home automation</tags>
+        <dependencies>
+            <dependency id="SerialPortLib" version="1.0.7" />
+            <dependency id="NLog" version="4.0.1" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="bin\Debug\ZWaveLib.dll" target="lib\ZWaveLib.dll" />
+        <file src="bin\Debug\ZWaveLib.dll.mdb" target="lib\ZWaveLib.dll.mdb" />
+        <file src="bin\Debug\ZWaveLib.xml" target="lib\ZWaveLib.xml" />
+    </files>
+</package>

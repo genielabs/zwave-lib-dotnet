@@ -67,7 +67,9 @@ namespace ZWaveLib
 
         NeighborUpdateStarted = 0x5A01,
         NeighborUpdateDone = 0x5A02,
-        NeighborUpdateFailed = 0x5A03
+        NeighborUpdateFailed = 0x5A03,
+
+        Timeout = 0xFFFF
     }
 
     public enum NeighborsUpdateStatus : byte

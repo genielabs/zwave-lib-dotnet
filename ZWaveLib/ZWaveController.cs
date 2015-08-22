@@ -31,6 +31,7 @@ using System.Xml.Serialization;
 using ZWaveLib.CommandClasses;
 using SerialPortLib;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace ZWaveLib
 {
@@ -42,15 +43,18 @@ namespace ZWaveLib
         
         #region Private fields
 
-        private const int sendMessageTimeoutMs = 10000;
+        private const int sendMessageTimeoutMs = 3000;
 
         private SerialPortInput serialPort;
 
         private object sendLock = new object();
         private ManualResetEvent sendMessageAck = new ManualResetEvent(false);
+        private ManualResetEvent queueEmptyAck = new ManualResetEvent(false);
 
         private ZWaveMessage pendingRequest;
         private QueryStage currentStage;
+        private List<ZWaveMessage> queuedMessages;
+        private Task queueManager;
 
         private ControllerStatus controllerStatus = ControllerStatus.Disconnected;
 
@@ -118,6 +122,9 @@ namespace ZWaveLib
             serialPort = new SerialPortInput();
             serialPort.MessageReceived += SerialPort_MessageReceived;
             serialPort.ConnectionStatusChanged += SerialPort_ConnectionStatusChanged;
+            queuedMessages = new List<ZWaveMessage>();
+            queueManager = new Task(QueueManagerTask);
+            queueManager.Start();
         }
 
         /// <summary>
@@ -173,14 +180,10 @@ namespace ZWaveLib
 
         #region Controller commands
 
-        /// <summary>
-        /// Sends a raw message.
-        /// </summary>
-        /// <returns><c>true</c>, if the message was sent, <c>false</c> otherwise.</returns>
-        /// <param name="message">Message.</param>
-        public bool SendRaw(byte[] message)
+        public void QueueMessage(ZWaveMessage message)
         {
-            return serialPort.SendMessage(message);
+            queuedMessages.Add(message);
+            queueEmptyAck.Reset();
         }
 
         /// <summary>
@@ -208,6 +211,8 @@ namespace ZWaveLib
                         SetQueryStage(QueryStage.Error);
                         // TODO: Dump Diagnostic Statistics
                         Utility.logger.Warn("Message timeout (CallbackId={0}, Function={1}, CommandClass={2})", pendingRequest.CallbackId, pendingRequest.Function, pendingRequest.CommandClass);
+                        if (message.NodeId > 1)
+                            UpdateOperationProgress(message.NodeId, NodeQueryStatus.NodeUpdated);
                         //System.Diagnostics.Debugger.Break();
                     }
                 }
@@ -222,7 +227,6 @@ namespace ZWaveLib
             stopWatch.Stop();
             Utility.logger.Trace("[[[ END REQUEST ]]] took {0} ms", stopWatch.ElapsedMilliseconds);
             #endregion
-
             return (currentStage != QueryStage.Error);
         }
 
@@ -240,7 +244,7 @@ namespace ZWaveLib
                 0xff,
                 0x00
             };
-            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
+            QueueMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
             Utility.logger.Trace("END");
         }
 
@@ -258,7 +262,7 @@ namespace ZWaveLib
                 0xff,
                 0x00
             };
-            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, false));
+            QueueMessage(new ZWaveMessage(message, MessageDirection.Outbound, false));
             Utility.logger.Trace("END");
         }
 
@@ -294,6 +298,7 @@ namespace ZWaveLib
                 GetNodeInformationFrame(zn.Id);
                 GetNeighborsRoutingInfo(zn.Id);
                 ManufacturerSpecific.Get(zn);
+                QueueWaitEmpty();
                 UpdateOperationProgress(zn.Id, NodeQueryStatus.NodeUpdated);
             }
             OnDiscoveryProgress(new DiscoveryProgressEventArgs(DiscoveryStatus.DiscoveryEnd));
@@ -314,7 +319,7 @@ namespace ZWaveLib
                 nodeId,
                 0x00
             };
-            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, false));
+            QueueMessage(new ZWaveMessage(message, MessageDirection.Outbound, false));
         }
 
         /// <summary>
@@ -332,7 +337,7 @@ namespace ZWaveLib
                 nodeId,
                 0x00
             };
-            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, false));
+            QueueMessage(new ZWaveMessage(message, MessageDirection.Outbound, false));
         }
 
         /// <summary>
@@ -377,7 +382,7 @@ namespace ZWaveLib
             System.Array.Copy(header, 0, message, 0, header.Length);
             System.Array.Copy(footer, 0, message, message.Length - footer.Length, footer.Length);
 
-            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
+            QueueMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
             Utility.logger.Trace("END");
         }
 
@@ -400,7 +405,7 @@ namespace ZWaveLib
             System.Array.Copy(header, 0, message, 0, header.Length);
             System.Array.Copy(footer, 0, message, message.Length - footer.Length, footer.Length);
 
-            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
+            QueueMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
             Utility.logger.Trace("END");
         }
 
@@ -423,7 +428,7 @@ namespace ZWaveLib
             System.Array.Copy(header, 0, message, 0, header.Length);
             System.Array.Copy(footer, 0, message, message.Length - footer.Length, footer.Length);
 
-            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
+            QueueMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
             Utility.logger.Trace("END");
         }
 
@@ -446,7 +451,7 @@ namespace ZWaveLib
             System.Array.Copy(header, 0, message, 0, header.Length);
             System.Array.Copy(footer, 0, message, message.Length - footer.Length, footer.Length);
 
-            SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
+            QueueMessage(new ZWaveMessage(message, MessageDirection.Outbound, true));
             Utility.logger.Trace("END");
         }
 
@@ -471,7 +476,7 @@ namespace ZWaveLib
                 0x00,
                 0x00
             };
-            SendMessage(new ZWaveMessage(msg, MessageDirection.Outbound, true));
+            QueueMessage(new ZWaveMessage(msg, MessageDirection.Outbound, true));
         }
 
         /// <summary>
@@ -490,7 +495,7 @@ namespace ZWaveLib
                 0x00,
                 0x00    
             };
-            SendMessage(new ZWaveMessage(msg, MessageDirection.Outbound, true));
+            QueueMessage(new ZWaveMessage(msg, MessageDirection.Outbound, true));
         }
 
         /// <summary>
@@ -511,7 +516,7 @@ namespace ZWaveLib
                 0x03,
                 0x00    
             };
-            SendMessage(new ZWaveMessage(msg, MessageDirection.Outbound, false));
+            QueueMessage(new ZWaveMessage(msg, MessageDirection.Outbound, false));
         }
 
         #endregion
@@ -521,6 +526,39 @@ namespace ZWaveLib
         #region Private members
 
         #region ZWave Message handling
+
+        private void QueueWaitEmpty()
+        {
+            queueEmptyAck.WaitOne();
+        }
+
+        private void QueueManagerTask()
+        {
+            while (true)
+            {
+                while (queuedMessages.Count > 0)
+                {
+                    var msg = queuedMessages[0];
+                    queuedMessages.Remove(msg);
+
+                    while (!SendMessage(msg) && msg.ResendCount < ZWaveMessage.ResendAttemptsMax)
+                    {
+                        msg.ResendCount++;
+                        // TODO: signel via evet and log anyway
+                        Utility.logger.Warn("Could not deliver message to Node {0} (CallbackId={1}, Attempt={2})", msg.NodeId, msg.CallbackId, msg.ResendCount);
+                    }
+                    
+                    if (msg.ResendCount == ZWaveMessage.ResendAttemptsMax)
+                    {
+                        Utility.logger.Warn("Delivery of message to Node {0} failed (CallbackId={1}).", msg.NodeId, msg.CallbackId);
+                        // TODO: signal via event and log anyway
+                    }
+                }
+                if (queuedMessages.Count == 0)
+                    queueEmptyAck.Set();
+                Thread.Sleep(500);
+            }
+        }
 
         private void ReceiveMessage(ZWaveMessage msg)
         {
@@ -1175,7 +1213,7 @@ namespace ZWaveLib
         private void NodeInformationFrameDone(ZWaveNode znode)
         {
             // once we get the security command classes we'll issue the same events and call SaveNodesConfig();
-            OnNodeUpdated(new NodeUpdatedEventArgs(znode.Id, new NodeEvent(znode, EventParameter.NodeInfo, BitConverter.ToString(znode.NodeInformationFrame), 0)));
+            OnNodeUpdated(new NodeUpdatedEventArgs(znode.Id, new NodeEvent(znode, EventParameter.NodeInfo, BitConverter.ToString(znode.NodeInformationFrame).Replace("-", " "), 0)));
             // TODO: deprecate the WakeUpNotify event?
             OnNodeUpdated(new NodeUpdatedEventArgs(znode.Id, new NodeEvent(znode, EventParameter.WakeUpNotify, "1", 0)));
             SaveNodesConfig();

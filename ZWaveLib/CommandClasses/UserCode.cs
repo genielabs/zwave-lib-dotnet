@@ -72,11 +72,7 @@ namespace ZWaveLib.CommandClasses
 
         private static UserCodeValue GetUserCodeData(ZWaveNode node)
         {
-            if (!node.Data.ContainsKey("UserCode"))
-            {
-                node.Data.Add("UserCode", new UserCodeValue());
-            }
-            return (UserCodeValue)node.Data["UserCode"];
+            return (UserCodeValue)node.GetData("UserCode", new UserCodeValue());
         }
 
     }

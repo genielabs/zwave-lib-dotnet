@@ -150,6 +150,20 @@ namespace ZWaveLib
 
         #region Public members
 
+        public object GetData(string fieldId, object defaultValue = null)
+        {
+            object val = defaultValue;
+            if (!Data.ContainsKey(fieldId) && defaultValue != null)
+            {
+                Data.Add(fieldId, defaultValue);
+            }
+            else
+            {
+                val = Data[fieldId];
+            }
+            return val;
+        }
+
         public void UpdateData(string fieldId, object value)
         {
             if (Data.ContainsKey(fieldId))
@@ -274,10 +288,10 @@ namespace ZWaveLib
             return false;
         }
 
-        internal bool SendMessage(byte[] message)
+        internal void SendMessage(byte[] message)
         {
             var msg = new ZWaveMessage(message, MessageDirection.Outbound, true);
-            return controller.SendMessage(msg);
+            controller.QueueMessage(msg);
         }
 
         internal virtual void OnNodeUpdated(NodeEvent zevent)
