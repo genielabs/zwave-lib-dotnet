@@ -21,6 +21,7 @@
  */
 
 using System;
+using System.Threading;
 
 namespace ZWaveLib
 {
@@ -68,13 +69,17 @@ namespace ZWaveLib
 
     public class ZWaveMessage
     {
+        public const int ResendAttemptsMax = 2;
+        public const int SendMessageTimeoutMs = 10000;
+
+        internal ManualResetEvent sentAck = new ManualResetEvent(true);
+
         private const byte CallbackStartId = 0x02;
         // 0x01 is reserved
         private static byte callbackIdSeq = ZWaveMessage.CallbackStartId;
 
         public static byte[] Ack = new byte[] { (byte)FrameHeader.ACK };
         public static byte[] Nack = new byte[] { (byte)FrameHeader.NAK };
-        public const int ResendAttemptsMax = 3;
 
         public FrameHeader Header;
 
@@ -159,7 +164,7 @@ namespace ZWaveLib
                     {
                         CallbackId = message[4];
                     }
-                    else if (Function == ZWaveFunction.GetNodeProtocolInfo || Function == ZWaveFunction.GetRoutingInfo)
+                    else if (Function == ZWaveFunction.RequestNodeInfo ||Function == ZWaveFunction.GetNodeProtocolInfo || Function == ZWaveFunction.GetRoutingInfo)
                     {
                         NodeId = message[4];
                     }
@@ -172,6 +177,12 @@ namespace ZWaveLib
                     break;
                 }
             }
+        }
+
+        public ZWaveMessage Wait()
+        {
+            sentAck.WaitOne(SendMessageTimeoutMs);
+            return this;
         }
 
         public static byte[] BuildSendDataRequest(byte nodeId, byte[] request)

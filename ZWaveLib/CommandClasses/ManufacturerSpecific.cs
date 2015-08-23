@@ -56,9 +56,9 @@ namespace ZWaveLib.CommandClasses
                     ProductId = BitConverter.ToString(productId).Replace("-", ""),
                     ManufacturerId = BitConverter.ToString(manufacturerId).Replace("-", "")
                 };
-                node.ManufacturerId = manufacturerSpecs.ManufacturerId;
-                node.TypeId = manufacturerSpecs.TypeId;
-                node.ProductId = manufacturerSpecs.ProductId;
+                node.ManufacturerSpecific.ManufacturerId = manufacturerSpecs.ManufacturerId;
+                node.ManufacturerSpecific.TypeId = manufacturerSpecs.TypeId;
+                node.ManufacturerSpecific.ProductId = manufacturerSpecs.ProductId;
                 nodeEvent = new NodeEvent(node, EventParameter.ManufacturerSpecific, manufacturerSpecs, 0);
             }
 

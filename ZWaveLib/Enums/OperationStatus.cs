@@ -69,6 +69,7 @@ namespace ZWaveLib
         NeighborUpdateDone = 0x5A02,
         NeighborUpdateFailed = 0x5A03,
 
+        Error = 0xFFEE,
         Timeout = 0xFFFF
     }
 

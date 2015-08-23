@@ -49,22 +49,10 @@ namespace ZWaveLib
         public byte Id { get; protected set; }
 
         /// <summary>
-        /// Gets or sets the manufacturer identifier.
+        /// Gets or sets the manufacturer specific.
         /// </summary>
-        /// <value>The manufacturer identifier.</value>
-        public string ManufacturerId { get; internal set; }
-
-        /// <summary>
-        /// Gets or sets the type identifier.
-        /// </summary>
-        /// <value>The type identifier.</value>
-        public string TypeId { get; internal set; }
-
-        /// <summary>
-        /// Gets or sets the product identifier.
-        /// </summary>
-        /// <value>The product identifier.</value>
-        public string ProductId { get; internal set; }
+        /// <value>The manufacturer specific.</value>
+        public ManufacturerSpecificInfo ManufacturerSpecific { get; internal set; }
 
         /// <summary>
         /// Gets or sets the basic class.
@@ -112,6 +100,11 @@ namespace ZWaveLib
         /// </summary>
         public event NodeUpdatedEventHandler NodeUpdated;
 
+        /// <summary>
+        /// Dictionary mapping supported command classes to versions.
+        /// </summary>
+        public Dictionary<CommandClass, byte> CommandClassVersions { get; internal set; }
+
         #endregion
 
         #region Lifecycle
@@ -126,8 +119,10 @@ namespace ZWaveLib
             this.controller = controller;
             Id = nodeId;
             Data = new Dictionary<string, object>();
+            CommandClassVersions = new Dictionary<CommandClass, byte>();
             NodeInformationFrame = new byte[]{};
             SecuredNodeInformationFrame = new byte[]{};
+            ManufacturerSpecific = new ManufacturerSpecificInfo();
         }
 
         /// <summary>
@@ -142,8 +137,10 @@ namespace ZWaveLib
             Id = nodeId;
             GenericClass = genericType;
             Data = new Dictionary<string, object>();
+            CommandClassVersions = new Dictionary<CommandClass, byte>();
             NodeInformationFrame = new byte[]{};
             SecuredNodeInformationFrame = new byte[]{};
+            ManufacturerSpecific = new ManufacturerSpecificInfo();
         }
 
         #endregion
@@ -153,9 +150,10 @@ namespace ZWaveLib
         public object GetData(string fieldId, object defaultValue = null)
         {
             object val = defaultValue;
-            if (!Data.ContainsKey(fieldId) && defaultValue != null)
+            if (!Data.ContainsKey(fieldId))
             {
-                Data.Add(fieldId, defaultValue);
+                if (defaultValue != null)
+                    Data.Add(fieldId, defaultValue);
             }
             else
             {
@@ -216,6 +214,23 @@ namespace ZWaveLib
                 isSecured = (Array.IndexOf(SecuredNodeInformationFrame, (byte)commandClass) >= 0);
             }
             return isSecured;
+        }
+
+        /// <summary>
+        /// Determines the version of the specified command class.
+        /// </summary>
+        /// <returns>The command class version, or 0 if it is not found.</returns>
+        /// <param name="cmdClass">Command class to query</param>
+        public byte GetCmdClassVersion(CommandClass cmdClass)
+        {
+            if (CommandClassVersions.ContainsKey(cmdClass))
+            {
+                return CommandClassVersions[cmdClass];
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         /// <summary>
@@ -288,10 +303,11 @@ namespace ZWaveLib
             return false;
         }
 
-        internal void SendMessage(byte[] message)
+        internal ZWaveMessage SendMessage(byte[] message)
         {
             var msg = new ZWaveMessage(message, MessageDirection.Outbound, true);
             controller.QueueMessage(msg);
+            return msg;
         }
 
         internal virtual void OnNodeUpdated(NodeEvent zevent)

@@ -16,9 +16,9 @@
 */
 
 /*
- *     Author: Generoso Martello <gene@homegenie.it>
- *     Project Homepage: https://github.com/genielabs/zwave-lib-dotnet
- */
+*     Author: Generoso Martello <gene@homegenie.it>
+*     Project Homepage: https://github.com/genielabs/zwave-lib-dotnet
+*/
 
 using System;
 
@@ -31,34 +31,66 @@ namespace ZWaveLib.Values
         CarbonMonoxide,
         CarbonDioxide,
         Heat,
-        Flood
+        Flood,
+        AccessControl,
+        Burglar,
+        PowerManagement,
+        System,
+        Emergency,
+        Clock,
+        Appliance,
+        HomeHealth
+    }
+
+    /// <summary>
+    /// Enumerator for alarm value details. e.g., 0x16 corresponds with the action of 
+    /// an open door if the alarm AccessControl alarm type is set.
+    /// </summary>
+    /// 
+    public enum ZWaveAlarmDetailType
+    {
+        Generic = 0x00,
+        // Access control
+        AccessDoorOpen = 0x16,
+        AccessDoorClosed = 0x17,
+        // Home security
+        HomeSecTamper = 0x03
     }
 
     public class AlarmValue
     {
         public EventParameter EventType = EventParameter.AlarmGeneric;
         public ZWaveAlarmType Parameter = ZWaveAlarmType.Generic;
+        public ZWaveAlarmDetailType Detail = ZWaveAlarmDetailType.Generic;
         public byte Value = 0x00;
 
         public static AlarmValue Parse(byte[] message)
         {
             AlarmValue alarm = new AlarmValue();
-            alarm.Value = message[3];
-
-            //Version 2 sends the value in argument 7
-            if (message.Length > 7)
-            { 
-                alarm.Value = message[7];
-            }
-
-            //
             byte cmdClass = message[0];
+
             if (cmdClass == (byte)CommandClass.SensorAlarm)
             {
                 alarm.Parameter = (ZWaveAlarmType)Enum.Parse(typeof(ZWaveAlarmType), message[3].ToString());
                 alarm.Value = message[4];
             }
-            //
+            else
+            {
+                if (message.Length > 7)
+                {
+                    // Version 2
+                    alarm.Detail = (ZWaveAlarmDetailType)Enum.Parse(typeof(ZWaveAlarmDetailType), message[7].ToString());
+                    alarm.Parameter = (ZWaveAlarmType)Enum.Parse(typeof(ZWaveAlarmType), message[6].ToString());
+                    alarm.Value = message[7];
+                }
+                else
+                {
+                    // Version 1
+                    alarm.Parameter = (ZWaveAlarmType)Enum.Parse(typeof(ZWaveAlarmType), message[2].ToString());
+                    alarm.Value = message[3];
+                }
+            }
+
             switch (alarm.Parameter)
             {
             case ZWaveAlarmType.CarbonDioxide:
@@ -76,10 +108,34 @@ namespace ZWaveLib.Values
             case ZWaveAlarmType.Flood:
                 alarm.EventType = EventParameter.AlarmFlood;
                 break;
+            case ZWaveAlarmType.AccessControl:
+                alarm.EventType = EventParameter.AlarmDoorWindow;
+                if (alarm.Detail != ZWaveAlarmDetailType.Generic)
+                {
+                    if (alarm.Detail == ZWaveAlarmDetailType.AccessDoorOpen)
+                    {
+                        alarm.Value = 0x01;
+                    }
+                    if (alarm.Detail == ZWaveAlarmDetailType.AccessDoorClosed)
+                    {
+                        alarm.Value = 0x00;
+                    }
+                }
+                break;
+            case ZWaveAlarmType.Burglar:
+                alarm.EventType = EventParameter.AlarmTampered;
+                if (alarm.Detail != ZWaveAlarmDetailType.Generic)
+                {
+                    if (alarm.Detail == ZWaveAlarmDetailType.HomeSecTamper)
+                    {
+                        alarm.Value = 0x01;
+                    }
+                }
+                break;
             }
+
             //
             return alarm;
         }
     }
 }
-
