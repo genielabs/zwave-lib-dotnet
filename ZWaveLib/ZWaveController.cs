@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Xml.Serialization;
 
+using ZWaveLib.Values;
 using ZWaveLib.CommandClasses;
 using SerialPortLib;
 using System.Diagnostics;
@@ -191,7 +192,6 @@ namespace ZWaveLib
         /// </summary>
         /// <returns>The message.</returns>
         /// <param name="message">Message.</param>
-        /// <param name="enableCallback">If set to <c>true</c> enable callback.</param>
         public bool SendMessage(ZWaveMessage message)
         {
             #region Debug 
@@ -1030,6 +1030,22 @@ namespace ZWaveLib
                 // we just send other events and save the node data
                 NodeInformationFrameDone(node);
             }
+            else if (eventData.Parameter == EventParameter.VersionCommandClass)
+            {
+                VersionCmdClassValue value = (VersionCmdClassValue)eventData.Value;
+
+                // Unsupported command class
+                if (!node.SupportCommandClass(value.cmdClass))
+                {
+                    return;
+                }
+
+                node.CommandClassVersions[value.cmdClass] = value.version;
+                SaveNodesConfig();
+
+                return;
+            }
+
             // Route node event
             OnNodeUpdated(new NodeUpdatedEventArgs(eventData.Node.Id, eventData));
         }
@@ -1162,6 +1178,7 @@ namespace ZWaveLib
                     newNode.NodeInformationFrame = node.NodeInformationFrame;
                     newNode.SecuredNodeInformationFrame = node.SecuredNodeInformationFrame;
                     Security.GetSecurityData(newNode).SetPrivateNetworkKey(node.DevicePrivateNetworkKey);
+                    newNode.CommandClassVersions = node.CommandClassVersions;
                     nodes.Add(newNode);
                 }
                 reader.Close();
@@ -1185,7 +1202,8 @@ namespace ZWaveLib
                         NodeId = nodes[n].Id,
                         NodeInformationFrame = nodes[n].NodeInformationFrame,
                         SecuredNodeInformationFrame = nodes[n].SecuredNodeInformationFrame,
-                        DevicePrivateNetworkKey = Security.GetSecurityData(nodes[n]).GetPrivateNetworkKey()
+                        DevicePrivateNetworkKey = Security.GetSecurityData(nodes[n]).GetPrivateNetworkKey(),
+                        CommandClassVersions = nodes[n].CommandClassVersions
                     });
                 }
             }
@@ -1217,6 +1235,16 @@ namespace ZWaveLib
             // TODO: deprecate the WakeUpNotify event?
             OnNodeUpdated(new NodeUpdatedEventArgs(znode.Id, new NodeEvent(znode, EventParameter.WakeUpNotify, "1", 0)));
             SaveNodesConfig();
+
+            // For nodes that support version command class, query each one for its version.
+            if (znode.SupportCommandClass(CommandClass.Version))
+            {
+                // Compile a list of all of our command class IDs
+                foreach (var cmdClass in znode.SupportedCommandClasses)
+                {
+                    ZWaveLib.CommandClasses.Version.Get(znode, cmdClass);
+                }
+            }
         }
 
         #endregion
@@ -1303,6 +1331,40 @@ namespace ZWaveLib
         /// </summary>
         /// <value>The device private network key.</value>
         public byte[] DevicePrivateNetworkKey { get; internal set; }
-    }
 
+        /// <summary>
+        /// Gets or sets the command class versions.
+        /// </summary>
+        /// <value>The command class versions.</value>
+        [XmlIgnore]
+        public Dictionary<CommandClass, byte> CommandClassVersions { get; internal set; }
+
+        // Get around the fact that Dictionaries aren't supported by XmlSerialize
+        // Solution found in: http://stackoverflow.com/questions/495647/serialize-class-containing-dictionary-member
+        public class SerializeableKeyValue<T1,T2>
+        {
+            public T1 Key { get; set; }
+            public T2 Value { get; set; }
+        }
+        public SerializeableKeyValue<CommandClass, byte>[] CommandClassSerializable
+        {
+            get
+            {
+                var list = new List<SerializeableKeyValue<CommandClass, byte>>();
+                if (CommandClassVersions != null)
+                {
+                    list.AddRange(CommandClassVersions.Keys.Select(key => new SerializeableKeyValue<CommandClass, byte>() { Key = key, Value = CommandClassVersions[key] }));
+                }
+                return list.ToArray();
+            }
+            set
+            {
+                CommandClassVersions = new Dictionary<CommandClass, byte>();
+                foreach (var item in value)
+                {
+                    CommandClassVersions.Add(item.Key, item.Value);
+                }
+            }
+        }
+    }
 }

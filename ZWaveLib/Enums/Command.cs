@@ -112,6 +112,9 @@ namespace ZWaveLib
         WakeUpIntervalCapabilitiesGet = 0x09,
         WakeUpIntervalCapabilitiesReport = 0x0A,
         //
+        VersionCommandClassGet = 0x13,
+        VersionCommandClassReport = 0x14,
+        //
         ThermostatSetPointSet = 0x01,
         ThermostatSetPointGet = 0x02,
         ThermostatSetPointReport = 0x03,
