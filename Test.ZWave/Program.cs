@@ -122,10 +122,24 @@ namespace Test.ZWave
                 Console.WriteLine("    Specific Class {0}", node.SpecificClass);
                 Console.WriteLine("    Secure Info {0}", BitConverter.ToString(node.SecuredNodeInformationFrame));
                 Console.WriteLine("    Node Info {0}", BitConverter.ToString(node.NodeInformationFrame));
-                foreach (var cclass in node.SupportedCommandClasses)
+                foreach (CommandClass cclass in node.SupportedCommandClasses)
                 {
-                    Console.WriteLine("        {0}", cclass);
+                    byte version = node.GetCmdClassVersion(cclass);
+                    string versionStr = version == 0 ? "?" : version.ToString();
+
+                    if (!Enum.IsDefined(typeof(CommandClass), cclass))
+                    {
+                        byte cc = (byte)cclass;
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("        Unsupported class 0x{0} (version {1})", cc.ToString("X2"), versionStr);
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.WriteLine("        {0} (version {1})", cclass, versionStr);
+                    }
                 }
+                Console.ForegroundColor = ConsoleColor.White;
                 if (node.GetData("RoutingInfo") != null)
                 {
                     Console.WriteLine("    Routing Info {0}", BitConverter.ToString((byte[])node.GetData("RoutingInfo")));

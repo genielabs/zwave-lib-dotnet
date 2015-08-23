@@ -51,6 +51,7 @@ namespace ZWaveLib
         WakeUpInterval,
         WakeUpNotify,
         Association,
+        VersionCommandClass,
         Battery,
         NodeInfo,
         MultiinstanceSwitchBinaryCount,

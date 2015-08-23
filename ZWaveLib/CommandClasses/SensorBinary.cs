@@ -25,6 +25,27 @@ using ZWaveLib.Values;
 
 namespace ZWaveLib.CommandClasses
 {
+    /// <summary>
+    /// Enumerator for possible sensor binary parameters (only reported for v2)
+    /// </summary>
+    public enum ZWaveSensorBinaryParameter : byte
+    {
+        Unknown = 0x00,
+        General = 0x01,
+        Smoke = 0x02,
+        CarbonMonoxide = 0x03,
+        CarbonDioxide = 0x04,
+        Heat = 0x05,
+        Water = 0x06,
+        Freeze = 0x07,
+        Tamper = 0x08,
+        Auxiliary = 0x09,
+        DoorWindow = 0x0a,
+        Tilt = 0x0b,
+        Motion = 0x0c,
+        GlassBreak = 0x0d
+    }
+
     public class SensorBinary : ICommandClass
     {
         public CommandClass GetClassId()
@@ -38,7 +59,60 @@ namespace ZWaveLib.CommandClasses
             byte cmdType = message[1];
             if (cmdType == (byte)Command.SensorBinaryReport)
             {
-                nodeEvent = new NodeEvent(node, EventParameter.SensorGeneric, message[2], 0);
+                byte version = node.GetCmdClassVersion(GetClassId());
+
+                if (version == 1 || message.Length <= 3)
+                {
+                    nodeEvent = new NodeEvent(node, EventParameter.SensorGeneric, message[2], 0);
+                }
+                else
+                {
+                    byte tmp = message[3];
+                    ZWaveSensorBinaryParameter sensorType = ZWaveSensorBinaryParameter.General;
+                    EventParameter eventType;
+
+                    if (Enum.IsDefined(typeof(ZWaveSensorBinaryParameter), tmp))
+                    {
+                        sensorType = (ZWaveSensorBinaryParameter)tmp;
+                    }
+
+                    switch (sensorType)
+                    {
+                    case ZWaveSensorBinaryParameter.Smoke:
+                        eventType = EventParameter.AlarmSmoke;
+                        break;
+                    case ZWaveSensorBinaryParameter.CarbonMonoxide:
+                        eventType = EventParameter.AlarmCarbonMonoxide;
+                        break;
+                    case ZWaveSensorBinaryParameter.CarbonDioxide:
+                        eventType = EventParameter.AlarmCarbonDioxide;
+                        break;
+                    case ZWaveSensorBinaryParameter.Heat:
+                        eventType = EventParameter.AlarmHeat;
+                        break;
+                    case ZWaveSensorBinaryParameter.Water:
+                        eventType = EventParameter.AlarmFlood;
+                        break;
+                    case ZWaveSensorBinaryParameter.Tamper:
+                        eventType = EventParameter.AlarmTampered;
+                        break;
+                    case ZWaveSensorBinaryParameter.DoorWindow:
+                        eventType = EventParameter.AlarmDoorWindow;
+                        break;
+                    case ZWaveSensorBinaryParameter.Motion:
+                        eventType = EventParameter.SensorMotion;
+                        break;
+                    case ZWaveSensorBinaryParameter.Freeze:
+                    case ZWaveSensorBinaryParameter.Auxiliary:
+                    case ZWaveSensorBinaryParameter.Tilt:
+                    default:
+                        // Catch-all for the undefined types above.
+                        eventType = EventParameter.SensorGeneric;
+                        break;
+                    }
+
+                    nodeEvent = new NodeEvent(node, eventType, message[2], 0);
+                }
             }
             return nodeEvent;
         }

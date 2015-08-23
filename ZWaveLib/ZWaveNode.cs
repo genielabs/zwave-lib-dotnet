@@ -112,6 +112,11 @@ namespace ZWaveLib
         /// </summary>
         public event NodeUpdatedEventHandler NodeUpdated;
 
+        /// <summary>
+        /// Dictionary mapping supported command classes to versions.
+        /// </summary>
+        public Dictionary<CommandClass, byte> CommandClassVersions { get; internal set; }
+
         #endregion
 
         #region Lifecycle
@@ -126,6 +131,7 @@ namespace ZWaveLib
             this.controller = controller;
             Id = nodeId;
             Data = new Dictionary<string, object>();
+            CommandClassVersions = new Dictionary<CommandClass, byte>();
             NodeInformationFrame = new byte[]{};
             SecuredNodeInformationFrame = new byte[]{};
         }
@@ -142,6 +148,7 @@ namespace ZWaveLib
             Id = nodeId;
             GenericClass = genericType;
             Data = new Dictionary<string, object>();
+            CommandClassVersions = new Dictionary<CommandClass, byte>();
             NodeInformationFrame = new byte[]{};
             SecuredNodeInformationFrame = new byte[]{};
         }
@@ -216,6 +223,23 @@ namespace ZWaveLib
                 isSecured = (Array.IndexOf(SecuredNodeInformationFrame, (byte)commandClass) >= 0);
             }
             return isSecured;
+        }
+
+        /// <summary>
+        /// Determines the version of the specified command class.
+        /// </summary>
+        /// <returns>The command class version, or 0 if it is not found.</returns>
+        /// <param name="cmdClass">Command class to query</param>
+        public byte GetCmdClassVersion(CommandClass cmdClass)
+        {
+            if (CommandClassVersions.ContainsKey(cmdClass))
+            {
+                return CommandClassVersions[cmdClass];
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         /// <summary>
