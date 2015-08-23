@@ -42,6 +42,11 @@ namespace ZWaveLib.Values
         HomeHealth
     }
 
+    /// <summary>
+    /// Enumerator for alarm value details. e.g., 0x16 corresponds with the action of 
+    /// an open door if the alarm AccessControl alarm type is set.
+    /// </summary>
+    /// 
     public enum ZWaveAlarmDetailType
     {
         Generic = 0x00,
