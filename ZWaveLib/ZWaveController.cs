@@ -1340,6 +1340,7 @@ namespace ZWaveLib
         public Dictionary<CommandClass, byte> CommandClassVersions { get; internal set; }
 
         // Get around the fact that Dictionaries aren't supported by XmlSerialize
+        // Solution found in: http://stackoverflow.com/questions/495647/serialize-class-containing-dictionary-member
         public class SerializeableKeyValue<T1,T2>
         {
             public T1 Key { get; set; }

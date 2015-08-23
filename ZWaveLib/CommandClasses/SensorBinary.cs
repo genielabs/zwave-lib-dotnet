@@ -105,6 +105,7 @@ namespace ZWaveLib.CommandClasses
                     case ZWaveSensorBinaryParameter.Freeze:
                     case ZWaveSensorBinaryParameter.Auxiliary:
                     case ZWaveSensorBinaryParameter.Tilt:
+                    case ZWaveSensorBinaryParameter.General:
                     default:
                         // Catch-all for the undefined types above.
                         eventType = EventParameter.SensorGeneric;
