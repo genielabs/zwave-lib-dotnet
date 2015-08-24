@@ -28,9 +28,9 @@ namespace ZWaveLib.Values
     public class VersionValue
     {
         public readonly CommandClass CmdClass;
-        public readonly int Version;
+        public readonly byte Version;
 
-        public VersionValue(CommandClass cmdClass, int version)
+        public VersionValue(CommandClass cmdClass, byte version)
         {
             CmdClass = cmdClass;
             Version = version;

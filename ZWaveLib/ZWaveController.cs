@@ -328,7 +328,6 @@ namespace ZWaveLib
                     else
                         OnNodeUpdated(new NodeUpdatedEventArgs(zn.Id, new NodeEvent(zn, EventParameter.NodeInfo, BitConverter.ToString(zn.NodeInformationFrame).Replace("-", " "), 0)));
 
-                    /*
                     // TODO: this is not working, just causing a bunch of errors or version number == 0
                     // For nodes that support version command class, query each one for its version.
                     if (zn.SupportCommandClass(CommandClass.Version))
@@ -339,7 +338,6 @@ namespace ZWaveLib
                             ZWaveLib.CommandClasses.Version.Get(zn, cmdClass.CommandClass);
                         }
                     }
-                    */
 
                     // Manufacturer Specific, if cached just return the cached value
                     if (String.IsNullOrWhiteSpace(zn.ManufacturerSpecific.ManufacturerId))
@@ -1096,6 +1094,22 @@ namespace ZWaveLib
                 // we just send other events and save the node data
                 NodeInformationFrameDone(node);
             }
+            else if (eventData.Parameter == EventParameter.VersionCommandClass)
+            {
+                VersionValue value = (VersionValue)eventData.Value;
+
+                // Unsupported command class
+                NodeCommandClass nodecc = node.GetCommandClass(value.CmdClass);
+                if (nodecc == null)
+                {
+                    return;
+                }
+
+                // Update command class version
+                nodecc.Version = value.Version;
+                return;
+            }
+
             // Route node event
             OnNodeUpdated(new NodeUpdatedEventArgs(eventData.Node.Id, eventData));
         }
