@@ -106,7 +106,7 @@ namespace ZWaveLib.CommandClasses
 
         private static List<byte[]> GetResendQueueData(ZWaveNode node)
         {
-            return (List<byte[]>)node.GetData("WakeUpResendQueue", new List<byte[]>());
+            return (List<byte[]>)node.GetData("WakeUpResendQueue", new List<byte[]>()).Value;
         }
     }
 }

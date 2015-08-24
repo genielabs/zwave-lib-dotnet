@@ -93,8 +93,7 @@
     <Compile Include="Enums\OperationStatus.cs" />
     <Compile Include="ZWaveController.cs" />
     <Compile Include="CommandClasses\Version.cs" />
-    <Compile Include="Values\VersionCmdClassValue.cs" />
-    <Compile Include="ZWaveNodeConfig.cs" />
+    <Compile Include="Values\VersionValue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

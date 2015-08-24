@@ -117,7 +117,7 @@ namespace ZWaveLib.CommandClasses
 
         private static Dictionary<byte, int> GetConfigParamsData(ZWaveNode node)
         {
-            return (Dictionary<byte, int>)node.GetData("ConfigParamsLength", new Dictionary<byte, int>());
+            return (Dictionary<byte, int>)node.GetData("ConfigParamsLength", new Dictionary<byte, int>()).Value;
         }
 
     }

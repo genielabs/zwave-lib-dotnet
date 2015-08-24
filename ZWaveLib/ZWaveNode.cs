@@ -28,10 +28,71 @@ using System.Linq;
 using System.Threading;
 
 using ZWaveLib.CommandClasses;
+using System.Xml.Serialization;
 
 namespace ZWaveLib
 {
-    
+    [Serializable]
+    public class NodeCapabilities
+    {
+
+        /// <summary>
+        /// Gets or sets the basic type.
+        /// </summary>
+        /// <value>The basic type.</value>
+        public byte BasicType { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the generic type.
+        /// </summary>
+        /// <value>The generic type.</value>
+        public byte GenericType { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the specific type.
+        /// </summary>
+        /// <value>The specific type.</value>
+        public byte SpecificType { get; internal set; }
+
+        public NodeCapabilities()
+        {
+        }
+
+    }
+
+    [Serializable]
+    public class NodeCommandClass
+    {
+        public readonly byte Id;
+        public int Version { get; internal set; }
+        [XmlIgnore]
+        public CommandClass CommandClass { get { return (CommandClass)Id; } }
+
+        public NodeCommandClass()
+        {
+        }
+
+        public NodeCommandClass(byte id, int version = 0)
+        {
+            Id = id;
+            Version = version;
+        }
+    }
+
+    public class NodeData
+    {
+        public string Name { get; internal set; }
+
+        public object Value { get; internal set; }
+
+        public NodeData(string fieldName, object data)
+        {
+            Name = fieldName;
+            Value = data;
+        }
+    }
+
+    [Serializable]
     public class ZWaveNode
     {
         #region Private fields
@@ -48,29 +109,7 @@ namespace ZWaveLib
         /// <value>The identifier.</value>
         public byte Id { get; protected set; }
 
-        /// <summary>
-        /// Gets or sets the manufacturer specific.
-        /// </summary>
-        /// <value>The manufacturer specific.</value>
-        public ManufacturerSpecificInfo ManufacturerSpecific { get; internal set; }
-
-        /// <summary>
-        /// Gets or sets the basic class.
-        /// </summary>
-        /// <value>The basic class.</value>
-        public byte BasicClass { get; internal set; }
-
-        /// <summary>
-        /// Gets or sets the generic class.
-        /// </summary>
-        /// <value>The generic class.</value>
-        public byte GenericClass { get; internal set; }
-
-        /// <summary>
-        /// Gets or sets the specific class.
-        /// </summary>
-        /// <value>The specific class.</value>
-        public byte SpecificClass { get; internal set; }
+        public NodeCapabilities ProtocolInfo { get; internal set; }
 
         /// <summary>
         /// Gets or sets the node information frame.
@@ -84,11 +123,20 @@ namespace ZWaveLib
         /// <value>The secured node information frame.</value>
         public byte[] SecuredNodeInformationFrame { get; internal set; }
 
+        public List<NodeCommandClass> CommandClasses { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the manufacturer specific.
+        /// </summary>
+        /// <value>The manufacturer specific.</value>
+        public ManufacturerSpecificInfo ManufacturerSpecific { get; internal set; }
+
         /// <summary>
         /// Gets or sets the data.
         /// </summary>
         /// <value>The data.</value>
-        public Dictionary<string, object> Data { get; internal set; }
+        [XmlIgnore]
+        public List<NodeData> Data { get; internal set; }
 
         /// <summary>
         /// Node updated event handler.
@@ -100,29 +148,29 @@ namespace ZWaveLib
         /// </summary>
         public event NodeUpdatedEventHandler NodeUpdated;
 
-        /// <summary>
-        /// Dictionary mapping supported command classes to versions.
-        /// </summary>
-        public Dictionary<CommandClass, byte> CommandClassVersions { get; internal set; }
-
         #endregion
 
         #region Lifecycle
+
+        public ZWaveNode()
+        {
+            Data = new List<NodeData>();
+            CommandClasses = new List<NodeCommandClass>();
+            ProtocolInfo = new NodeCapabilities();
+            NodeInformationFrame = new byte[]{ };
+            SecuredNodeInformationFrame = new byte[]{ };
+            ManufacturerSpecific = new ManufacturerSpecificInfo();
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ZWaveLib.ZWaveNode"/> class.
         /// </summary>
         /// <param name="controller">Controller.</param>
         /// <param name="nodeId">Node identifier.</param>
-        public ZWaveNode(ZWaveController controller, byte nodeId)
+        public ZWaveNode(ZWaveController controller, byte nodeId) : this()
         {
             this.controller = controller;
             Id = nodeId;
-            Data = new Dictionary<string, object>();
-            CommandClassVersions = new Dictionary<CommandClass, byte>();
-            NodeInformationFrame = new byte[]{};
-            SecuredNodeInformationFrame = new byte[]{};
-            ManufacturerSpecific = new ManufacturerSpecificInfo();
         }
 
         /// <summary>
@@ -131,62 +179,49 @@ namespace ZWaveLib
         /// <param name="controller">Controller.</param>
         /// <param name="nodeId">Node identifier.</param>
         /// <param name="genericType">Generic type.</param>
-        public ZWaveNode(ZWaveController controller, byte nodeId, byte genericType)
+        public ZWaveNode(ZWaveController controller, byte nodeId, byte genericType) : this(controller, nodeId)
         {
-            this.controller = controller;
-            Id = nodeId;
-            GenericClass = genericType;
-            Data = new Dictionary<string, object>();
-            CommandClassVersions = new Dictionary<CommandClass, byte>();
-            NodeInformationFrame = new byte[]{};
-            SecuredNodeInformationFrame = new byte[]{};
-            ManufacturerSpecific = new ManufacturerSpecificInfo();
+            ProtocolInfo.GenericType = genericType;
         }
 
         #endregion
 
         #region Public members
 
-        public object GetData(string fieldId, object defaultValue = null)
+        /// <summary>
+        /// Gets the custom node data.
+        /// </summary>
+        /// <returns>The data.</returns>
+        /// <param name="fieldId">Field identifier.</param>
+        /// <param name="defaultValue">Default value.</param>
+        public NodeData GetData(string fieldId, object defaultValue = null)
         {
-            object val = defaultValue;
-            if (!Data.ContainsKey(fieldId))
+            var item = Data.Find(d => d.Name == fieldId);
+            if (item == null)
             {
                 if (defaultValue != null)
-                    Data.Add(fieldId, defaultValue);
+                {
+                    item = new NodeData(fieldId, defaultValue);
+                    Data.Add(item);
+                }
             }
-            else
-            {
-                val = Data[fieldId];
-            }
-            return val;
-        }
-
-        public void UpdateData(string fieldId, object value)
-        {
-            if (Data.ContainsKey(fieldId))
-                Data[fieldId] = value;
-            else
-                Data.Add(fieldId, value);
+            return item;
         }
 
         /// <summary>
-        /// Gets the supported command classes.
+        /// Updates the custom node data.
         /// </summary>
-        /// <value>The supported command classes.</value>
-        public List<CommandClass> SupportedCommandClasses
+        /// <param name="fieldId">Field identifier.</param>
+        /// <param name="value">Value.</param>
+        public void UpdateData(string fieldId, object value)
         {
-            get
-            {
-                var cclist = new List<CommandClass>();
-                foreach (var cc in NodeInformationFrame)
-                {
-                    var cclass = CommandClass.NotSet;
-                    Enum.TryParse<CommandClass>(cc.ToString(), out cclass);
-                    cclist.Add(cclass);
-                }
-                return cclist;
-            }
+            var item = GetData(fieldId, value);
+            item.Value = value;
+        }
+
+        public NodeCommandClass GetCommandClass(CommandClass cclass)
+        {
+            return this.CommandClasses.Find(cc => cc.Id.Equals(cclass));
         }
 
         /// <summary>
@@ -214,23 +249,6 @@ namespace ZWaveLib
                 isSecured = (Array.IndexOf(SecuredNodeInformationFrame, (byte)commandClass) >= 0);
             }
             return isSecured;
-        }
-
-        /// <summary>
-        /// Determines the version of the specified command class.
-        /// </summary>
-        /// <returns>The command class version, or 0 if it is not found.</returns>
-        /// <param name="cmdClass">Command class to query</param>
-        public byte GetCmdClassVersion(CommandClass cmdClass)
-        {
-            if (CommandClassVersions.ContainsKey(cmdClass))
-            {
-                return CommandClassVersions[cmdClass];
-            }
-            else
-            {
-                return 0;
-            }
         }
 
         /// <summary>
@@ -314,6 +332,26 @@ namespace ZWaveLib
         {
             if (NodeUpdated != null)
                 NodeUpdated(this, zevent);
+        }
+
+        internal void UpdateCommandClassList()
+        {
+            // we only build the list once
+            if (this.CommandClasses.Count != NodeInformationFrame.Length)
+            {
+                this.CommandClasses.Clear();
+                foreach (var cc in NodeInformationFrame)
+                {
+                    var cclass = CommandClass.NotSet;
+                    Enum.TryParse<CommandClass>(cc.ToString(), out cclass);
+                    this.CommandClasses.Add(new NodeCommandClass((byte)cclass));
+                }
+            }
+        }
+
+        internal void SetController(ZWaveController controller)
+        {
+            this.controller = controller;
         }
 
         #endregion

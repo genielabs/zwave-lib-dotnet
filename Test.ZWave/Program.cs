@@ -78,6 +78,7 @@ namespace Test.ZWave
                 }
             }
 
+            controller.Dispose();
         }
 
         static void ShowMenu()
@@ -118,20 +119,20 @@ namespace Test.ZWave
                 Console.ForegroundColor = ConsoleColor.White;
                 var mspecs = node.ManufacturerSpecific;
                 Console.WriteLine("    Manufacturer Specific {0}-{1}-{2}", mspecs.ManufacturerId, mspecs.TypeId, mspecs.ProductId);
-                Console.WriteLine("    Basic Class {0}", (GenericType)node.BasicClass);
-                Console.WriteLine("    Generic Class {0}", (GenericType)node.GenericClass);
-                Console.WriteLine("    Specific Class {0}", node.SpecificClass);
-                Console.WriteLine("    Secure Info {0}", BitConverter.ToString(node.SecuredNodeInformationFrame));
-                Console.WriteLine("    Node Info {0}", BitConverter.ToString(node.NodeInformationFrame));
-                foreach (CommandClass cclass in node.SupportedCommandClasses)
+                Console.WriteLine("    Basic Type {0}", (GenericType)node.ProtocolInfo.BasicType);
+                Console.WriteLine("    Generic Type {0}", (GenericType)node.ProtocolInfo.GenericType);
+                Console.WriteLine("    Specific Type {0}", node.ProtocolInfo.SpecificType);
+                Console.WriteLine("    Secure Info Frame {0}", BitConverter.ToString(node.SecuredNodeInformationFrame));
+                Console.WriteLine("    Info Frame {0}", BitConverter.ToString(node.NodeInformationFrame));
+                foreach (NodeCommandClass nodeCmdClass in node.CommandClasses)
                 {
                     string versionInfo = "";
                     // TODO: GetCmdClassVersion version is not currently working
                     if (node.SupportCommandClass(CommandClass.Version))
                     {
-                        versionInfo = String.Format("(version {0})", node.GetCmdClassVersion(cclass));
+                        versionInfo = String.Format("(version {0})", nodeCmdClass.Version);
                     }
-                    if (!Enum.IsDefined(typeof(CommandClass), cclass))
+                    if (!Enum.IsDefined(typeof(CommandClass), nodeCmdClass.Id))
                     {
                         versionInfo += " [UNSUPPORTED]";
                         Console.ForegroundColor = ConsoleColor.Red;
@@ -140,12 +141,12 @@ namespace Test.ZWave
                     {
                         Console.ForegroundColor = ConsoleColor.White;
                     }
-                    Console.WriteLine("        {0} {1}", cclass, versionInfo);
+                    Console.WriteLine("        {0} {1}", nodeCmdClass.CommandClass, versionInfo);
                 }
                 Console.ForegroundColor = ConsoleColor.White;
                 if (node.GetData("RoutingInfo") != null)
                 {
-                    Console.WriteLine("    Routing Info {0}", BitConverter.ToString((byte[])node.GetData("RoutingInfo")));
+                    Console.WriteLine("    Routing Info {0}", BitConverter.ToString((byte[])node.GetData("RoutingInfo").Value));
                 }
             }
             Console.WriteLine("\n");

@@ -43,7 +43,12 @@ namespace ZWaveLib.CommandClasses
                     return nodeEvent;
                 }
                 CommandClass cmdClass = (CommandClass)message[2];
-                VersionCmdClassValue value = new VersionCmdClassValue(cmdClass, message[3]);
+                VersionValue value = new VersionValue(cmdClass, message[3]);
+                // Update node CC data
+                var nodeCc = node.GetCommandClass(cmdClass);
+                if (nodeCc != null)
+                    nodeCc.Version = value.Version;
+                // Set the VersionCommandClass event
                 nodeEvent = new NodeEvent(node, EventParameter.VersionCommandClass, value, 0);
             }
 

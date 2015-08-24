@@ -25,21 +25,21 @@ using System.Collections;
 
 namespace ZWaveLib.Values
 {
-    public class VersionCmdClassValue
+    public class VersionValue
     {
-        public CommandClass cmdClass;
-        public byte version;
+        public readonly CommandClass CmdClass;
+        public readonly int Version;
 
-        public VersionCmdClassValue(CommandClass cmdClass, byte version)
+        public VersionValue(CommandClass cmdClass, int version)
         {
-            this.cmdClass = cmdClass;
-            this.version = version;
+            CmdClass = cmdClass;
+            Version = version;
         }
 
-        public VersionCmdClassValue()
+        public VersionValue()
         {
-            this.cmdClass = 0;
-            this.version = 0;
+            CmdClass = 0;
+            Version = 0;
         }
     }
 }

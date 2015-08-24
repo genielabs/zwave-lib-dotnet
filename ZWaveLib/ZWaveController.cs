@@ -59,8 +59,7 @@ namespace ZWaveLib
 
         private ControllerStatus controllerStatus = ControllerStatus.Disconnected;
 
-        private List<ZWaveNode> nodes = new List<ZWaveNode>();
-        private List<ZWaveNodeConfig> nodesConfig = new List<ZWaveNodeConfig>();
+        private List<ZWaveNode> nodeList = new List<ZWaveNode>();
 
         private byte[] lastMessage = null;
         private DateTime lastMessageTimestamp = DateTime.UtcNow;
@@ -139,6 +138,7 @@ namespace ZWaveLib
 
         public void Dispose()
         {
+            Disconnect();
             SaveNodesConfig();
         }
 
@@ -278,7 +278,7 @@ namespace ZWaveLib
                 0x00
             };
             SendMessage(new ZWaveMessage(message, MessageDirection.Outbound, false));
-            nodes.Clear();
+            nodeList.Clear();
             Utility.logger.Trace("END");
         }
 
@@ -292,6 +292,7 @@ namespace ZWaveLib
         public void Initialize()
         {
             Utility.logger.Trace("BEGIN");
+            Thread.Sleep(1000);
             OnControllerStatusChanged(new ControllerStatusEventArgs(ControllerStatus.Initializing));
             var initialized = SendMessage(new ZWaveMessage(new byte[] { 0x01, 0x03, 0x00, (byte)ZWaveFunction.GetInitData, 0xFE }, MessageDirection.Outbound, false));
             if (initialized)
@@ -312,28 +313,34 @@ namespace ZWaveLib
             {
                 discoveryRunning = true;
                 OnDiscoveryProgress(new DiscoveryProgressEventArgs(DiscoveryStatus.DiscoveryStart));
-                foreach (ZWaveNode zn in nodes)
+                foreach (ZWaveNode zn in nodeList)
                 {
                     Utility.logger.Trace("Querying/Updating node {0}", zn.Id);
-                    // Generic/Basic/Specific Class
-                    GetNodeProtocolInfo(zn.Id);
+                    // Get Generic/Basic/Specific Class if not already cached
+                    if (zn.ProtocolInfo.BasicType == 0 && zn.ProtocolInfo.GenericType == 0 && zn.ProtocolInfo.SpecificType == 0)
+                        GetNodeProtocolInfo(zn.Id);
+                    
+                    // TODO: should check for SecureNodeInformationFrame as well??
+
                     // NIF, if cached just return the cached value
                     if (zn.NodeInformationFrame.Length == 0)
                         GetNodeInformationFrame(zn.Id);
                     else
                         OnNodeUpdated(new NodeUpdatedEventArgs(zn.Id, new NodeEvent(zn, EventParameter.NodeInfo, BitConverter.ToString(zn.NodeInformationFrame).Replace("-", " "), 0)));
+
                     /*
                     // TODO: this is not working, just causing a bunch of errors or version number == 0
                     // For nodes that support version command class, query each one for its version.
-                    if (znode.SupportCommandClass(CommandClass.Version))
+                    if (zn.SupportCommandClass(CommandClass.Version))
                     {
                         // Compile a list of all of our command class IDs
-                        foreach (var cmdClass in znode.SupportedCommandClasses)
+                        foreach (var cmdClass in zn.CommandClasses)
                         {
-                            ZWaveLib.CommandClasses.Version.Get(znode, cmdClass);
+                            ZWaveLib.CommandClasses.Version.Get(zn, cmdClass.CommandClass);
                         }
                     }
                     */
+
                     // Manufacturer Specific, if cached just return the cached value
                     if (String.IsNullOrWhiteSpace(zn.ManufacturerSpecific.ManufacturerId))
                         ManufacturerSpecific.Get(zn);
@@ -342,6 +349,7 @@ namespace ZWaveLib
                     // Raise the node updated event
                     UpdateOperationProgress(zn.Id, NodeQueryStatus.NodeUpdated);
                 }
+                SaveNodesConfig();
                 OnDiscoveryProgress(new DiscoveryProgressEventArgs(DiscoveryStatus.DiscoveryEnd));
                 discoveryRunning = false;
             }
@@ -394,7 +402,7 @@ namespace ZWaveLib
         /// <param name="nodeId">Node identifier.</param>
         public ZWaveNode GetNode(byte nodeId)
         {
-            return nodes.Find(zn => zn.Id == nodeId);
+            return nodeList.Find(zn => zn.Id == nodeId);
         }
 
         /// <summary>
@@ -403,7 +411,7 @@ namespace ZWaveLib
         /// <value>The nodes.</value>
         public List<ZWaveNode> Nodes
         {
-            get { return nodes; }
+            get { return nodeList; }
         }
 
         #endregion
@@ -639,7 +647,7 @@ namespace ZWaveLib
 
             case MessageType.Request:
 
-                if (nodes.Count == 0)
+                if (nodeList.Count == 0)
                     break;
 
                 switch (msg.Function)
@@ -670,11 +678,10 @@ namespace ZWaveLib
                         byte[] nodeInfo = new byte[nodeInfoLength];
                         Array.Copy(rawData, 8, nodeInfo, 0, nodeInfoLength);
                         newNode.NodeInformationFrame = nodeInfo;
-
-                        newNode.BasicClass = rawData[8];
-                        newNode.GenericClass = rawData[9];
-                        newNode.SpecificClass = rawData[10];
-                        nodes.Add(newNode);
+                        newNode.ProtocolInfo.BasicType = rawData[8];
+                        newNode.ProtocolInfo.GenericType = rawData[9];
+                        newNode.ProtocolInfo.SpecificType = rawData[10];
+                        nodeList.Add(newNode);
 
                         UpdateOperationProgress(newNode.Id, NodeQueryStatus.NodeAddStarted);
 
@@ -881,9 +888,9 @@ namespace ZWaveLib
 
                 case ZWaveFunction.GetNodeProtocolInfo:
                     var node = GetNode(msg.NodeId);
-                    node.BasicClass = rawData[7];
-                    node.GenericClass = rawData[8];
-                    node.SpecificClass = rawData[9];
+                    node.ProtocolInfo.BasicType = rawData[7];
+                    node.ProtocolInfo.GenericType = rawData[8];
+                    node.ProtocolInfo.SpecificType = rawData[9];
                     break;
 
                 case ZWaveFunction.RequestNodeInfo:
@@ -1089,16 +1096,6 @@ namespace ZWaveLib
                 // we just send other events and save the node data
                 NodeInformationFrameDone(node);
             }
-            else if (eventData.Parameter == EventParameter.VersionCommandClass)
-            {
-                VersionCmdClassValue value = (VersionCmdClassValue)eventData.Value;
-                // Unsupported command class
-                if (!node.SupportCommandClass(value.cmdClass))
-                {
-                    return;
-                }
-                node.CommandClassVersions[value.cmdClass] = value.version;
-            }
             // Route node event
             OnNodeUpdated(new NodeUpdatedEventArgs(eventData.Node.Id, eventData));
         }
@@ -1175,14 +1172,14 @@ namespace ZWaveLib
 
         private void InitializeNodes(byte[] receivedMessage)
         {
-            var nodeList = Utility.ExtractNodesFromBitMask(receivedMessage);
-            foreach (byte i in nodeList)
+            var nodes = Utility.ExtractNodesFromBitMask(receivedMessage);
+            foreach (byte i in nodes)
             {
                 // i = 0x01 is the controller itself, so we don't add it to the nodelist
                 if (i == 0x01)
                     continue;
                 if (GetNode(i) == null)
-                    nodes.Add(AddNode(i, 0x00));
+                    nodeList.Add(AddNode(i, 0x00));
             }
         }
 
@@ -1211,7 +1208,7 @@ namespace ZWaveLib
             {
                 node.NodeUpdated -= ZWave_NodeUpdated;
             }
-            nodes.RemoveAll(zn => zn.Id == nodeId);
+            nodeList.RemoveAll(zn => zn.Id == nodeId);
             UpdateOperationProgress(nodeId, NodeQueryStatus.NodeRemoved);
         }
 
@@ -1219,55 +1216,36 @@ namespace ZWaveLib
         {
             string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "zwavenodes.xml");
             if (File.Exists(configPath))
+            {
                 try
                 {
-                    var serializer = new XmlSerializer(nodesConfig.GetType());
+                    var serializer = new XmlSerializer(nodeList.GetType());
                     var reader = new StreamReader(configPath);
-                    nodesConfig = (List<ZWaveNodeConfig>)serializer.Deserialize(reader);
-                    foreach (ZWaveNodeConfig node in nodesConfig)
-                    {
-                        var newNode = AddNode(node.NodeId, 0x00);
-                        newNode.NodeInformationFrame = node.NodeInformationFrame;
-                        newNode.SecuredNodeInformationFrame = node.SecuredNodeInformationFrame;
-                        Security.GetSecurityData(newNode).SetPrivateNetworkKey(node.DevicePrivateNetworkKey);
-                        if (node.CommandClassVersions != null)
-                            newNode.CommandClassVersions = node.CommandClassVersions;
-                        nodes.Add(newNode);
-                    }
+                    nodeList = (List<ZWaveNode>)serializer.Deserialize(reader);
                     reader.Close();
+                    foreach (var node in nodeList)
+                    {
+                        node.NodeUpdated += ZWave_NodeUpdated;
+                        node.SetController(this);
+                    }
                 }
                 catch (Exception e)
                 {
                     Utility.logger.Error(e);
                 }
+            }
         }
 
         private void SaveNodesConfig()
         {
-            nodesConfig.Clear();
-            for (int n = 0; n < nodes.Count; n++)
-            {
-                // save only the nodes that are still in the network - not sure how is the best way to handle this
-                // we just want to save the vlid nodes, not all the nodes that ever existed and were not cleanly removed
-                if (nodes[n].SpecificClass > 0)
-                {
-                    nodesConfig.Add(new ZWaveNodeConfig() {
-                        NodeId = nodes[n].Id,
-                        NodeInformationFrame = nodes[n].NodeInformationFrame,
-                        SecuredNodeInformationFrame = nodes[n].SecuredNodeInformationFrame,
-                        DevicePrivateNetworkKey = Security.GetSecurityData(nodes[n]).GetPrivateNetworkKey(),
-                        CommandClassVersions = nodes[n].CommandClassVersions
-                    });
-                }
-            }
             string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "zwavenodes.xml");
             try
             {
                 var settings = new System.Xml.XmlWriterSettings();
                 settings.Indent = true;
-                var serializer = new System.Xml.Serialization.XmlSerializer(nodesConfig.GetType());
+                var serializer = new System.Xml.Serialization.XmlSerializer(nodeList.GetType());
                 var writer = System.Xml.XmlWriter.Create(configPath, settings);
-                serializer.Serialize(writer, nodesConfig);
+                serializer.Serialize(writer, nodeList);
                 writer.Close();
             }
             catch (Exception e)
@@ -1283,6 +1261,7 @@ namespace ZWaveLib
 
         private void NodeInformationFrameDone(ZWaveNode znode)
         {
+            znode.UpdateCommandClassList();
             // once we get the security command classes we'll issue the same events and call SaveNodesConfig();
             OnNodeUpdated(new NodeUpdatedEventArgs(znode.Id, new NodeEvent(znode, EventParameter.NodeInfo, BitConverter.ToString(znode.NodeInformationFrame).Replace("-", " "), 0)));
             // TODO: deprecate the WakeUpNotify event?
