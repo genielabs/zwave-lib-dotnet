@@ -189,36 +189,10 @@ namespace ZWaveLib
         #region Public members
 
         /// <summary>
-        /// Gets the custom node data.
+        /// Gets the command class.
         /// </summary>
-        /// <returns>The data.</returns>
-        /// <param name="fieldId">Field identifier.</param>
-        /// <param name="defaultValue">Default value.</param>
-        public NodeData GetData(string fieldId, object defaultValue = null)
-        {
-            var item = Data.Find(d => d.Name == fieldId);
-            if (item == null)
-            {
-                if (defaultValue != null)
-                {
-                    item = new NodeData(fieldId, defaultValue);
-                    Data.Add(item);
-                }
-            }
-            return item;
-        }
-
-        /// <summary>
-        /// Updates the custom node data.
-        /// </summary>
-        /// <param name="fieldId">Field identifier.</param>
-        /// <param name="value">Value.</param>
-        public void UpdateData(string fieldId, object value)
-        {
-            var item = GetData(fieldId, value);
-            item.Value = value;
-        }
-
+        /// <returns>The command class.</returns>
+        /// <param name="cclass">Cclass.</param>
         public NodeCommandClass GetCommandClass(CommandClass cclass)
         {
             return this.CommandClasses.Find(cc => cc.Id.Equals((byte)cclass));
@@ -249,6 +223,37 @@ namespace ZWaveLib
                 isSecured = (Array.IndexOf(SecuredNodeInformationFrame, (byte)commandClass) >= 0);
             }
             return isSecured;
+        }
+
+        /// <summary>
+        /// Gets the custom node data.
+        /// </summary>
+        /// <returns>The data.</returns>
+        /// <param name="fieldId">Field identifier.</param>
+        /// <param name="defaultValue">Default value.</param>
+        public NodeData GetData(string fieldId, object defaultValue = null)
+        {
+            var item = Data.Find(d => d.Name == fieldId);
+            if (item == null)
+            {
+                if (defaultValue != null)
+                {
+                    item = new NodeData(fieldId, defaultValue);
+                    Data.Add(item);
+                }
+            }
+            return item;
+        }
+
+        /// <summary>
+        /// Updates the custom node data.
+        /// </summary>
+        /// <param name="fieldId">Field identifier.</param>
+        /// <param name="value">Value.</param>
+        public void UpdateData(string fieldId, object value)
+        {
+            var item = GetData(fieldId, value);
+            item.Value = value;
         }
 
         /// <summary>
@@ -286,6 +291,8 @@ namespace ZWaveLib
             {
                 byte commandLength = receivedMessage[6];
                 byte commandClass = receivedMessage[7];
+                // TODO: this should be moved inside the NodeCommandClass class
+                // TODO: as "Instance" property
                 var cc = CommandClassFactory.GetCommandClass(commandClass);
                 byte[] message = new byte[commandLength];
                 Array.Copy(receivedMessage, 7, message, 0, commandLength);
@@ -305,19 +312,6 @@ namespace ZWaveLib
             }
             else if (messageLength > 3 && receivedMessage[3] != 0x13)
             {
-                /*
-                if (receivedMessage[3] != 0x13)
-                {
-                    bool log = true;
-                    // do not log an error message for ManufacturerSpecific and Security CommandClass
-                    if (messageLength > 7 && (receivedMessage[7] == (byte)CommandClass.ManufacturerSpecific || receivedMessage[7] == (byte) CommandClass.Security))
-                        log = false;
-                    if (log)
-                    {
-                        Utility.DebugLog(DebugMessageType.Error, "Unhandled message: " + BitConverter.ToString(receivedMessage));
-                    }
-                }
-                */
                 Utility.logger.Warn("Unhandled message type");
             }
 
@@ -329,12 +323,6 @@ namespace ZWaveLib
             var msg = new ZWaveMessage(message, MessageDirection.Outbound, true);
             controller.QueueMessage(msg);
             return msg;
-        }
-
-        internal virtual void OnNodeUpdated(NodeEvent zevent)
-        {
-            if (NodeUpdated != null)
-                NodeUpdated(this, zevent);
         }
 
         internal void UpdateCommandClassList()
@@ -355,6 +343,12 @@ namespace ZWaveLib
         internal void SetController(ZWaveController controller)
         {
             this.controller = controller;
+        }
+
+        internal virtual void OnNodeUpdated(NodeEvent zevent)
+        {
+            if (NodeUpdated != null)
+                NodeUpdated(this, zevent);
         }
 
         #endregion

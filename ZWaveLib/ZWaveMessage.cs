@@ -26,87 +26,119 @@ using System.Threading;
 namespace ZWaveLib
 {
 
-    public enum QueryStage
-    {
-        NotSet,
-        WaitAck,
-        SendDataReady,
-        WaitData,
-        Complete,
-        Error
-    }
-
-    public enum FrameHeader : byte
-    {
-        SOF = 0x01,
-        ACK = 0x06,
-        NAK = 0x15,
-        CAN = 0x18
-    }
-
-    public enum MessageDirection : byte
-    {
-        Inbound = 0x00,
-        Outbound = 0x01
-    }
-
-    public enum MessageType : byte
-    {
-        Request = 0x00,
-        Response = 0x01,
-        NotSet = 0xFF
-    }
-
-    public class MessageReceivedEventArgs
-    {
-        public readonly ZWaveMessage Message;
-
-        public MessageReceivedEventArgs(ZWaveMessage message)
-        {
-            Message = message;
-        }
-    }
-
+    /// <summary>
+    /// Z-Wave message.
+    /// </summary>
     public class ZWaveMessage
     {
-        public const int ResendAttemptsMax = 2;
-        public const int SendMessageTimeoutMs = 10000;
 
+        #region Private fields
+
+        private const byte callbackStartId = 0x02;
+        private static byte callbackIdSeq = ZWaveMessage.callbackStartId;
         internal ulong seqNumber = 0;
         internal ManualResetEvent sentAck = new ManualResetEvent(true);
 
-        private const byte CallbackStartId = 0x02;
-        // 0x01 is reserved
-        private static byte callbackIdSeq = ZWaveMessage.CallbackStartId;
+        #endregion
 
+        #region public static fields
+
+        /// <summary>
+        /// Ack message.
+        /// </summary>
         public static byte[] Ack = new byte[] { (byte)FrameHeader.ACK };
+        /// <summary>
+        /// Nack message.
+        /// </summary>
         public static byte[] Nack = new byte[] { (byte)FrameHeader.NAK };
 
+        #endregion
+
+        #region Public Fields
+
+        /// <summary>
+        /// Max resend attempts.
+        /// </summary>
+        public const int ResendAttemptsMax = 2;
+        /// <summary>
+        /// The send message timeout in milliseconds.
+        /// </summary>
+        public const int SendMessageTimeoutMs = 10000;
+        /// <summary>
+        /// The Z-Wave message frame header.
+        /// </summary>
         public FrameHeader Header;
 
-        public byte CallbackId { get; internal set; }
-
+        /// <summary>
+        /// Gets or sets the identifier of the node subject of this message.
+        /// </summary>
+        /// <value>The node identifier.</value>
         public byte NodeId { get; internal set; }
 
+        /// <summary>
+        /// Gets or sets the callback identifier.
+        /// </summary>
+        /// <value>The callback identifier.</value>
+        public byte CallbackId { get; internal set; }
+
+        /// <summary>
+        /// The raw message bytes data.
+        /// </summary>
         public readonly byte[] RawData;
 
+        /// <summary>
+        /// The sequence number of this message.
+        /// </summary>
         public readonly ulong Seq;
 
+        /// <summary>
+        /// The timestamp.
+        /// </summary>
         public readonly DateTime Timestamp = DateTime.UtcNow;
+
+        /// <summary>
+        /// Gets or sets the resend counter.
+        /// </summary>
+        /// <value>The resend counter.</value>
         public int ResendCount { get; internal set; }
 
+        /// <summary>
+        /// The message direction (Inboud/Outbound).
+        /// </summary>
         public readonly MessageDirection Direction = MessageDirection.Outbound;
+        /// <summary>
+        /// The type of message (Request/Response).
+        /// </summary>
         public readonly MessageType Type = MessageType.NotSet;
+        /// <summary>
+        /// The function.
+        /// </summary>
         public readonly ZWaveFunction Function = ZWaveFunction.NotSet;
+        /// <summary>
+        /// The command class.
+        /// </summary>
         public readonly CommandClass CommandClass = CommandClass.NotSet;
+        /// <summary>
+        /// The callback status.
+        /// </summary>
         public readonly CallbackStatus CallbackStatus = CallbackStatus.NotSet;
 
+        #endregion
+
+        #region Public members
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZWaveLib.ZWaveMessage"/> class.
+        /// </summary>
+        /// <param name="message">Message.</param>
+        /// <param name="direction">Direction.</param>
+        /// <param name="generateCallback">If set to <c>true</c> generate callback.</param>
         public ZWaveMessage(byte[] message, MessageDirection direction = MessageDirection.Outbound, bool generateCallback = false)
         {
-            Seq = ++seqNumber;
             Direction = direction;
             Header = (FrameHeader)message[0];
             RawData = message;
+
             if (direction == MessageDirection.Outbound)
             {
                 if (generateCallback)
@@ -117,6 +149,7 @@ namespace ZWaveLib
                 // Insert checksum
                 RawData[RawData.Length - 1] = GenerateChecksum(RawData);
             }
+
             if (Header == FrameHeader.SOF)
             {
                 if (message.Length > 4)
@@ -168,7 +201,7 @@ namespace ZWaveLib
                     {
                         CallbackId = message[4];
                     }
-                    else if (Function == ZWaveFunction.RequestNodeInfo ||Function == ZWaveFunction.GetNodeProtocolInfo || Function == ZWaveFunction.GetRoutingInfo)
+                    else if (Function == ZWaveFunction.RequestNodeInfo || Function == ZWaveFunction.GetNodeProtocolInfo || Function == ZWaveFunction.GetRoutingInfo)
                     {
                         NodeId = message[4];
                     }
@@ -181,14 +214,31 @@ namespace ZWaveLib
                     break;
                 }
             }
+
+            if (seqNumber == long.MaxValue)
+                seqNumber = 0;
+            Seq = ++seqNumber;
         }
 
+        /// <summary>
+        /// Wait until this message transaction is completed.
+        /// </summary>
         public ZWaveMessage Wait()
         {
             sentAck.WaitOne(SendMessageTimeoutMs);
             return this;
         }
 
+        #endregion
+
+        #region Public static utility functions
+
+        /// <summary>
+        /// Builds a Z-Wave SendData request message.
+        /// </summary>
+        /// <returns>The send data request.</returns>
+        /// <param name="nodeId">Node identifier.</param>
+        /// <param name="request">Request.</param>
         public static byte[] BuildSendDataRequest(byte nodeId, byte[] request)
         {
             byte[] header = new byte[] {
@@ -209,6 +259,11 @@ namespace ZWaveLib
             return message;
         }
 
+        /// <summary>
+        /// Verifies the checksum.
+        /// </summary>
+        /// <returns><c>true</c>, if checksum was verifyed, <c>false</c> otherwise.</returns>
+        /// <param name="data">Data.</param>
         public static bool VerifyChecksum(byte[] data)
         {
             uint checksum = 0xff;
@@ -219,15 +274,24 @@ namespace ZWaveLib
             return (checksum == data[data.Length - 1]);
         }
 
+        /// <summary>
+        /// Generates the callback identifier for an Outbound message.
+        /// </summary>
+        /// <returns>The callback identifier.</returns>
         private static byte GenerateCallbackId()
         {
             if (++callbackIdSeq > 0xFF)
             {
-                callbackIdSeq = CallbackStartId;
+                callbackIdSeq = callbackStartId;
             }
             return callbackIdSeq;
         }
 
+        /// <summary>
+        /// Generates the checksum of an Outbound message.
+        /// </summary>
+        /// <returns>The checksum.</returns>
+        /// <param name="data">Data.</param>
         private static byte GenerateChecksum(byte[] data)
         {
             int offset = 1;
@@ -241,6 +305,8 @@ namespace ZWaveLib
             returnValue = (byte)(~returnValue);
             return returnValue;
         }
+
+        #endregion
 
     }
 

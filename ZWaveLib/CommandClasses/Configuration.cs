@@ -73,6 +73,8 @@ namespace ZWaveLib.CommandClasses
             {
                 Get(node, parameter);
                 int retries = 0;
+                // TODO: check if this can be removed by using the .Wait method 
+                // TODO: in the "Get(node, parameter)" instruction above
                 while (!nodeConfigParamsLength.ContainsKey(parameter) && retries++ <= 5)
                 {
                     Thread.Sleep(1000);

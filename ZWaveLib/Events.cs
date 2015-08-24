@@ -81,5 +81,16 @@ namespace ZWaveLib
             this.Status = status;
         }
     }
+
+    public class MessageReceivedEventArgs
+    {
+        public readonly ZWaveMessage Message;
+
+        public MessageReceivedEventArgs(ZWaveMessage message)
+        {
+            Message = message;
+        }
+    }
+
 }
 

@@ -130,7 +130,7 @@ namespace ZWaveLib
         /// <summary>
         /// Initializes a new instance of the <see cref="ZWaveLib.ZWaveController"/> class.
         /// </summary>
-        /// <param name="portName">Port name.</param>
+        /// <param name="portName">The serial port name.</param>
         public ZWaveController(string portName) : this()
         {
             PortName = portName;
@@ -194,7 +194,7 @@ namespace ZWaveLib
         /// <summary>
         /// Queues the message.
         /// </summary>
-        /// <returns>The message.</returns>
+        /// <returns>The ZWaveMessage object itself.</returns>
         /// <param name="message">Message.</param>
         public ZWaveMessage QueueMessage(ZWaveMessage message)
         {
@@ -207,7 +207,7 @@ namespace ZWaveLib
         /// <summary>
         /// Sends the message.
         /// </summary>
-        /// <returns>The message.</returns>
+        /// <returns>True if sending succesfull, False otherwise.</returns>
         /// <param name="message">Message.</param>
         public bool SendMessage(ZWaveMessage message)
         {
@@ -361,6 +361,7 @@ namespace ZWaveLib
         /// <summary>
         /// Gets the node information frame.
         /// </summary>
+        /// <returns>The ZWaveMessage object of this request.</returns>
         /// <param name="nodeId">Node identifier.</param>
         public ZWaveMessage GetNodeInformationFrame(byte nodeId)
         {
@@ -379,6 +380,7 @@ namespace ZWaveLib
         /// <summary>
         /// Gets the node protocol info.
         /// </summary>
+        /// <returns>The ZWaveMessage object of this request.</returns>
         /// <param name="nodeId">Node identifier.</param>
         public ZWaveMessage GetNodeProtocolInfo(byte nodeId)
         {
@@ -420,7 +422,7 @@ namespace ZWaveLib
         /// <summary>
         /// Begins the node add.
         /// </summary>
-        /// <returns>A reference to the ZWaveMessage of this request.</returns>
+        /// <returns>The ZWaveMessage object of this request.</returns>
         /// <returns>The node add.</returns>
         public ZWaveMessage BeginNodeAdd()
         {
@@ -445,7 +447,7 @@ namespace ZWaveLib
         /// <summary>
         /// Stops the node add.
         /// </summary>
-        /// <returns>A reference to the ZWaveMessage of this request.</returns>
+        /// <returns>The ZWaveMessage object of this request.</returns>
         /// <returns>The node add.</returns>
         public ZWaveMessage StopNodeAdd()
         {
@@ -470,7 +472,7 @@ namespace ZWaveLib
         /// <summary>
         /// Begins the node remove.
         /// </summary>
-        /// <returns>A reference to the ZWaveMessage of this request.</returns>
+        /// <returns>The ZWaveMessage object of this request.</returns>
         /// <returns>The node remove.</returns>
         public ZWaveMessage BeginNodeRemove()
         {
@@ -495,7 +497,7 @@ namespace ZWaveLib
         /// <summary>
         /// Stops the node remove.
         /// </summary>
-        /// <returns>A reference to the ZWaveMessage of this request.</returns>
+        /// <returns>The ZWaveMessage object of this request.</returns>
         /// <returns>The node remove.</returns>
         public ZWaveMessage StopNodeRemove()
         {
@@ -524,7 +526,7 @@ namespace ZWaveLib
         /// <summary>
         /// Requests the neighbors options update.
         /// </summary>
-        /// <returns>A reference to the ZWaveMessage of this request.</returns>
+        /// <returns>The ZWaveMessage object of this request.</returns>
         /// <param name="nodeId">Node identifier.</param>
         public ZWaveMessage RequestNeighborsUpdateOptions(byte nodeId)
         {
@@ -545,7 +547,7 @@ namespace ZWaveLib
         /// <summary>
         /// Requests the neighbors update.
         /// </summary>
-        /// <returns>A reference to the ZWaveMessage of this request.</returns>
+        /// <returns>The ZWaveMessage object of this request.</returns>
         /// <param name="nodeId">Node identifier.</param>
         public ZWaveMessage RequestNeighborsUpdate(byte nodeId)
         {
@@ -565,7 +567,7 @@ namespace ZWaveLib
         /// <summary>
         /// Gets the neighbors routing info.
         /// </summary>
-        /// <returns>A reference to the ZWaveMessage of this request.</returns>
+        /// <returns>The ZWaveMessage object of this request.</returns>
         /// <param name="nodeId">Node identifier.</param>
         public ZWaveMessage GetNeighborsRoutingInfo(byte nodeId)
         {
