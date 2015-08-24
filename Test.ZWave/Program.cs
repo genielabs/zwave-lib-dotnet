@@ -125,21 +125,22 @@ namespace Test.ZWave
                 Console.WriteLine("    Node Info {0}", BitConverter.ToString(node.NodeInformationFrame));
                 foreach (CommandClass cclass in node.SupportedCommandClasses)
                 {
-                    Console.WriteLine("        {0}", cclass);
-                    byte version = node.GetCmdClassVersion(cclass);
-                    string versionStr = version == 0 ? "?" : version.ToString();
-
+                    string versionInfo = "";
+                    // TODO: GetCmdClassVersion version is not currently working
+                    if (node.SupportCommandClass(CommandClass.Version))
+                    {
+                        versionInfo = String.Format("(version {0})", node.GetCmdClassVersion(cclass));
+                    }
                     if (!Enum.IsDefined(typeof(CommandClass), cclass))
                     {
-                        byte cc = (byte)cclass;
+                        versionInfo += " [UNSUPPORTED]";
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("        Unsupported class {0} (0x{1}) (version {2})", cc, cc.ToString("X2"), versionStr);
                     }
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine("        {0} (version {1})", cclass, versionStr);
                     }
+                    Console.WriteLine("        {0} {1}", cclass, versionInfo);
                 }
                 Console.ForegroundColor = ConsoleColor.White;
                 if (node.GetData("RoutingInfo") != null)
@@ -199,9 +200,6 @@ namespace Test.ZWave
             {
                 foreach (var node in controller.Nodes)
                 {
-                    //if (node.Id == 31 || node.Id == 43 || node.Id == 44)
-                    //    continue;
-
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.WriteLine("\nNode {0} Controller.GetNodeInformationFrame", node.Id);
                     Console.ForegroundColor = ConsoleColor.White;
@@ -333,5 +331,6 @@ namespace Test.ZWave
         }
 
         #endregion
+
     }
 }

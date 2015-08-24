@@ -72,6 +72,7 @@ namespace ZWaveLib
         public const int ResendAttemptsMax = 2;
         public const int SendMessageTimeoutMs = 10000;
 
+        internal ulong seqNumber = 0;
         internal ManualResetEvent sentAck = new ManualResetEvent(true);
 
         private const byte CallbackStartId = 0x02;
@@ -89,6 +90,8 @@ namespace ZWaveLib
 
         public readonly byte[] RawData;
 
+        public readonly ulong Seq;
+
         public readonly DateTime Timestamp = DateTime.UtcNow;
         public int ResendCount { get; internal set; }
 
@@ -100,6 +103,7 @@ namespace ZWaveLib
 
         public ZWaveMessage(byte[] message, MessageDirection direction = MessageDirection.Outbound, bool generateCallback = false)
         {
+            Seq = ++seqNumber;
             Direction = direction;
             Header = (FrameHeader)message[0];
             RawData = message;
