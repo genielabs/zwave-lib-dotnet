@@ -221,7 +221,7 @@ namespace ZWaveLib
 
         public NodeCommandClass GetCommandClass(CommandClass cclass)
         {
-            return this.CommandClasses.Find(cc => cc.Id.Equals(cclass));
+            return this.CommandClasses.Find(cc => cc.CommandClass.Equals(cclass));
         }
 
         /// <summary>
