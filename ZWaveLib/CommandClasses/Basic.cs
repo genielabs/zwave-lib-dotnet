@@ -41,18 +41,18 @@ namespace ZWaveLib.CommandClasses
             return nodeEvent;
         }
 
-        public static void Set(ZWaveNode node, int value)
+        public static ZWaveMessage Set(ZWaveNode node, int value)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.Basic, 
                 (byte)Command.BasicSet, 
                 byte.Parse(value.ToString())
             });
         }
 
-        public static void Get(ZWaveNode node)
+        public static ZWaveMessage Get(ZWaveNode node)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.Basic, 
                 (byte)Command.BasicGet 
             });

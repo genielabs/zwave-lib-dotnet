@@ -54,9 +54,9 @@ namespace ZWaveLib.CommandClasses
             return new NodeEvent(node, EventParameter.ThermostatFanState, message[2], 0);
         }
 
-        public static void Get(ZWaveNode node)
+        public static ZWaveMessage Get(ZWaveNode node)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.ThermostatFanState, 
                 (byte)Command.BasicGet
             });

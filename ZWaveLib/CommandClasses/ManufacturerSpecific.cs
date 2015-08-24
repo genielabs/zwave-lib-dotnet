@@ -65,13 +65,13 @@ namespace ZWaveLib.CommandClasses
             return nodeEvent;
         }
 
-        public static void Get(ZWaveNode node)
+        public static ZWaveMessage Get(ZWaveNode node)
         {
             byte[] request = new byte[] {
                 (byte)CommandClass.ManufacturerSpecific,
                 (byte)Command.ManufacturerSpecificGet
             }; 
-            node.SendDataRequest(request);
+            return node.SendDataRequest(request);
         }
 
     }

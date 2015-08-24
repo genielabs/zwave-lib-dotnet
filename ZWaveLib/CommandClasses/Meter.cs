@@ -43,26 +43,26 @@ namespace ZWaveLib.CommandClasses
             return nodeEvent;
         }
 
-        public static void Get(ZWaveNode node, byte scaleType)
+        public static ZWaveMessage Get(ZWaveNode node, byte scaleType)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.Meter, 
                 (byte)Command.MeterGet,
                 scaleType
             });
         }
 
-        public static void GetSupported(ZWaveNode node)
+        public static ZWaveMessage GetSupported(ZWaveNode node)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.Meter, 
                 (byte)Command.MeterSupportedGet
             });
         }
 
-        public static void Reset(ZWaveNode node)
+        public static ZWaveMessage Reset(ZWaveNode node)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.Meter, 
                 (byte)Command.MeterReset
             });

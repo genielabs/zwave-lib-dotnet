@@ -69,6 +69,9 @@ namespace Test.ZWave
                 case "8":
                     ShowZWaveLibApi();
                     break;
+                case "9":
+                    ZWaveLib.CommandClasses.Version.Get(controller.GetNode(0x07), CommandClass.Association);
+                    break;
                 case "?":
                     SetSerialPortName(controller);
                     break;

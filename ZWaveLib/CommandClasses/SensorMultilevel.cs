@@ -53,9 +53,9 @@ namespace ZWaveLib.CommandClasses
             return nodeEvent;
         }
 
-        public static void Get(ZWaveNode node)
+        public static ZWaveMessage Get(ZWaveNode node)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.SensorMultilevel, 
                 (byte)Command.SensorMultilevelGet 
             });

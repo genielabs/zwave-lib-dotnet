@@ -221,7 +221,7 @@ namespace ZWaveLib
 
         public NodeCommandClass GetCommandClass(CommandClass cclass)
         {
-            return this.CommandClasses.Find(cc => cc.Id.Equals(cclass));
+            return this.CommandClasses.Find(cc => cc.Id.Equals((byte)cclass));
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace ZWaveLib
         /// Sends the data request.
         /// </summary>
         /// <param name="request">Request.</param>
-        public void SendDataRequest(byte[] request)
+        public ZWaveMessage SendDataRequest(byte[] request)
         {
             byte cmdClass = request[0];
             byte[] message = ZWaveMessage.BuildSendDataRequest(Id, request);
@@ -263,10 +263,13 @@ namespace ZWaveLib
             if (cmdClass != (byte)CommandClass.Security && IsSecuredCommandClass((CommandClass)cmdClass))
             {
                 Security.SendMessage(this, message);
+                // TODO: not yet supported for Security Command Classs,
+                // TODO: update Security.cs class
+                return null;
             }
             else
             {
-                SendMessage(message);
+                return SendMessage(message);
             }
         }
 

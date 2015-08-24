@@ -77,9 +77,9 @@ namespace ZWaveLib.CommandClasses
             return nodeEvent;
         }
 
-        public static void Set(ZWaveNode node, byte groupid, byte targetNodeId)
+        public static ZWaveMessage Set(ZWaveNode node, byte groupid, byte targetNodeId)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.Association, 
                 (byte)Command.AssociationSet, 
                 groupid, 
@@ -87,18 +87,18 @@ namespace ZWaveLib.CommandClasses
             });
         }
 
-        public static void Get(ZWaveNode node, byte groupId)
+        public static ZWaveMessage Get(ZWaveNode node, byte groupId)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.Association, 
                 (byte)Command.AssociationGet, 
                 groupId 
             });
         }
 
-        public static void Remove(ZWaveNode node, byte groupId, byte targetNodeId)
+        public static ZWaveMessage Remove(ZWaveNode node, byte groupId, byte targetNodeId)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.Association, 
                 (byte)Command.AssociationRemove, 
                 groupId, 

@@ -69,16 +69,16 @@ namespace ZWaveLib.CommandClasses
             return new NodeEvent(node, EventParameter.ThermostatSetPoint, ptype, 0);
         }
 
-        public static void Get(ZWaveNode node, Value ptype)
+        public static ZWaveMessage Get(ZWaveNode node, Value ptype)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.ThermostatSetPoint, 
                 (byte)Command.ThermostatSetPointGet,
                 (byte)ptype
             });
         }
 
-        public static void Set(ZWaveNode node, Value ptype, double temperature)
+        public static ZWaveMessage Set(ZWaveNode node, Value ptype, double temperature)
         {
             List<byte> message = new List<byte>();
             message.AddRange(new byte[] { 
@@ -88,7 +88,7 @@ namespace ZWaveLib.CommandClasses
             });
             var setPoint = ThermostatSetPoint.GetSetPointData(node);
             message.AddRange(ZWaveValue.GetValueBytes(temperature, setPoint.Precision, setPoint.Scale, setPoint.Size));
-            node.SendDataRequest(message.ToArray());
+            return node.SendDataRequest(message.ToArray());
         }
 
         public static ZWaveValue GetSetPointData(ZWaveNode node)

@@ -45,19 +45,26 @@ namespace ZWaveLib.CommandClasses
                 CommandClass cmdClass = (CommandClass)message[2];
                 VersionValue value = new VersionValue(cmdClass, message[3]);
                 // Update node CC data
-                var nodeCc = node.GetCommandClass(cmdClass);
-                if (nodeCc != null)
-                    nodeCc.Version = value.Version;
-                // Set the VersionCommandClass event
-                nodeEvent = new NodeEvent(node, EventParameter.VersionCommandClass, value, 0);
+                if (cmdClass != CommandClass.NotSet)
+                {
+                    var nodeCc = node.GetCommandClass(cmdClass);
+                    if (nodeCc != null)
+                        nodeCc.Version = value.Version;
+                    // Set the VersionCommandClass event
+                    nodeEvent = new NodeEvent(node, EventParameter.VersionCommandClass, value, 0);
+                }
+                else
+                {
+                    Utility.logger.Warn("Command Class {0} ({1}) not supported yet", message[3], message[3].ToString("X2"));
+                }
             }
 
             return nodeEvent;
         }
 
-        public static void Get(ZWaveNode node, CommandClass cmdClass)
+        public static ZWaveMessage Get(ZWaveNode node, CommandClass cmdClass)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.Version, 
                 (byte)Command.VersionCommandClassGet,
                 (byte)cmdClass

@@ -50,7 +50,7 @@ namespace ZWaveLib.CommandClasses
             return nodeEvent;
         }
 
-        public static void Set(ZWaveNode node, UserCodeValue newUserCode)
+        public static ZWaveMessage Set(ZWaveNode node, UserCodeValue newUserCode)
         {
             var userCode = GetUserCodeData(node);
             userCode.TagCode = newUserCode.TagCode;
@@ -62,7 +62,7 @@ namespace ZWaveLib.CommandClasses
             message.Add(userCode.UserId);
             message.Add(userCode.UserIdStatus);
             message.AddRange(userCode.TagCode);
-            node.SendDataRequest(message.ToArray());
+            return node.SendDataRequest(message.ToArray());
         }
 
         public static UserCodeValue GetUserCode(ZWaveNode node)

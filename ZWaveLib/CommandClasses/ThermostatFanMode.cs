@@ -46,17 +46,17 @@ namespace ZWaveLib.CommandClasses
             return new NodeEvent(node, EventParameter.ThermostatFanMode, message[2], 0);
         }
 
-        public static void Get(ZWaveNode node)
+        public static ZWaveMessage Get(ZWaveNode node)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.ThermostatFanMode, 
                 (byte)Command.BasicGet
             });
         }
 
-        public static void Set(ZWaveNode node, Value mode)
+        public static ZWaveMessage Set(ZWaveNode node, Value mode)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.ThermostatFanMode, 
                 (byte)Command.BasicSet, 
                 (byte)mode

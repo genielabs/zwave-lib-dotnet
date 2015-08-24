@@ -65,7 +65,7 @@ namespace ZWaveLib.CommandClasses
             return nodeEvent;
         }
 
-        public static void Set(ZWaveNode node, byte parameter, Int32 paramValue)
+        public static ZWaveMessage Set(ZWaveNode node, byte parameter, Int32 paramValue)
         {
             int valueLength = 1;
             var nodeConfigParamsLength = GetConfigParamsData(node);
@@ -103,12 +103,12 @@ namespace ZWaveLib.CommandClasses
                 Array.Copy(value32, 0, msg, 4, 4);
                 break;
             }
-            node.SendDataRequest(msg);
+            return node.SendDataRequest(msg);
         }
 
-        public static void Get(ZWaveNode node, byte parameter)
+        public static ZWaveMessage Get(ZWaveNode node, byte parameter)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.Configuration, 
                 (byte)Command.ConfigurationGet,
                 parameter

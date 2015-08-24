@@ -328,18 +328,17 @@ namespace ZWaveLib
                     else
                         OnNodeUpdated(new NodeUpdatedEventArgs(zn.Id, new NodeEvent(zn, EventParameter.NodeInfo, BitConverter.ToString(zn.NodeInformationFrame).Replace("-", " "), 0)));
 
-                    /*
-                    // TODO: this is not working, just causing a bunch of errors or version number == 0
                     // For nodes that support version command class, query each one for its version.
                     if (zn.SupportCommandClass(CommandClass.Version))
                     {
                         // Compile a list of all of our command class IDs
                         foreach (var cmdClass in zn.CommandClasses)
                         {
-                            ZWaveLib.CommandClasses.Version.Get(zn, cmdClass.CommandClass);
+                            // if not cached query the node.
+                            if (cmdClass.Version == 0)
+                                ZWaveLib.CommandClasses.Version.Get(zn, cmdClass.CommandClass).Wait();
                         }
                     }
-                    */
 
                     // Manufacturer Specific, if cached just return the cached value
                     if (String.IsNullOrWhiteSpace(zn.ManufacturerSpecific.ManufacturerId))
