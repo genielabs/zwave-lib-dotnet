@@ -46,16 +46,18 @@ namespace ZWaveLib
         #region Private fields
 
         private SerialPortInput serialPort;
+        private string portName = "";
 
         private ManualResetEvent sendMessageAck = new ManualResetEvent(false);
-        private ManualResetEvent queueEmptyAck = new ManualResetEvent(false);
+        private bool busyReceiving = false;
+        private bool discoveryRunning = false;
 
         private ZWaveMessage pendingRequest;
         private QueryStage currentStage;
-        private List<ZWaveMessage> queuedMessages;
-        private Task queueManager;
 
-        private bool discoveryRunning = false;
+        private Task queueManager;
+        private CancellationTokenSource qmTokenSource;
+        private List<ZWaveMessage> queuedMessages;
 
         private ControllerStatus controllerStatus = ControllerStatus.Disconnected;
 
@@ -63,8 +65,6 @@ namespace ZWaveLib
 
         private byte[] lastMessage = null;
         private DateTime lastMessageTimestamp = DateTime.UtcNow;
-
-        private string portName = "";
 
         #endregion
 
@@ -119,12 +119,14 @@ namespace ZWaveLib
         /// </summary>
         public ZWaveController()
         {
+            // Setup Serial Port
             serialPort = new SerialPortInput();
             serialPort.MessageReceived += SerialPort_MessageReceived;
             serialPort.ConnectionStatusChanged += SerialPort_ConnectionStatusChanged;
+            // Setup Queue Manager Task
             queuedMessages = new List<ZWaveMessage>();
-            queueManager = new Task(QueueManagerTask);
-            queueManager.Start();
+            qmTokenSource = new CancellationTokenSource();
+            queueManager = Task.Factory.StartNew(() => QueueManagerTask(qmTokenSource.Token), qmTokenSource.Token);
         }
 
         /// <summary>
@@ -138,6 +140,12 @@ namespace ZWaveLib
 
         public void Dispose()
         {
+            qmTokenSource.Cancel();
+            queueManager.Wait(ZWaveMessage.SendMessageTimeoutMs);
+            if (queueManager != null)
+                queueManager.Dispose();
+            queueManager = null;
+            qmTokenSource = null;
             Disconnect();
             SaveNodesConfig();
         }
@@ -199,7 +207,6 @@ namespace ZWaveLib
         public ZWaveMessage QueueMessage(ZWaveMessage message)
         {
             queuedMessages.Add(message);
-            queueEmptyAck.Reset();
             message.sentAck.Reset();
             return message;
         }
@@ -594,19 +601,18 @@ namespace ZWaveLib
 
         #region ZWave Message handling
 
-        private void QueueManagerTask()
+        private void QueueManagerTask(CancellationToken qmt)
         {
-            // TODO: implement cancellation token
-            while (true)
+            while (!qmt.IsCancellationRequested)
             {
-                while (queuedMessages.Count > 0)
+                while (queuedMessages.Count > 0 && !busyReceiving && !qmt.IsCancellationRequested)
                 {
                     var msg = queuedMessages[0];
                     queuedMessages.Remove(msg);
 
                     if (controllerStatus == ControllerStatus.Ready)
                     {
-                        while (!SendMessage(msg) && msg.ResendCount < ZWaveMessage.ResendAttemptsMax)
+                        while (!SendMessage(msg) && msg.ResendCount < ZWaveMessage.ResendAttemptsMax && !qmt.IsCancellationRequested)
                         {
                             msg.ResendCount++;
                             Utility.logger.Warn("Could not deliver message to Node {0} (CallbackId={1}, Retry={2})", msg.NodeId, msg.CallbackId.ToString("X2"), msg.ResendCount);
@@ -626,9 +632,9 @@ namespace ZWaveLib
                         if (msg.NodeId > 1)
                             UpdateOperationProgress(msg.NodeId, NodeQueryStatus.Error);
                     }
+                    // little breeze between each send
+                    Thread.Sleep(100);
                 }
-                if (queuedMessages.Count == 0)
-                    queueEmptyAck.Set();
                 // TODO: get rid of this Sleep
                 Thread.Sleep(500);
             }
@@ -985,15 +991,16 @@ namespace ZWaveLib
                         }
                         else
                         {
-                            SetQueryStage(QueryStage.WaitData);
-                            zm.NodeId = pendingRequest.NodeId;
+                            SetQueryStage(QueryStage.Complete);
+                            //zm.NodeId = pendingRequest.NodeId;
                         }
                     }
                     break;
+                // TODO: deprecate this...
                 case QueryStage.WaitData:
                     // got the data from the node
-                    zm.NodeId = pendingRequest.NodeId;
-                    zm.CallbackId = pendingRequest.CallbackId;
+                    //zm.NodeId = pendingRequest.NodeId;
+                    //zm.CallbackId = pendingRequest.CallbackId;
                     SetQueryStage(QueryStage.Complete);
                     break;
                 }
@@ -1164,7 +1171,9 @@ namespace ZWaveLib
 
         private void SerialPort_MessageReceived(object sender, SerialPortLib.MessageReceivedEventArgs args)
         {
+            busyReceiving = true;
             ParseSerialData(args.Data);
+            busyReceiving = false;
         }
 
         #endregion
