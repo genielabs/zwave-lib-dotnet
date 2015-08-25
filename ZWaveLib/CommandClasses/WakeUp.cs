@@ -49,7 +49,7 @@ namespace ZWaveLib.CommandClasses
                 }
                 break;
             case (byte)Command.WakeUpNotification:
-                    // Resend queued messages while node was asleep
+                // Resend queued messages while node was asleep
                 var wakeUpResendQueue = GetResendQueueData(node);
                 for (int m = 0; m < wakeUpResendQueue.Count; m++)
                 {

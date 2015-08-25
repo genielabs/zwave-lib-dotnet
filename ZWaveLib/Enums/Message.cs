@@ -8,7 +8,6 @@ namespace ZWaveLib
         NotSet,
         WaitAck,
         SendDataReady,
-        WaitData,
         Complete,
         Error
     }

@@ -140,13 +140,16 @@ namespace ZWaveLib
 
         public void Dispose()
         {
+            // Dispose the message Queue Manager
             qmTokenSource.Cancel();
             queueManager.Wait(ZWaveMessage.SendMessageTimeoutMs);
             if (queueManager != null)
                 queueManager.Dispose();
             queueManager = null;
             qmTokenSource = null;
+            // Disconnect the serial port
             Disconnect();
+            // Update the nodes configuration file
             SaveNodesConfig();
         }
 
@@ -212,7 +215,7 @@ namespace ZWaveLib
         }
 
         /// <summary>
-        /// Sends the message.
+        /// Sends the message without waiting other pending requests to complete.
         /// </summary>
         /// <returns>True if sending succesfull, False otherwise.</returns>
         /// <param name="message">Message.</param>
@@ -678,17 +681,19 @@ namespace ZWaveLib
 
                     case NodeAddStatus.AddingSlave:
                         
-                        var newNode = AddNode(rawData[6], 0x00);
+                        var newNode = CreateNode(rawData[6], 0x00);
                         // Extract node information frame
                         int nodeInfoLength = (int)rawData[7];
-                        // we don't need to exclude the last 2 CommandClasses
                         byte[] nodeInfo = new byte[nodeInfoLength];
                         Array.Copy(rawData, 8, nodeInfo, 0, nodeInfoLength);
+                        // Update node properties
                         newNode.NodeInformationFrame = nodeInfo;
                         newNode.ProtocolInfo.BasicType = rawData[8];
                         newNode.ProtocolInfo.GenericType = rawData[9];
                         newNode.ProtocolInfo.SpecificType = rawData[10];
+                        // Add it to the node list and save it
                         nodeList.Add(newNode);
+                        SaveNodesConfig();
 
                         UpdateOperationProgress(newNode.Id, NodeQueryStatus.NodeAddStarted);
 
@@ -757,7 +762,10 @@ namespace ZWaveLib
                     case NodeRemoveStatus.Done:
 
                         if (rawData[6] != 0x00)
+                        {
                             RemoveNode(rawData[6]);
+                            SaveNodesConfig();
+                        }
                         UpdateOperationProgress(rawData[6], NodeQueryStatus.NodeRemoveDone);
                         SetQueryStage(QueryStage.Complete);
                         break;
@@ -787,7 +795,6 @@ namespace ZWaveLib
                     case NeighborsUpdateStatus.NeighborsUpdateDone:
 
                         UpdateOperationProgress(msg.NodeId, NodeQueryStatus.NeighborUpdateDone);
-                        //GetNeighborsRoutingInfo(msg.NodeId);
                         SetQueryStage(QueryStage.Complete);
                         break;
 
@@ -962,7 +969,6 @@ namespace ZWaveLib
             if (currentStage != QueryStage.Complete && currentStage != QueryStage.NotSet && currentStage != QueryStage.Error)
             {
                 //Utility.logger.Trace("Query Stage {0} Type {1} Function {2}={3} Node {4}={5} Callback {6}={7}", currentStage, zm.Type, zm.Function, currentMessage.Function, zm.NodeId, currentMessage.NodeId, zm.CallbackId, currentMessage.CallbackId);
-
                 switch (currentStage)
                 {
                 case QueryStage.WaitAck:
@@ -992,16 +998,8 @@ namespace ZWaveLib
                         else
                         {
                             SetQueryStage(QueryStage.Complete);
-                            //zm.NodeId = pendingRequest.NodeId;
                         }
                     }
-                    break;
-                // TODO: deprecate this...
-                case QueryStage.WaitData:
-                    // got the data from the node
-                    //zm.NodeId = pendingRequest.NodeId;
-                    //zm.CallbackId = pendingRequest.CallbackId;
-                    SetQueryStage(QueryStage.Complete);
                     break;
                 }
             }
@@ -1189,21 +1187,21 @@ namespace ZWaveLib
                 if (i == 0x01)
                     continue;
                 if (GetNode(i) == null)
-                    nodeList.Add(AddNode(i, 0x00));
+                    nodeList.Add(CreateNode(i, 0x00));
             }
         }
 
-        private ZWaveNode AddNode(byte nodeId, byte genericClass)
+        private ZWaveNode CreateNode(byte nodeId, byte genericType)
         {
             ZWaveNode node;
-            switch (genericClass)
+            switch (genericType)
             {
             case (byte) GenericType.StaticController:
                 // TODO: what should be done here?...
                 node = null;
                 break;
             default: // generic node
-                node = new ZWaveNode(this, nodeId, genericClass);
+                node = new ZWaveNode(this, nodeId, genericType);
                 break;
             }
             node.NodeUpdated += ZWave_NodeUpdated;
@@ -1274,8 +1272,6 @@ namespace ZWaveLib
             znode.UpdateCommandClassList();
             // once we get the security command classes we'll issue the same events and call SaveNodesConfig();
             OnNodeUpdated(new NodeUpdatedEventArgs(znode.Id, new NodeEvent(znode, EventParameter.NodeInfo, BitConverter.ToString(znode.NodeInformationFrame).Replace("-", " "), 0)));
-            // TODO: deprecate the WakeUpNotify event?
-            OnNodeUpdated(new NodeUpdatedEventArgs(znode.Id, new NodeEvent(znode, EventParameter.WakeUpNotify, "1", 0)));
         }
 
         #endregion

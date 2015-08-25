@@ -69,6 +69,9 @@ namespace Test.ZWave
                 case "8":
                     ShowZWaveLibApi();
                     break;
+                case "9":
+                    Discovery(controller);
+                    break;
                 case "?":
                     SetSerialPortName(controller);
                     break;
@@ -77,7 +80,7 @@ namespace Test.ZWave
                     break;
                 }
             }
-
+            Console.WriteLine("\nCiao!\n");
             controller.Dispose();
         }
 
@@ -92,6 +95,7 @@ namespace Test.ZWave
             Console.WriteLine("[6] Heal Network");
             Console.WriteLine("[7] Run Node Stress Test");
             Console.WriteLine("[8] Dump available ZWaveLib API commands");
+            Console.WriteLine("[9] Discovery (query all nodes data)");
             Console.WriteLine("[?] Change serial port (PortName={0})", serialPortName);
             Console.WriteLine("[+] Connect / Reconnect (Status={0})", controllerStatus);
             Console.WriteLine("[!] Exit");
@@ -224,6 +228,13 @@ namespace Test.ZWave
                 // Pause 2 secods between each test pass
                 Thread.Sleep(2000);
             }
+            ToggleDebug(false);
+        }
+
+        private static void Discovery(ZWaveController controller)
+        {
+            ToggleDebug(true);
+            controller.Discovery();
             ToggleDebug(false);
         }
 

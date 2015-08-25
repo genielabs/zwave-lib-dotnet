@@ -38,10 +38,6 @@ namespace ZWaveLib.CommandClasses
 
             if (type == Command.VersionCommandClassReport)
             {
-                if (!Enum.IsDefined(typeof(CommandClass), message[2]))
-                {
-                    return nodeEvent;
-                }
                 CommandClass cmdClass = (CommandClass)message[2];
                 VersionValue value = new VersionValue(cmdClass, message[3]);
                 // Update node CC data

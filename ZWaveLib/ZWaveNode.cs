@@ -32,10 +32,13 @@ using System.Xml.Serialization;
 
 namespace ZWaveLib
 {
+
+    /// <summary>
+    /// Node capabilities (Protocol Info).
+    /// </summary>
     [Serializable]
     public class NodeCapabilities
     {
-
         /// <summary>
         /// Gets or sets the basic type.
         /// </summary>
@@ -54,24 +57,50 @@ namespace ZWaveLib
         /// <value>The specific type.</value>
         public byte SpecificType { get; internal set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZWaveLib.NodeCapabilities"/> class.
+        /// </summary>
         public NodeCapabilities()
         {
         }
-
     }
 
+    /// <summary>
+    /// Node command class.
+    /// </summary>
     [Serializable]
     public class NodeCommandClass
     {
+        /// <summary>
+        /// The CC identifier.
+        /// </summary>
         public readonly byte Id;
+
+        /// <summary>
+        /// Gets or sets the version for this CC.
+        /// </summary>
+        /// <value>The version.</value>
         public int Version { get; internal set; }
+
+        /// <summary>
+        /// Gets the command class enumeration entry.
+        /// </summary>
+        /// <value>The command class.</value>
         [XmlIgnore]
         public CommandClass CommandClass { get { return (CommandClass)Id; } }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZWaveLib.NodeCommandClass"/> class.
+        /// </summary>
         public NodeCommandClass()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZWaveLib.NodeCommandClass"/> class.
+        /// </summary>
+        /// <param name="id">Identifier.</param>
+        /// <param name="version">Version.</param>
         public NodeCommandClass(byte id, int version = 0)
         {
             Id = id;
@@ -79,12 +108,28 @@ namespace ZWaveLib
         }
     }
 
+    /// <summary>
+    /// Custom node data.
+    /// </summary>
     public class NodeData
     {
+        /// <summary>
+        /// Gets or sets the name for this data entry.
+        /// </summary>
+        /// <value>The name.</value>
         public string Name { get; internal set; }
 
+        /// <summary>
+        /// Gets or sets the value.
+        /// </summary>
+        /// <value>The value.</value>
         public object Value { get; internal set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZWaveLib.NodeData"/> class.
+        /// </summary>
+        /// <param name="fieldName">Field name.</param>
+        /// <param name="data">Data.</param>
         public NodeData(string fieldName, object data)
         {
             Name = fieldName;
@@ -92,6 +137,9 @@ namespace ZWaveLib
         }
     }
 
+    /// <summary>
+    /// Z-wave node object.
+    /// </summary>
     [Serializable]
     public class ZWaveNode
     {
@@ -152,6 +200,9 @@ namespace ZWaveLib
 
         #region Lifecycle
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZWaveLib.ZWaveNode"/> class.
+        /// </summary>
         public ZWaveNode()
         {
             Data = new List<NodeData>();
@@ -282,20 +333,20 @@ namespace ZWaveLib
 
         #region Private members
 
-        internal virtual bool ApplicationCommandHandler(byte[] receivedMessage)
+        internal virtual bool ApplicationCommandHandler(byte[] rawMessage)
         {
             NodeEvent messageEvent = null;
-            int messageLength = receivedMessage.Length;
+            int messageLength = rawMessage.Length;
 
             if (messageLength > 8)
             {
-                byte commandLength = receivedMessage[6];
-                byte commandClass = receivedMessage[7];
+                byte commandLength = rawMessage[6];
+                byte commandClass = rawMessage[7];
                 // TODO: this should be moved inside the NodeCommandClass class
                 // TODO: as "Instance" property
                 var cc = CommandClassFactory.GetCommandClass(commandClass);
                 byte[] message = new byte[commandLength];
-                Array.Copy(receivedMessage, 7, message, 0, commandLength);
+                Array.Copy(rawMessage, 7, message, 0, commandLength);
                 try
                 {
                     messageEvent = cc.GetEvent(this, message);
@@ -310,9 +361,9 @@ namespace ZWaveLib
             {
                 OnNodeUpdated(messageEvent);
             }
-            else if (messageLength > 3 && receivedMessage[3] != 0x13)
+            else if (messageLength > 3 && rawMessage[3] != (byte)ZWaveFunction.SendData)
             {
-                Utility.logger.Warn("Unhandled message type");
+                Utility.logger.Warn("Unhandled message type: {0}", BitConverter.ToString(rawMessage));
             }
 
             return false;
