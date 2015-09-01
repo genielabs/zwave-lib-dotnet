@@ -43,16 +43,16 @@ namespace ZWaveLib.CommandClasses
             return nodeEvent;
         }
 
-        public static void Set(ZWaveNode node, int value)
+        public static ZWaveMessage Set(ZWaveNode node, int value)
         {
             // same as basic class
-            Basic.Set(node, value);
+            return Basic.Set(node, value);
         }
 
-        public static void Get(ZWaveNode node)
+        public static ZWaveMessage Get(ZWaveNode node)
         {
             // same as basic class
-            Basic.Get(node);
+            return Basic.Get(node);
         }
     }
 }

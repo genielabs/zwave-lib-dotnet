@@ -37,10 +37,10 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.0.1\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.1.0\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="SerialPortLib">
-      <HintPath>..\packages\SerialPortLib.1.0.7\lib\SerialPortLib.dll</HintPath>
+      <HintPath>..\packages\SerialPortLib.1.0.8\lib\SerialPortLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -109,9 +109,9 @@
     <Folder Include="Utility\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="..\README.md">
       <Link>README.md</Link>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

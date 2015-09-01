@@ -62,17 +62,17 @@ namespace ZWaveLib.CommandClasses
             return nodeEvent;
         }
 
-        public static void Get(ZWaveNode node)
+        public static ZWaveMessage Get(ZWaveNode node)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.WakeUp, 
                 (byte)Command.WakeUpIntervalGet 
             });
         }
 
-        public static void Set(ZWaveNode node, uint interval)
+        public static ZWaveMessage Set(ZWaveNode node, uint interval)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.WakeUp, 
                 (byte)Command.WakeUpIntervalSet,
                 (byte)((interval >> 16) & 0xff),

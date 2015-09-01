@@ -79,6 +79,87 @@ namespace ZWaveLib.CommandClasses
             return nodeEvent;
         }
 
+        public static ZWaveMessage GetCount(ZWaveNode node, byte commandClass)
+        {
+            return node.SendDataRequest(new byte[] {
+                (byte)CommandClass.MultiInstance,
+                (byte)Command.MultiInstanceCountGet,
+                commandClass
+            });
+        }
+
+        public static ZWaveMessage SwitchBinaryGet(ZWaveNode node, byte instance)
+        {
+            return node.SendDataRequest(new byte[] {
+                (byte)CommandClass.MultiInstance,
+                0x0d, // ?? (MultiInstaceV2Encapsulated ??)
+                0x00, // ??
+                instance,
+                (byte)CommandClass.SwitchBinary,
+                (byte)Command.MultiInstanceGet
+            });
+        }
+
+        public static ZWaveMessage SwitchBinarySet(ZWaveNode node, byte instance, int value)
+        {
+            return node.SendDataRequest(new byte[] {
+                (byte)CommandClass.MultiInstance,
+                0x0d, //  ?? (MultiInstaceV2Encapsulated ??)
+                0x00, // ??
+                instance,
+                (byte)CommandClass.SwitchBinary,
+                (byte)Command.MultiInstanceSet,
+                byte.Parse(value.ToString())
+            });
+        }
+
+        public static ZWaveMessage SwitchMultiLevelGet(ZWaveNode node, byte instance)
+        {
+            return node.SendDataRequest(new byte[] {
+                (byte)CommandClass.MultiInstance,
+                0x0d, // ?? (MultiInstaceV2Encapsulated ??)
+                0x00, // ??
+                instance,
+                (byte)CommandClass.SwitchMultilevel,
+                (byte)Command.MultiInstanceGet
+            });
+        }
+
+        public static ZWaveMessage SwitchMultiLevelSet(ZWaveNode node, byte instance, int value)
+        {
+            return node.SendDataRequest(new byte[] {
+                (byte)CommandClass.MultiInstance,
+                0x0d, // ?? (MultiInstaceV2Encapsulated ??)
+                0x00, // ??
+                instance,
+                (byte)CommandClass.SwitchMultilevel,
+                (byte)Command.MultiInstanceSet,
+                byte.Parse(value.ToString())
+            });
+        }
+
+        public static ZWaveMessage SensorBinaryGet(ZWaveNode node, byte instance)
+        {
+            return node.SendDataRequest(new byte[] {
+                (byte)CommandClass.MultiInstance,
+                0x06, // ??
+                instance,
+                (byte)CommandClass.SensorBinary,
+                0x04 //
+            });
+        }
+
+        public static ZWaveMessage SensorMultiLevelGet(ZWaveNode node, byte instance)
+        {
+            return node.SendDataRequest(new byte[] {
+                (byte)CommandClass.MultiInstance,
+                0x06, // ??
+                instance,
+                (byte)CommandClass.SensorMultilevel,
+                0x04 //
+            });
+        }
+
         private NodeEvent HandleMultiInstanceEncapReport(ZWaveNode node, byte[] message)
         {
             if (message.Length < 5)
@@ -152,87 +233,6 @@ namespace ZWaveLib.CommandClasses
                 break;
             }
             return nestedEvent;
-        }
-
-        public static void GetCount(ZWaveNode node, byte commandClass)
-        {
-            node.SendDataRequest(new byte[] {
-                (byte)CommandClass.MultiInstance,
-                (byte)Command.MultiInstanceCountGet,
-                commandClass
-            });
-        }
-
-        public static void SwitchBinaryGet(ZWaveNode node, byte instance)
-        {
-            node.SendDataRequest(new byte[] {
-                (byte)CommandClass.MultiInstance,
-                0x0d, // ?? (MultiInstaceV2Encapsulated ??)
-                0x00, // ??
-                instance,
-                (byte)CommandClass.SwitchBinary,
-                (byte)Command.MultiInstanceGet
-            });
-        }
-
-        public static void SwitchBinarySet(ZWaveNode node, byte instance, int value)
-        {
-            node.SendDataRequest(new byte[] {
-                (byte)CommandClass.MultiInstance,
-                0x0d, //  ?? (MultiInstaceV2Encapsulated ??)
-                0x00, // ??
-                instance,
-                (byte)CommandClass.SwitchBinary,
-                (byte)Command.MultiInstanceSet,
-                byte.Parse(value.ToString())
-            });
-        }
-
-        public static void SwitchMultiLevelGet(ZWaveNode node, byte instance)
-        {
-            node.SendDataRequest(new byte[] {
-                (byte)CommandClass.MultiInstance,
-                0x0d, // ?? (MultiInstaceV2Encapsulated ??)
-                0x00, // ??
-                instance,
-                (byte)CommandClass.SwitchMultilevel,
-                (byte)Command.MultiInstanceGet
-            });
-        }
-
-        public static void SwitchMultiLevelSet(ZWaveNode node, byte instance, int value)
-        {
-            node.SendDataRequest(new byte[] {
-                (byte)CommandClass.MultiInstance,
-                0x0d, // ?? (MultiInstaceV2Encapsulated ??)
-                0x00, // ??
-                instance,
-                (byte)CommandClass.SwitchMultilevel,
-                (byte)Command.MultiInstanceSet,
-                byte.Parse(value.ToString())
-            });
-        }
-
-        public static void SensorBinaryGet(ZWaveNode node, byte instance)
-        {
-            node.SendDataRequest(new byte[] {
-                (byte)CommandClass.MultiInstance,
-                0x06, // ??
-                instance,
-                (byte)CommandClass.SensorBinary,
-                0x04 //
-            });
-        }
-
-        public static void SensorMultiLevelGet(ZWaveNode node, byte instance)
-        {
-            node.SendDataRequest(new byte[] {
-                (byte)CommandClass.MultiInstance,
-                0x06, // ??
-                instance,
-                (byte)CommandClass.SensorMultilevel,
-                0x04 //
-            });
         }
     }
 }

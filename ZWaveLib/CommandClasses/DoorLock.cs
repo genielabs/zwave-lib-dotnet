@@ -65,15 +65,15 @@ namespace ZWaveLib.CommandClasses
             return nodeEvent;
         }
 
-        public static void Get(ZWaveNode node)
+        public static ZWaveMessage Get(ZWaveNode node)
         {
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.DoorLock, 
                 (byte)Command.DoorLockGet
             });
         }
 
-        public static void Set(ZWaveNode node, Value value)
+        public static ZWaveMessage Set(ZWaveNode node, Value value)
         {
             byte lockValue;
             if (value == DoorLock.Value.Secured)
@@ -81,7 +81,7 @@ namespace ZWaveLib.CommandClasses
             else
                 lockValue = 0;
 
-            node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new byte[] { 
                 (byte)CommandClass.DoorLock, 
                 (byte)Command.DoorLockSet,
                 (byte)lockValue

@@ -142,7 +142,14 @@ namespace ZWaveLib
         {
             // Dispose the message Queue Manager
             qmTokenSource.Cancel();
-            queueManager.Wait(ZWaveMessage.SendMessageTimeoutMs);
+            try
+            {
+                queueManager.Wait(ZWaveMessage.SendMessageTimeoutMs);
+            }
+            catch (AggregateException e) 
+            {
+                Utility.logger.Error(e);
+            }
             if (queueManager != null)
                 queueManager.Dispose();
             queueManager = null;
@@ -1286,10 +1293,7 @@ namespace ZWaveLib
         {
             Utility.logger.Debug("{0} {1} {2}", args.NodeId, args.Event.Parameter, args.Event.Value);
             if (NodeUpdated != null)
-                new Thread(() =>
-                {
-                    NodeUpdated(this, args);
-                }).Start();
+                NodeUpdated(this, args);
         }
 
         /// <summary>
