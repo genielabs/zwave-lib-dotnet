@@ -66,6 +66,8 @@ namespace ZWaveLib
         private byte[] lastMessage = null;
         private DateTime lastMessageTimestamp = DateTime.UtcNow;
 
+        private string configFolder;
+
         #endregion
 
         #region Public events
@@ -119,6 +121,10 @@ namespace ZWaveLib
         /// </summary>
         public ZWaveController()
         {
+            string codeBase = GetType().Assembly.CodeBase;
+            UriBuilder uri = new UriBuilder(codeBase);
+            string path = Uri.UnescapeDataString(uri.Path);
+            configFolder = Path.GetDirectoryName(path);
             // Setup Serial Port
             serialPort = new SerialPortInput();
             serialPort.MessageReceived += SerialPort_MessageReceived;
@@ -1229,7 +1235,7 @@ namespace ZWaveLib
 
         private void LoadNodesConfig()
         {
-            string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "zwavenodes.xml");
+            string configPath = Path.Combine(configFolder, "zwavenodes.xml");
             if (File.Exists(configPath))
             {
                 try
@@ -1253,7 +1259,7 @@ namespace ZWaveLib
 
         private void SaveNodesConfig()
         {
-            string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "zwavenodes.xml");
+            string configPath = Path.Combine(configFolder, "zwavenodes.xml");
             try
             {
                 var settings = new System.Xml.XmlWriterSettings();
