@@ -222,8 +222,27 @@ namespace ZWaveLib
         /// <param name="message">Message.</param>
         public ZWaveMessage QueueMessage(ZWaveMessage message)
         {
-            queuedMessages.Add(message);
-            message.sentAck.Reset();
+            bool addToQueue = true;
+            var node = GetNode(message.NodeId);
+            if (node != null && node.SupportCommandClass(CommandClass.WakeUp))
+            {
+                var wakeUpStatus = node.GetData("WakeUpStatus");
+                if (wakeUpStatus != null && wakeUpStatus.Value != null && ((WakeUpStatus)wakeUpStatus.Value).IsSleeping)
+                {
+                    Utility.logger.Warn("Node is flagged as sleeping, message will be re-sent on Wake Up (Node={0}, CallbackId={0}, Function={1}, CommandClass={2})", message.NodeId, message.CallbackId.ToString("X2"), message.Function, message.CommandClass);
+                    WakeUp.ResendOnWakeUp(node, message.RawData);
+                    addToQueue = false;
+                }
+            }
+            if (addToQueue)
+            {
+                queuedMessages.Add(message);
+                message.sentAck.Reset();
+            }
+            else
+            {
+                message.sentAck.Set();
+            }
             return message;
         }
 
@@ -347,21 +366,12 @@ namespace ZWaveLib
 
                     // NIF, if cached just return the cached value
                     if (zn.NodeInformationFrame.Length == 0)
-                        GetNodeInformationFrame(zn.Id);
+                        GetNodeInformationFrame(zn.Id).Wait();
                     else
                         OnNodeUpdated(new NodeUpdatedEventArgs(zn.Id, new NodeEvent(zn, EventParameter.NodeInfo, BitConverter.ToString(zn.NodeInformationFrame).Replace("-", " "), 0)));
-
+                    
                     // For nodes that support version command class, query each one for its version.
-                    if (zn.SupportCommandClass(CommandClass.Version))
-                    {
-                        // Compile a list of all of our command class IDs
-                        foreach (var cmdClass in zn.CommandClasses)
-                        {
-                            // if not cached query the node.
-                            if (cmdClass.Version == 0)
-                                ZWaveLib.CommandClasses.Version.Get(zn, cmdClass.CommandClass).Wait();
-                        }
-                    }
+                    //GetNodeCcsVersion(zn);
 
                     // Manufacturer Specific, if cached just return the cached value
                     if (String.IsNullOrWhiteSpace(zn.ManufacturerSpecific.ManufacturerId))
@@ -381,6 +391,20 @@ namespace ZWaveLib
             }
         }
 
+        public void GetNodeCcsVersion(ZWaveNode zn)
+        {
+            // If node support version command class, query each one for its version.
+            if (zn.SupportCommandClass(CommandClass.Version))
+            {
+                foreach (var cmdClass in zn.CommandClasses)
+                {
+                    // if not cached query the node.
+                    if (cmdClass.Version == 0)
+                        ZWaveLib.CommandClasses.Version.Get(zn, cmdClass.CommandClass).Wait();
+                }
+            }
+        }
+
         /// <summary>
         /// Gets the node information frame.
         /// </summary>
@@ -397,7 +421,7 @@ namespace ZWaveLib
                 nodeId,
                 0x00
             };
-            return QueueMessage(new ZWaveMessage(message, MessageDirection.Outbound, false)).Wait();
+            return QueueMessage(new ZWaveMessage(message, MessageDirection.Outbound, false));
         }
 
         /// <summary>
@@ -606,7 +630,7 @@ namespace ZWaveLib
                 0x03,
                 0x00    
             };
-            return QueueMessage(new ZWaveMessage(msg, MessageDirection.Outbound, false)).Wait();
+            return QueueMessage(new ZWaveMessage(msg, MessageDirection.Outbound, false));
         }
 
         #endregion
@@ -639,12 +663,20 @@ namespace ZWaveLib
                         {
                             Utility.logger.Warn("Delivery of message to Node {0} failed (CallbackId={1}).", msg.NodeId, msg.CallbackId.ToString("X2"));
                             if (msg.NodeId > 1)
+                            {
                                 UpdateOperationProgress(msg.NodeId, NodeQueryStatus.Error);
+                                var node = GetNode(msg.NodeId);
+                                if (node != null && node.SupportCommandClass(CommandClass.WakeUp))
+                                {
+                                    Utility.logger.Warn("Node is flagged as sleeping, message will be re-sent on Wake Up (Node={0}, CallbackId={0}, Function={1}, CommandClass={2})", msg.NodeId, msg.CallbackId.ToString("X2"), msg.Function, msg.CommandClass);
+                                    WakeUp.ResendOnWakeUp(node, msg.RawData);
+                                }
+                            }
                         }
                     }
                     else
                     {
-                        Utility.logger.Warn("Controller satus not read, delivery of message to Node {0} failed (CallbackId={1}).", msg.NodeId, msg.CallbackId.ToString("X2"));
+                        Utility.logger.Warn("Controller not ready, delivery of message to Node {0} failed (CallbackId={1}).", msg.NodeId, msg.CallbackId.ToString("X2"));
                         if (msg.NodeId > 1)
                             UpdateOperationProgress(msg.NodeId, NodeQueryStatus.Error);
                     }

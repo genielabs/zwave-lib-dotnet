@@ -50,6 +50,7 @@ namespace ZWaveLib
         Configuration,
         WakeUpInterval,
         WakeUpNotify,
+        WakeUpSleepingStatus,
         Association,
         VersionCommandClass,
         Battery,

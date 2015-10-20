@@ -49,10 +49,19 @@ namespace ZWaveLib.CommandClasses
                 }
                 break;
             case (byte)Command.WakeUpNotification:
+                // If node was marked as sleeping, reset the flag
+                var wakeUpStatus = node.GetData("WakeUpStatus");
+                if (wakeUpStatus != null && wakeUpStatus.Value != null && ((WakeUpStatus)wakeUpStatus.Value).IsSleeping)
+                {
+                    ((WakeUpStatus)wakeUpStatus.Value).IsSleeping = false;
+                    var wakeEvent = new NodeEvent(node, EventParameter.WakeUpSleepingStatus, 0 /* 1 = sleeping, 0 = awake */, 0);
+                    node.OnNodeUpdated(wakeEvent);
+                }
                 // Resend queued messages while node was asleep
                 var wakeUpResendQueue = GetResendQueueData(node);
                 for (int m = 0; m < wakeUpResendQueue.Count; m++)
                 {
+                    Utility.logger.Trace("Sending message {0} {1}", m, BitConverter.ToString(wakeUpResendQueue[m]));
                     node.SendMessage(wakeUpResendQueue[m]);
                 }
                 wakeUpResendQueue.Clear();
@@ -97,10 +106,19 @@ namespace ZWaveLib.CommandClasses
                     Array.Copy(wakeUpResendQueue[i], 0, queuedCommand, 0, minCommandLength);
                     if (queuedCommand.SequenceEqual(command))
                     {
+                        Utility.logger.Trace("Removing old message {0}", BitConverter.ToString(wakeUpResendQueue[i]));
                         wakeUpResendQueue.RemoveAt(i);
                     }
                 }
+                Utility.logger.Trace("Adding message {0}", BitConverter.ToString(msg));
                 wakeUpResendQueue.Add(msg);
+                var wakeUpStatus = (WakeUpStatus)node.GetData("WakeUpStatus", new WakeUpStatus()).Value;
+                if (!wakeUpStatus.IsSleeping)
+                {
+                    wakeUpStatus.IsSleeping = true;
+                    var nodeEvent = new NodeEvent(node, EventParameter.WakeUpSleepingStatus, 1 /* 1 = sleeping, 0 = awake */, 0);
+                    node.OnNodeUpdated(nodeEvent);
+                }
             }
         }
 
