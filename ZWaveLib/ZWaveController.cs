@@ -55,8 +55,8 @@ namespace ZWaveLib
         private ZWaveMessage pendingRequest;
         private QueryStage currentStage;
 
-        private Task queueManager;
-        private CancellationTokenSource qmTokenSource;
+        private bool disposing = false;
+        private Thread queueManager;
         private List<ZWaveMessage> queuedMessages;
 
         private ControllerStatus controllerStatus = ControllerStatus.Disconnected;
@@ -131,8 +131,8 @@ namespace ZWaveLib
             serialPort.ConnectionStatusChanged += SerialPort_ConnectionStatusChanged;
             // Setup Queue Manager Task
             queuedMessages = new List<ZWaveMessage>();
-            qmTokenSource = new CancellationTokenSource();
-            queueManager = Task.Factory.StartNew(() => QueueManagerTask(qmTokenSource.Token), qmTokenSource.Token);
+            queueManager = new Thread(QueueManagerTask);
+            queueManager.Start();
         }
 
         /// <summary>
@@ -147,19 +147,10 @@ namespace ZWaveLib
         public void Dispose()
         {
             // Dispose the message Queue Manager
-            qmTokenSource.Cancel();
-            try
-            {
-                queueManager.Wait(ZWaveMessage.SendMessageTimeoutMs);
-            }
-            catch (AggregateException e) 
-            {
-                Utility.logger.Error(e);
-            }
-            if (queueManager != null)
-                queueManager.Dispose();
+            disposing = true;
+            if (!queueManager.Join(ZWaveMessage.SendMessageTimeoutMs))
+                queueManager.Abort();
             queueManager = null;
-            qmTokenSource = null;
             // Disconnect the serial port
             Disconnect();
             // Update the nodes configuration file
@@ -176,10 +167,7 @@ namespace ZWaveLib
         public void Connect()
         {
             LoadNodesConfig();
-            ThreadPool.QueueUserWorkItem(new WaitCallback((state) =>
-            {
-                serialPort.Connect();
-            }));
+            new Thread(() => { serialPort.Connect(); }).Start();
         }
 
         /// <summary>
@@ -187,7 +175,7 @@ namespace ZWaveLib
         /// </summary>
         public void Disconnect()
         {
-            serialPort.Disconnect();
+            new Thread(() => { serialPort.Disconnect(); }).Start();
         }
 
         /// <summary>
@@ -353,10 +341,16 @@ namespace ZWaveLib
             // that only one instance of this is running
             if (!discoveryRunning)
             {
-                discoveryRunning = true;
+                bool discoveryError = false;
                 OnDiscoveryProgress(new DiscoveryProgressEventArgs(DiscoveryStatus.DiscoveryStart));
+                discoveryRunning = true;
                 foreach (ZWaveNode zn in nodeList)
                 {
+                    if (controllerStatus != ControllerStatus.Ready || !serialPort.IsConnected)
+                    {
+                        discoveryError = true;
+                        break;
+                    }
                     Utility.logger.Trace("Querying/Updating node {0}", zn.Id);
                     // Get Generic/Basic/Specific Class if not already cached
                     if (zn.ProtocolInfo.BasicType == 0 && zn.ProtocolInfo.GenericType == 0 && zn.ProtocolInfo.SpecificType == 0)
@@ -371,7 +365,7 @@ namespace ZWaveLib
                         OnNodeUpdated(new NodeUpdatedEventArgs(zn.Id, new NodeEvent(zn, EventParameter.NodeInfo, BitConverter.ToString(zn.NodeInformationFrame).Replace("-", " "), 0)));
                     
                     // For nodes that support version command class, query each one for its version.
-                    //GetNodeCcsVersion(zn);
+                    GetNodeCcsVersion(zn);
 
                     // Manufacturer Specific, if cached just return the cached value
                     if (String.IsNullOrWhiteSpace(zn.ManufacturerSpecific.ManufacturerId))
@@ -381,9 +375,16 @@ namespace ZWaveLib
                     // Raise the node updated event
                     UpdateOperationProgress(zn.Id, NodeQueryStatus.NodeUpdated);
                 }
-                SaveNodesConfig();
-                OnDiscoveryProgress(new DiscoveryProgressEventArgs(DiscoveryStatus.DiscoveryEnd));
                 discoveryRunning = false;
+                if (!discoveryError)
+                {
+                    SaveNodesConfig();
+                }
+                else
+                {
+                    OnDiscoveryProgress(new DiscoveryProgressEventArgs(DiscoveryStatus.DiscoveryError));
+                }
+                OnDiscoveryProgress(new DiscoveryProgressEventArgs(DiscoveryStatus.DiscoveryEnd));
             }
             else
             {
@@ -398,8 +399,10 @@ namespace ZWaveLib
             {
                 foreach (var cmdClass in zn.CommandClasses)
                 {
+                    if (controllerStatus != ControllerStatus.Ready || !serialPort.IsConnected)
+                        break;
                     // if not cached query the node.
-                    if (cmdClass.Version == 0)
+                    if (cmdClass.CommandClass != CommandClass.NotSet && cmdClass.Version == -1)
                         ZWaveLib.CommandClasses.Version.Get(zn, cmdClass.CommandClass).Wait();
                 }
             }
@@ -641,18 +644,18 @@ namespace ZWaveLib
 
         #region ZWave Message handling
 
-        private void QueueManagerTask(CancellationToken qmt)
+        private void QueueManagerTask()
         {
-            while (!qmt.IsCancellationRequested)
+            while (!disposing)
             {
-                while (queuedMessages.Count > 0 && !busyReceiving && !qmt.IsCancellationRequested)
+                while (queuedMessages.Count > 0 && !busyReceiving && !disposing)
                 {
                     var msg = queuedMessages[0];
                     queuedMessages.Remove(msg);
 
                     if (controllerStatus == ControllerStatus.Ready)
                     {
-                        while (!SendMessage(msg) && msg.ResendCount < ZWaveMessage.ResendAttemptsMax && !qmt.IsCancellationRequested)
+                        while (!SendMessage(msg) && msg.ResendCount < ZWaveMessage.ResendAttemptsMax && !disposing)
                         {
                             msg.ResendCount++;
                             Utility.logger.Warn("Could not deliver message to Node {0} (CallbackId={1}, Retry={2})", msg.NodeId, msg.CallbackId.ToString("X2"), msg.ResendCount);

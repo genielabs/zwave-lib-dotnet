@@ -34,12 +34,12 @@ namespace ZWaveLib.CommandClasses
         public NodeEvent GetEvent(ZWaveNode node, byte[] message)
         {
             NodeEvent nodeEvent = null;
-            Command type = (Command)message[1];
+            var type = (Command)message[1];
 
             if (type == Command.VersionCommandClassReport)
             {
-                CommandClass cmdClass = (CommandClass)message[2];
-                VersionValue value = new VersionValue(cmdClass, message[3]);
+                var cmdClass = (CommandClass)message[2];
+                var value = new VersionValue(cmdClass, message[3]);
                 // Update node CC data
                 if (cmdClass != CommandClass.NotSet)
                 {

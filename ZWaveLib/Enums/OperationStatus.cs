@@ -46,7 +46,8 @@ namespace ZWaveLib
     public enum DiscoveryStatus : uint
     {
         DiscoveryStart = 0x0201,
-        DiscoveryEnd = 0x0202
+        DiscoveryEnd = 0x0202,
+        DiscoveryError = 0x0203
     }
 
     public enum NodeQueryStatus : uint

@@ -94,6 +94,7 @@ namespace ZWaveLib
         /// </summary>
         public NodeCommandClass()
         {
+            Version = -1;
         }
 
         /// <summary>
@@ -101,7 +102,7 @@ namespace ZWaveLib
         /// </summary>
         /// <param name="id">Identifier.</param>
         /// <param name="version">Version.</param>
-        public NodeCommandClass(byte id, int version = 0)
+        public NodeCommandClass(byte id, int version = -1)
         {
             Id = id;
             Version = version;

@@ -225,7 +225,12 @@ namespace ZWaveLib
         /// </summary>
         public ZWaveMessage Wait()
         {
-            sentAck.WaitOne(SendMessageTimeoutMs);
+            try
+            {
+                sentAck.WaitOne(SendMessageTimeoutMs);
+            } catch (Exception e) {
+                Utility.logger.Error(e);
+            }
             return this;
         }
 

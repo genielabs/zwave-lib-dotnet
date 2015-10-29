@@ -51,7 +51,7 @@ namespace ZWaveLib.CommandClasses
 
         public NodeEvent GetEvent(ZWaveNode node, byte[] message)
         {
-            return new NodeEvent(node, EventParameter.ThermostatOperatingState, message[2], 0);
+            return new NodeEvent(node, EventParameter.ThermostatOperatingState, (Value)message[2], 0);
         }
 
         public static ZWaveMessage GetOperatingState(ZWaveNode node)
