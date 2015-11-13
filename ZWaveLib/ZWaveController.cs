@@ -49,6 +49,7 @@ namespace ZWaveLib
         private string portName = "";
         private int commandDelay = 0;
         private DateTime lastCommand = DateTime.Now;
+        private bool startupDiscovery = true;
 
         private ManualResetEvent sendMessageAck = new ManualResetEvent(false);
         private bool busyReceiving = false;
@@ -217,6 +218,19 @@ namespace ZWaveLib
             set
             {
                 lastCommand = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the startup discovery boolean.
+        /// </summary>
+        /// <value>The startup discovery boolean.</value>
+        public bool StartupDiscovery
+        {
+            get { return startupDiscovery; }
+            set
+            {
+                startupDiscovery = value;
             }
         }
 
