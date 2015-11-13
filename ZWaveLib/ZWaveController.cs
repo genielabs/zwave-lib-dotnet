@@ -47,6 +47,8 @@ namespace ZWaveLib
 
         private SerialPortInput serialPort;
         private string portName = "";
+        private int commandDelay = 0;
+        private DateTime lastCommand = DateTime.Now;
 
         private ManualResetEvent sendMessageAck = new ManualResetEvent(false);
         private bool busyReceiving = false;
@@ -189,6 +191,32 @@ namespace ZWaveLib
             {
                 portName = value;
                 serialPort.SetPort(value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the amount of command delay.
+        /// </summary>
+        /// <value>The length of the delay in ms.</value>
+        public int CommandDelay
+        {
+            get { return commandDelay; }
+            set
+            {
+                commandDelay = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the wait boolean.
+        /// </summary>
+        /// <value>The current wait state.</value>
+        public DateTime LastCommand
+        {
+            get { return lastCommand; }
+            set
+            {
+                lastCommand = value;
             }
         }
 
@@ -374,6 +402,7 @@ namespace ZWaveLib
                         zn.OnNodeUpdated(new NodeEvent(zn, EventParameter.ManufacturerSpecific, zn.ManufacturerSpecific, 0));
                     // Raise the node updated event
                     UpdateOperationProgress(zn.Id, NodeQueryStatus.NodeUpdated);
+                    System.Threading.Thread.Sleep(commandDelay);
                 }
                 discoveryRunning = false;
                 if (!discoveryError)
