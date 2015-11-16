@@ -82,6 +82,16 @@ namespace ZWaveLib
         }
     }
 
+    public class HealProgressEventArgs
+    {
+        public readonly HealStatus Status;
+
+        public HealProgressEventArgs(HealStatus status)
+        {
+            this.Status = status;
+        }
+    }
+
     public class MessageReceivedEventArgs
     {
         public readonly ZWaveMessage Message;
