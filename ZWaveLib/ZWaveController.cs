@@ -47,10 +47,14 @@ namespace ZWaveLib
 
         private SerialPortInput serialPort;
         private string portName = "";
+        private int commandDelay = 0;
+        private DateTime lastCommand = DateTime.Now;
+        private bool startupDiscovery = true;
 
         private ManualResetEvent sendMessageAck = new ManualResetEvent(false);
         private bool busyReceiving = false;
         private bool discoveryRunning = false;
+        private bool healRunning = false;
 
         private ZWaveMessage pendingRequest;
         private QueryStage currentStage;
@@ -88,9 +92,19 @@ namespace ZWaveLib
         public delegate void DiscoveryProgressEventHandler(object sender, DiscoveryProgressEventArgs args);
 
         /// <summary>
+        /// Heal progress event handler.
+        /// </summary>
+        public delegate void HealProgressEventHandler(object sender, HealProgressEventArgs args);
+
+        /// <summary>
         /// Occurs during discovery process.
         /// </summary>
         public event DiscoveryProgressEventHandler DiscoveryProgress;
+
+        /// <summary>
+        /// Occurs during heal process.
+        /// </summary>
+        public event HealProgressEventHandler HealProgress;
 
         /// <summary>
         /// Node operation progress event handler.
@@ -189,6 +203,45 @@ namespace ZWaveLib
             {
                 portName = value;
                 serialPort.SetPort(value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the amount of command delay.
+        /// </summary>
+        /// <value>The length of the delay in ms.</value>
+        public int CommandDelay
+        {
+            get { return commandDelay; }
+            set
+            {
+                commandDelay = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the wait boolean.
+        /// </summary>
+        /// <value>The current wait state.</value>
+        public DateTime LastCommand
+        {
+            get { return lastCommand; }
+            set
+            {
+                lastCommand = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the startup discovery boolean.
+        /// </summary>
+        /// <value>The startup discovery boolean.</value>
+        public bool StartupDiscovery
+        {
+            get { return startupDiscovery; }
+            set
+            {
+                startupDiscovery = value;
             }
         }
 
@@ -374,6 +427,7 @@ namespace ZWaveLib
                         zn.OnNodeUpdated(new NodeEvent(zn, EventParameter.ManufacturerSpecific, zn.ManufacturerSpecific, 0));
                     // Raise the node updated event
                     UpdateOperationProgress(zn.Id, NodeQueryStatus.NodeUpdated);
+                    System.Threading.Thread.Sleep(commandDelay);
                 }
                 discoveryRunning = false;
                 if (!discoveryError)
@@ -389,6 +443,43 @@ namespace ZWaveLib
             else
             {
                 Utility.logger.Warn("Discovery already running");
+            }
+        }
+
+        /// <summary>
+        /// Iterate through the nodes and performa a heal on each one
+        /// </summary>
+        public void HealNetwork()
+        {
+            // A full network heal can be a long operation, so we ensure that only one instance of this is running
+            if (!healRunning)
+            {
+                healRunning = true;
+                bool healError = false;
+                OnHealProgress(new HealProgressEventArgs(HealStatus.HealStart));
+                foreach (ZWaveNode zn in nodeList)
+                {
+                    if (controllerStatus != ControllerStatus.Ready || !serialPort.IsConnected)
+                    {
+                        healError = true;
+                        break;
+                    }
+                    Utility.logger.Trace("Healing node {0}", zn.Id);
+                    RequestNeighborsUpdateOptions(zn.Id);
+                    RequestNeighborsUpdate(zn.Id);
+                    GetNeighborsRoutingInfo(zn.Id);
+                    System.Threading.Thread.Sleep(commandDelay);
+                }
+                healRunning = false;
+                if (healError)
+                {
+                    OnHealProgress(new HealProgressEventArgs(HealStatus.HealError));
+                }
+                OnHealProgress(new HealProgressEventArgs(HealStatus.HealEnd));
+            }
+            else
+            {
+                Utility.logger.Warn("Heal already running");
             }
         }
 
@@ -659,6 +750,7 @@ namespace ZWaveLib
                         {
                             msg.ResendCount++;
                             Utility.logger.Warn("Could not deliver message to Node {0} (CallbackId={1}, Retry={2})", msg.NodeId, msg.CallbackId.ToString("X2"), msg.ResendCount);
+                            System.Threading.Thread.Sleep(commandDelay > 250 ? commandDelay : 250);
                         }
                         msg.sentAck.Set();
                     
@@ -835,7 +927,7 @@ namespace ZWaveLib
                     switch (neighborUpdateStatus)
                     {
 
-                    case NeighborsUpdateStatus.NeighborsUpdateStared:
+                    case NeighborsUpdateStatus.NeighborsUpdateStarted:
 
                         UpdateOperationProgress(msg.NodeId, NodeQueryStatus.NeighborUpdateStarted);
                         break;
@@ -1346,6 +1438,17 @@ namespace ZWaveLib
             Utility.logger.Debug(args.Status);
             if (DiscoveryProgress != null)
                 DiscoveryProgress(this, args);
+        }
+
+        /// <summary>
+        /// Raises the heal progress event.
+        /// </summary>
+        /// <param name="args">Arguments.</param>
+        protected virtual void OnHealProgress(HealProgressEventArgs args)
+        {
+            Utility.logger.Debug(args.Status);
+            if (HealProgress != null)
+                HealProgress(this, args);
         }
 
         /// <summary>

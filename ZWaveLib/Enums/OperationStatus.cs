@@ -50,6 +50,13 @@ namespace ZWaveLib
         DiscoveryError = 0x0203
     }
 
+    public enum HealStatus : uint
+    {
+        HealStart = 0x0201,
+        HealEnd = 0x0202,
+        HealError = 0x0203
+    }
+
     public enum NodeQueryStatus : uint
     {
         NodeAdded = 0xFF01,
@@ -77,7 +84,7 @@ namespace ZWaveLib
     public enum NeighborsUpdateStatus : byte
     {
         None = 0x00,
-        NeighborsUpdateStared = 0x21,
+        NeighborsUpdateStarted = 0x21,
         NeighborsUpdateDone = 0x22,
         NeighborsUpdateFailed = 0x23
     }
