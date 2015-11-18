@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>ZWaveLib</id>
-        <version>1.0.7</version>
+        <version>1.0.8</version>
         <title>ZWaveLib</title>
         <authors>Generoso Martello</authors>
         <owners>G-Labs</owners>
@@ -21,7 +21,7 @@ Features
 [Source Code and Home Page]
 https://github.com/genielabs/zwave-lib-dotnet</description>
         <summary>Z-Wave library for Home Automation (.NET / Mono)</summary>
-        <releaseNotes>Updated to use latest SerialPortLib.</releaseNotes>
+        <releaseNotes>Added configurable delay between commands and HealNetwork method to ZWaveController.</releaseNotes>
         <copyright>G-Labs</copyright>
         <tags>zwave z-wave home automation</tags>
         <dependencies>

@@ -47,7 +47,8 @@ namespace ZWaveLib
 
         private SerialPortInput serialPort;
         private string portName = "";
-        private int commandDelay = 0;
+        private const int commandDelayMin = 100;
+        private int commandDelay = commandDelayMin;
         private DateTime lastCommand = DateTime.Now;
         private bool startupDiscovery = true;
 
@@ -215,33 +216,7 @@ namespace ZWaveLib
             get { return commandDelay; }
             set
             {
-                commandDelay = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the wait boolean.
-        /// </summary>
-        /// <value>The current wait state.</value>
-        public DateTime LastCommand
-        {
-            get { return lastCommand; }
-            set
-            {
-                lastCommand = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the startup discovery boolean.
-        /// </summary>
-        /// <value>The startup discovery boolean.</value>
-        public bool StartupDiscovery
-        {
-            get { return startupDiscovery; }
-            set
-            {
-                startupDiscovery = value;
+                commandDelay = (value > commandDelayMin ? value : commandDelayMin);
             }
         }
 
@@ -427,7 +402,6 @@ namespace ZWaveLib
                         zn.OnNodeUpdated(new NodeEvent(zn, EventParameter.ManufacturerSpecific, zn.ManufacturerSpecific, 0));
                     // Raise the node updated event
                     UpdateOperationProgress(zn.Id, NodeQueryStatus.NodeUpdated);
-                    System.Threading.Thread.Sleep(commandDelay);
                 }
                 discoveryRunning = false;
                 if (!discoveryError)
@@ -468,7 +442,6 @@ namespace ZWaveLib
                     RequestNeighborsUpdateOptions(zn.Id);
                     RequestNeighborsUpdate(zn.Id);
                     GetNeighborsRoutingInfo(zn.Id);
-                    System.Threading.Thread.Sleep(commandDelay);
                 }
                 healRunning = false;
                 if (healError)
@@ -750,7 +723,7 @@ namespace ZWaveLib
                         {
                             msg.ResendCount++;
                             Utility.logger.Warn("Could not deliver message to Node {0} (CallbackId={1}, Retry={2})", msg.NodeId, msg.CallbackId.ToString("X2"), msg.ResendCount);
-                            System.Threading.Thread.Sleep(commandDelay > 250 ? commandDelay : 250);
+                            System.Threading.Thread.Sleep(commandDelay);
                         }
                         msg.sentAck.Set();
                     
@@ -776,7 +749,7 @@ namespace ZWaveLib
                             UpdateOperationProgress(msg.NodeId, NodeQueryStatus.Error);
                     }
                     // little breeze between each send
-                    Thread.Sleep(100);
+                    System.Threading.Thread.Sleep(commandDelay);
                 }
                 // TODO: get rid of this Sleep
                 Thread.Sleep(500);
