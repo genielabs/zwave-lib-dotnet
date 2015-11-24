@@ -43,19 +43,19 @@ namespace ZWaveLib
         /// Gets or sets the basic type.
         /// </summary>
         /// <value>The basic type.</value>
-        public byte BasicType { get; internal set; }
+        public byte BasicType { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets or sets the generic type.
         /// </summary>
         /// <value>The generic type.</value>
-        public byte GenericType { get; internal set; }
+        public byte GenericType { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets or sets the specific type.
         /// </summary>
         /// <value>The specific type.</value>
-        public byte SpecificType { get; internal set; }
+        public byte SpecificType { get; /*internal*/ set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ZWaveLib.NodeCapabilities"/> class.
@@ -74,13 +74,13 @@ namespace ZWaveLib
         /// <summary>
         /// The CC identifier.
         /// </summary>
-        public readonly byte Id;
+        public /* readonly */ byte Id;
 
         /// <summary>
         /// Gets or sets the version for this CC.
         /// </summary>
         /// <value>The version.</value>
-        public int Version { get; internal set; }
+        public int Version { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets the command class enumeration entry.
@@ -156,29 +156,29 @@ namespace ZWaveLib
         /// Gets or sets the identifier.
         /// </summary>
         /// <value>The identifier.</value>
-        public byte Id { get; protected set; }
+        public byte Id { get; /*protected*/ set; }
 
-        public NodeCapabilities ProtocolInfo { get; internal set; }
+        public NodeCapabilities ProtocolInfo { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets or sets the node information frame.
         /// </summary>
         /// <value>The node information frame.</value>
-        public byte[] NodeInformationFrame { get; internal set; }
+        public byte[] NodeInformationFrame { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets or sets the secured node information frame.
         /// </summary>
         /// <value>The secured node information frame.</value>
-        public byte[] SecuredNodeInformationFrame { get; internal set; }
+        public byte[] SecuredNodeInformationFrame { get; /*internal*/ set; }
 
-        public List<NodeCommandClass> CommandClasses { get; internal set; }
+        public List<NodeCommandClass> CommandClasses { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets or sets the manufacturer specific.
         /// </summary>
         /// <value>The manufacturer specific.</value>
-        public ManufacturerSpecificInfo ManufacturerSpecific { get; internal set; }
+        public ManufacturerSpecificInfo ManufacturerSpecific { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets or sets the data.

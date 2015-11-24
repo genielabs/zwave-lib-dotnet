@@ -28,6 +28,11 @@ namespace ZWaveLib
         NotSet = 0x00,
 
         GetInitData = 0x02,
+        GetControllerCapabilities = 0x07,
+        GetControllerInfo = 0x015,
+        GetHomeId = 0x20,
+        GetSucNodeId = 0x56,
+
         ApplicationCommandHandler = 0x04,
         ControllerSoftReset = 0x08,
         SendData = 0x13,

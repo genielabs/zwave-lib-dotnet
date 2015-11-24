@@ -262,6 +262,10 @@ namespace Test.ZWave
             {
             case ControllerStatus.Connected:
                 // Initialize the controller and get the node list
+                controller.GetControllerInfo();
+                controller.GetControllerCapabilities();
+                controller.GetHomeId();
+                controller.GetSucNodeId();
                 controller.Initialize();
                 break;
             case ControllerStatus.Disconnected:
@@ -271,7 +275,7 @@ namespace Test.ZWave
                 break;
             case ControllerStatus.Ready:
                 // Query all nodes (Supported Classes, Routing Info, Node Information Frame, Manufacturer Specific)
-                controller.Discovery();
+//                controller.Discovery();
                 ShowMenu();
                 break;
             case ControllerStatus.Error:

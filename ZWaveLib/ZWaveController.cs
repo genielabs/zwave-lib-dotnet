@@ -27,7 +27,6 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 using SerialPortLib;
@@ -49,8 +48,6 @@ namespace ZWaveLib
         private string portName = "";
         private const int commandDelayMin = 100;
         private int commandDelay = commandDelayMin;
-        private DateTime lastCommand = DateTime.Now;
-        private bool startupDiscovery = true;
 
         private ManualResetEvent sendMessageAck = new ManualResetEvent(false);
         private bool busyReceiving = false;
@@ -352,12 +349,48 @@ namespace ZWaveLib
             Utility.logger.Trace("BEGIN");
             Thread.Sleep(1000);
             OnControllerStatusChanged(new ControllerStatusEventArgs(ControllerStatus.Initializing));
-            var initialized = SendMessage(new ZWaveMessage(new byte[] { 0x01, 0x03, 0x00, (byte)ZWaveFunction.GetInitData, 0xFE }, MessageDirection.Outbound, false));
+            var initialized = SendMessage(new ZWaveMessage(new byte[] { 0x01, 0x03, 0x00, (byte)ZWaveFunction.GetInitData, 0x00 }, MessageDirection.Outbound, false));
             if (initialized)
                 OnControllerStatusChanged(new ControllerStatusEventArgs(ControllerStatus.Ready));
             else
                 OnControllerStatusChanged(new ControllerStatusEventArgs(ControllerStatus.Error));
             Utility.logger.Trace("END");
+        }
+
+        /// <summary>
+        /// Gets the controller info.
+        /// </summary>
+        /// <returns><c>true</c>, if controller info was gotten, <c>false</c> otherwise.</returns>
+        public bool GetControllerInfo()
+        {
+            return SendMessage(new ZWaveMessage(new byte[] { 0x01, 0x03, 0x00, (byte)ZWaveFunction.GetControllerInfo, 0x00 }, MessageDirection.Outbound, false));
+        }
+
+        /// <summary>
+        /// Gets the controller capabilities.
+        /// </summary>
+        /// <returns><c>true</c>, if controller capabilities was gotten, <c>false</c> otherwise.</returns>
+        public bool GetControllerCapabilities()
+        {
+            return SendMessage(new ZWaveMessage(new byte[] { 0x01, 0x03, 0x00, (byte)ZWaveFunction.GetControllerCapabilities, 0x00 }, MessageDirection.Outbound, false));
+        }
+
+        /// <summary>
+        /// Gets the home identifier.
+        /// </summary>
+        /// <returns><c>true</c>, if home identifier was gotten, <c>false</c> otherwise.</returns>
+        public bool GetHomeId()
+        {
+            return SendMessage(new ZWaveMessage(new byte[] { 0x01, 0x03, 0x00, (byte)ZWaveFunction.GetHomeId, 0x00 }, MessageDirection.Outbound, false));
+        }
+
+        /// <summary>
+        /// Gets the suc node identifier.
+        /// </summary>
+        /// <returns><c>true</c>, if suc node identifier was gotten, <c>false</c> otherwise.</returns>
+        public bool GetSucNodeId()
+        {
+            return SendMessage(new ZWaveMessage(new byte[] { 0x01, 0x03, 0x00, (byte)ZWaveFunction.GetSucNodeId, 0x00 }, MessageDirection.Outbound, false));
         }
 
         /// <summary>
@@ -372,6 +405,20 @@ namespace ZWaveLib
                 bool discoveryError = false;
                 OnDiscoveryProgress(new DiscoveryProgressEventArgs(DiscoveryStatus.DiscoveryStart));
                 discoveryRunning = true;
+                // First pass, we get protocol info for all nodes
+                foreach (ZWaveNode zn in nodeList)
+                {
+                    if (controllerStatus != ControllerStatus.Ready || !serialPort.IsConnected)
+                    {
+                        discoveryError = true;
+                        break;
+                    }
+                    Utility.logger.Trace("Getting protocol info for node {0}", zn.Id);
+                    // Get Generic/Basic/Specific Class if not already cached
+                    if (zn.ProtocolInfo.BasicType == 0 && zn.ProtocolInfo.GenericType == 0 && zn.ProtocolInfo.SpecificType == 0)
+                        GetNodeProtocolInfo(zn.Id);
+                }
+                // Second pass, we query additional node informations
                 foreach (ZWaveNode zn in nodeList)
                 {
                     if (controllerStatus != ControllerStatus.Ready || !serialPort.IsConnected)
@@ -380,10 +427,7 @@ namespace ZWaveLib
                         break;
                     }
                     Utility.logger.Trace("Querying/Updating node {0}", zn.Id);
-                    // Get Generic/Basic/Specific Class if not already cached
-                    if (zn.ProtocolInfo.BasicType == 0 && zn.ProtocolInfo.GenericType == 0 && zn.ProtocolInfo.SpecificType == 0)
-                        GetNodeProtocolInfo(zn.Id);
-                    
+
                     // TODO: should check for SecureNodeInformationFrame as well??
 
                     // NIF, if cached just return the cached value
@@ -723,7 +767,7 @@ namespace ZWaveLib
                         {
                             msg.ResendCount++;
                             Utility.logger.Warn("Could not deliver message to Node {0} (CallbackId={1}, Retry={2})", msg.NodeId, msg.CallbackId.ToString("X2"), msg.ResendCount);
-                            System.Threading.Thread.Sleep(commandDelay);
+                            Thread.Sleep(commandDelay);
                         }
                         msg.sentAck.Set();
                     
@@ -749,7 +793,7 @@ namespace ZWaveLib
                             UpdateOperationProgress(msg.NodeId, NodeQueryStatus.Error);
                     }
                     // little breeze between each send
-                    System.Threading.Thread.Sleep(commandDelay);
+                    Thread.Sleep(commandDelay);
                 }
                 // TODO: get rid of this Sleep
                 Thread.Sleep(500);
@@ -1011,6 +1055,27 @@ namespace ZWaveLib
                 case ZWaveFunction.GetInitData:
                     InitializeNodes(rawData);
                     SetQueryStage(QueryStage.Complete);
+                    break;
+
+                case ZWaveFunction.GetHomeId:
+                    if (rawData.Length > 7)
+                    {
+                        byte[] homeId = new byte[4] { rawData[4], rawData[5], rawData[6], rawData[7] };
+                        byte nodeId = rawData[2]; // <-- perhaps this is rawData[8] ...
+                        Utility.logger.Info("Home Id is {0}, Controller node id is {1}", BitConverter.ToString(homeId), nodeId);
+                        // TODO: complete this code
+                    }
+                    else
+                    {
+                        Utility.logger.Warn("Could not read Home Id.");
+                    }
+                    break;
+
+                case ZWaveFunction.GetControllerInfo:
+                case ZWaveFunction.GetControllerCapabilities:
+                case ZWaveFunction.GetSucNodeId:
+                    // TODO: complete this code
+                    Utility.logger.Warn("Response handling for {0} not implemented yet!", msg.Function);
                     break;
 
                 case ZWaveFunction.GetNodeProtocolInfo:
