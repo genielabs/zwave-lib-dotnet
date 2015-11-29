@@ -89,5 +89,12 @@ namespace ZWaveLib
         NeighborsUpdateFailed = 0x23
     }
 
+    public enum ApplicationUpdateStatus : byte
+    {
+        None = 0x00,
+        RequestNodeInfoFailed = 0x81,
+        RequestNodeInfoSuccessful = 0x84
+    }
+
 }
 

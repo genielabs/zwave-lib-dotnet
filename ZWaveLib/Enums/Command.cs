@@ -109,6 +109,7 @@ namespace ZWaveLib
         WakeUpIntervalGet = 0x05,
         WakeUpIntervalReport = 0x06,
         WakeUpNotification = 0x07,
+        WakeUpNoMoreInfo = 0x08,
         WakeUpIntervalCapabilitiesGet = 0x09,
         WakeUpIntervalCapabilitiesReport = 0x0A,
         //

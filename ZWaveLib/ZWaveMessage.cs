@@ -160,18 +160,18 @@ namespace ZWaveLib
                 switch (Type)
                 {
                 case MessageType.Request:
-                    if (Function == ZWaveFunction.SendData && message.Length == 8)
-                    {
-                        Enum.TryParse<CommandClass>(message[6].ToString(), out CommandClass);
-                    }
-                    else if (Function == ZWaveFunction.SendData && message.Length == 6)
+                    if (Function == ZWaveFunction.SendData && message.Length == 6)
                     {
                         Enum.TryParse<CallbackStatus>(message[4].ToString(), out CallbackStatus);
                     }
-                    else if (Function == ZWaveFunction.SendData && message.Length == 7)
+                    else if (Function == ZWaveFunction.SendData && (message.Length == 7 || message.Length == 9))
                     {
                         CallbackId = message[4];
                         Enum.TryParse<CallbackStatus>(message[5].ToString(), out CallbackStatus);
+                    }
+                    else if (Function == ZWaveFunction.SendData && message.Length == 8)
+                    {
+                        Enum.TryParse<CommandClass>(message[6].ToString(), out CommandClass);
                     }
                     else if (Function == ZWaveFunction.SendData && message.Length > 6)
                     {
@@ -218,6 +218,14 @@ namespace ZWaveLib
             if (seqNumber == long.MaxValue)
                 seqNumber = 0;
             Seq = ++seqNumber;
+
+            Utility.logger.Debug("ZWaveMessage (RawData={0})", BitConverter.ToString(RawData));
+            if (Direction == MessageDirection.Inbound)
+                Utility.logger.Debug("ZWaveMessage (Direction={0}, Header={1}, NodeId={2}, Type={3}, Function={4}, CommandClass={5})",
+                    Direction, Header, NodeId, Type, Function, CommandClass);
+            else
+                Utility.logger.Debug("ZWaveMessage (Direction={0}, Header={1}, NodeId={2}, Type={3}, Function={4}, CommandClass={5}, CallbackId={6}, CallbackStatus={7})",
+                    Direction, Header, NodeId, Type, Function, CommandClass, CallbackId, CallbackStatus);
         }
 
         /// <summary>

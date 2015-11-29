@@ -47,6 +47,7 @@ namespace ZWaveLib
         private SerialPortInput serialPort;
         private string portName = "";
         private const int commandDelayMin = 100;
+        private const int commandRetryDelay = 200;
         private int commandDelay = commandDelayMin;
 
         private ManualResetEvent sendMessageAck = new ManualResetEvent(false);
@@ -56,6 +57,7 @@ namespace ZWaveLib
 
         private ZWaveMessage pendingRequest;
         private QueryStage currentStage;
+        private object readLock = new object();
 
         private bool disposing = false;
         private Thread queueManager;
@@ -65,6 +67,7 @@ namespace ZWaveLib
 
         private List<ZWaveNode> nodeList = new List<ZWaveNode>();
 
+        private byte[] serialBuffer = null;
         private byte[] lastMessage = null;
         private DateTime lastMessageTimestamp = DateTime.UtcNow;
 
@@ -767,7 +770,7 @@ namespace ZWaveLib
                         {
                             msg.ResendCount++;
                             Utility.logger.Warn("Could not deliver message to Node {0} (CallbackId={1}, Retry={2})", msg.NodeId, msg.CallbackId.ToString("X2"), msg.ResendCount);
-                            Thread.Sleep(commandDelay);
+                            Thread.Sleep(commandRetryDelay);
                         }
                         msg.sentAck.Set();
                     
@@ -793,7 +796,8 @@ namespace ZWaveLib
                             UpdateOperationProgress(msg.NodeId, NodeQueryStatus.Error);
                     }
                     // little breeze between each send
-                    Thread.Sleep(commandDelay);
+                    if (commandDelay > 0)
+                        Thread.Sleep(commandDelay);
                 }
                 // TODO: get rid of this Sleep
                 Thread.Sleep(500);
@@ -1014,6 +1018,14 @@ namespace ZWaveLib
 
                 case ZWaveFunction.ApplicationUpdate:
 
+                    // TODO: enable nodeInfoStatus byte check
+                    /*
+                    var applicationUpdateStatus = ApplicationUpdateStatus.None;
+                    Enum.TryParse(rawData[4].ToString(), out nodeInfoStatus);
+
+                    if (applicationUpdateStatus == ApplicationUpdateStatus.RequestNodeInfoSuccessful)
+                    {
+                    */
                     int nifLength = (int)rawData[6];
                     var znode = GetNode(rawData[5]);
                     if (znode != null)
@@ -1031,6 +1043,11 @@ namespace ZWaveLib
                         {
                             NodeInformationFrameDone(znode);
                             SetQueryStage(QueryStage.Complete);
+                        }
+                        // if node supports WakeUp command class and is sleeping, then wake it up
+                        if (znode.SupportCommandClass(CommandClass.WakeUp))
+                        {
+                            WakeUp.WakeUpNode(znode);
                         }
                     }
                     else
@@ -1191,10 +1208,8 @@ namespace ZWaveLib
         {
             if (zm.Header == FrameHeader.SOF)
             {
-
                 if (ZWaveMessage.VerifyChecksum(zm.RawData))
                 {
-
                     // Some replies do not include the Id of the node
                     // so we take it from the pending request message
                     if (pendingRequest != null && zm.NodeId == 0)
@@ -1202,18 +1217,15 @@ namespace ZWaveLib
                         zm.NodeId = pendingRequest.NodeId;
                         zm.CallbackId = pendingRequest.CallbackId;
                     }
-
                     SendAck();
                     ReceiveMessage(zm);
                     UpdateQueryStage(zm);
-
                 }
                 else
                 {
                     SendNack();
                     Utility.logger.Warn("Bad message checksum");
                 }
-
             }
             else if (zm.Header == FrameHeader.CAN)
             {
@@ -1294,6 +1306,16 @@ namespace ZWaveLib
         /// <param name="message">raw bytes data.</param>
         private void ParseSerialData(byte[] message)
         {
+            if (serialBuffer != null)
+            {
+                byte[] merged = new byte[serialBuffer.Length + message.Length];
+                Array.Copy(serialBuffer, 0, merged, 0, serialBuffer.Length);
+                Array.Copy(message, 0, merged, serialBuffer.Length, message.Length);
+                message = merged;
+                serialBuffer = null;
+                Utility.logger.Trace("Merged buffer to message: {0}", BitConverter.ToString(message));
+            }
+
             // Extract Z-Wave frames from incoming serial port data
             FrameHeader header = (FrameHeader)((int)message[0]);
             if (header == FrameHeader.ACK)
@@ -1309,7 +1331,13 @@ namespace ZWaveLib
 
             int msgLength = 0;
             byte[] nextMessage = null;
-            if (message.Length > 1)
+            if (header == FrameHeader.CAN && message.Length > 1)
+            {
+                nextMessage = new byte[message.Length - 1];
+                Array.Copy(message, 1, nextMessage, 0, nextMessage.Length);
+                message = new byte[] { (byte)header };
+            }
+            else if (message.Length > 1)
             {
                 msgLength = (int)message[1];
                 if (message.Length > msgLength + 2)
@@ -1319,6 +1347,13 @@ namespace ZWaveLib
                     byte[] tmpmsg = new byte[msgLength + 2];
                     Array.Copy(message, 0, tmpmsg, 0, msgLength + 2);
                     message = tmpmsg;
+                }
+                else if (header == FrameHeader.SOF && message.Length < msgLength + 2)
+                {
+                    serialBuffer = new byte[message.Length];
+                    Array.Copy(message, 0, serialBuffer, 0, serialBuffer.Length);
+                    Utility.logger.Trace("Expected message length is {0}, currently received length is {1}", msgLength + 2, message.Length);
+                    return;
                 }
             }
 
@@ -1341,15 +1376,20 @@ namespace ZWaveLib
         private void SerialPort_ConnectionStatusChanged(object sender, ConnectionStatusChangedEventArgs args)
         {
             var status = args.Connected ? ControllerStatus.Connected : ControllerStatus.Disconnected;
+            serialBuffer = null;
+            lastMessage = null;
             Thread.Sleep(1000);
             OnControllerStatusChanged(new ControllerStatusEventArgs(status));
         }
 
         private void SerialPort_MessageReceived(object sender, SerialPortLib.MessageReceivedEventArgs args)
         {
-            busyReceiving = true;
-            ParseSerialData(args.Data);
-            busyReceiving = false;
+            lock (readLock)
+            {
+                busyReceiving = true;
+                ParseSerialData(args.Data);
+                busyReceiving = false;
+            }
         }
 
         #endregion
@@ -1462,7 +1502,7 @@ namespace ZWaveLib
         /// <param name="args">Arguments.</param>
         protected virtual void OnNodeUpdated(NodeUpdatedEventArgs args)
         {
-            Utility.logger.Debug("{0} {1} {2}", args.NodeId, args.Event.Parameter, args.Event.Value);
+            Utility.logger.Debug("NodeUpdated (NodeId={0}, Parameter={1}, Value={2})", args.NodeId, args.Event.Parameter, args.Event.Value);
             if (NodeUpdated != null)
                 NodeUpdated(this, args);
         }
