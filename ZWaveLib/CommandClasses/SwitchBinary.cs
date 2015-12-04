@@ -38,21 +38,26 @@ namespace ZWaveLib.CommandClasses
             if (cmdType == (byte)Command.SwitchBinaryReport || cmdType == (byte)Command.SwitchBinarySet) // some devices use this instead of report
             {
                 int levelValue = (int)message[2];
-                nodeEvent = new NodeEvent(node, EventParameter.Level, (double)levelValue, 0);
+                nodeEvent = new NodeEvent(node, EventParameter.SwitchBinary, (double)levelValue, 0);
             }
             return nodeEvent;
         }
 
         public static ZWaveMessage Set(ZWaveNode node, int value)
         {
-            // same as basic class
-            return Basic.Set(node, value);
+            return node.SendDataRequest(new byte[] { 
+                (byte)CommandClass.SwitchBinary, 
+                (byte)Command.SwitchBinarySet, 
+                byte.Parse(value.ToString())
+            });
         }
 
         public static ZWaveMessage Get(ZWaveNode node)
         {
-            // same as basic class
-            return Basic.Get(node);
+            return node.SendDataRequest(new byte[] { 
+                (byte)CommandClass.SwitchBinary, 
+                (byte)Command.SwitchBinaryGet 
+            });
         }
     }
 }

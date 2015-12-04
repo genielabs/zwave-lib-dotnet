@@ -118,7 +118,7 @@ namespace ZWaveLib.CommandClasses
         public static void ResendOnWakeUp(ZWaveNode node, byte[] msg)
         {
             int minCommandLength = 8;
-            if (msg.Length >= minCommandLength && (msg[6] != (byte)CommandClass.WakeUp && msg[7] != (byte)Command.WakeUpNoMoreInfo))
+            if (msg.Length >= minCommandLength && !(msg[6] == (byte)CommandClass.WakeUp && msg[7] == (byte)Command.WakeUpNoMoreInfo))
             {
                 byte[] command = new byte[minCommandLength];
                 Array.Copy(msg, 0, command, 0, minCommandLength);

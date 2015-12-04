@@ -38,7 +38,7 @@ namespace ZWaveLib.CommandClasses
             if (cmdType == (byte)Command.SwitchMultilevelReport || cmdType == (byte)Command.SwitchMultilevelSet) // some devices use this instead of report
             {
                 int levelValue = (int)message[2];
-                nodeEvent = new NodeEvent(node, EventParameter.Level, (double)levelValue, 0);
+                nodeEvent = new NodeEvent(node, EventParameter.SwitchMultilevel, (double)levelValue, 0);
             }
             return nodeEvent;
         }

@@ -25,7 +25,9 @@ namespace ZWaveLib
 
     public enum EventParameter
     {
-        Level,
+        Basic,
+        SwitchBinary,
+        SwitchMultilevel,
         ManufacturerSpecific,
         MeterKwHour,
         MeterKvaHour,

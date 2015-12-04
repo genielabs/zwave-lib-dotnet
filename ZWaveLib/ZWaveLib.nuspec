@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>ZWaveLib</id>
-        <version>1.0.9</version>
+        <version>1.0.10</version>
         <title>ZWaveLib</title>
         <authors>Generoso Martello</authors>
         <owners>G-Labs</owners>
@@ -21,9 +21,9 @@ Features
 [Source Code and Home Page]
 https://github.com/genielabs/zwave-lib-dotnet</description>
         <summary>Z-Wave library for Home Automation (.NET / Mono)</summary>
-        <releaseNotes>- Fixed packet fragmentation issue (affecting RaZberry) and timeout errors occurring with some devices (eg. Fibaro in wall switches).
-- Added WakeUp.SendToSleep command
-- Added WakeUp on NodeInfo</releaseNotes>
+        <releaseNotes>- Fixed WakeUp class bug, it was queuing send to sleep commands
+        - Fixed SwitchBinary class that was sending out messages as Basic cc
+        - Assigned proper events to Basic, SwitchBinary and SwitchMultilevel report</releaseNotes>
         <copyright>G-Labs</copyright>
         <tags>zwave z-wave home automation</tags>
         <dependencies>

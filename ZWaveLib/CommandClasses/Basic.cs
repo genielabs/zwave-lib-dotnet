@@ -36,7 +36,7 @@ namespace ZWaveLib.CommandClasses
             if (cmdType == (byte)Command.BasicReport || cmdType == (byte)Command.BasicSet)
             {
                 int levelValue = (int)message[2];
-                nodeEvent = new NodeEvent(node, EventParameter.Level, (double)levelValue, 0);
+                nodeEvent = new NodeEvent(node, EventParameter.Basic, (double)levelValue, 0);
             }
             return nodeEvent;
         }

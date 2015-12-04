@@ -40,7 +40,7 @@
       <HintPath>..\packages\NLog.4.1.0\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="SerialPortLib">
-      <HintPath>..\packages\SerialPortLib.1.0.10\lib\SerialPortLib.dll</HintPath>
+      <HintPath>..\packages\SerialPortLib.1.0.11\lib\SerialPortLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
