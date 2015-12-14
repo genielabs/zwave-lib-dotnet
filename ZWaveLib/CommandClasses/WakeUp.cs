@@ -146,6 +146,21 @@ namespace ZWaveLib.CommandClasses
             }
         }
 
+        public static bool GetAlwaysAwake(ZWaveNode node)
+        {
+            var alwaysAwake = node.GetData("WakeUpAlwaysAwake");
+            if (alwaysAwake != null && alwaysAwake.Value != null && ((bool)alwaysAwake.Value) == true)
+                return true;
+            return false;
+        }
+
+        public static void SetAlwaysAwake(ZWaveNode node, bool alwaysAwake)
+        {
+            node.GetData("WakeUpAlwaysAwake", false).Value = alwaysAwake;
+            if (alwaysAwake)
+                WakeUpNode(node);
+        }
+
         private static List<byte[]> GetResendQueueData(ZWaveNode node)
         {
             return (List<byte[]>)node.GetData("WakeUpResendQueue", new List<byte[]>()).Value;

@@ -781,7 +781,7 @@ namespace ZWaveLib
                             {
                                 UpdateOperationProgress(msg.NodeId, NodeQueryStatus.Error);
                                 var node = GetNode(msg.NodeId);
-                                if (node != null && node.SupportCommandClass(CommandClass.WakeUp))
+                                if (node != null && node.SupportCommandClass(CommandClass.WakeUp) && WakeUp.GetAlwaysAwake(node) == false)
                                 {
                                     Utility.logger.Warn("Node is flagged as sleeping, message will be re-sent on Wake Up (Node={0}, CallbackId={0}, Function={1}, CommandClass={2})", msg.NodeId, msg.CallbackId.ToString("X2"), msg.Function, msg.CommandClass);
                                     WakeUp.ResendOnWakeUp(node, msg.RawData);
