@@ -57,9 +57,11 @@ namespace ZWaveLib.CommandClasses
                 Array.Copy(message, offset + 1, instanceMessage, 0, length);
                 Utility.DebugLog(DebugMessageType.Information, String.Format("Processing message chunk: {0}", BitConverter.ToString(instanceMessage)));
 
+                // Move offset to the next encap message
+                offset += (byte)(length + 1);
+
                 // Grab command class from the factory. If we don't have one, print out a warning and continue.
                 var cc = CommandClassFactory.GetCommandClass(cmdClass);
-
                 if (cc == null)
                 {
                     Utility.DebugLog(DebugMessageType.Information, String.Format("Can't find CommandClass handler for command class {0}", cmdClass));
@@ -68,8 +70,6 @@ namespace ZWaveLib.CommandClasses
 
                 // Chain this event onto previously seen events.
                 NodeEvent tmp = cc.GetEvent(node, instanceMessage);
-                offset += (byte)(length + 1);
-
                 if (tmp == null)
                 {
                     continue;
