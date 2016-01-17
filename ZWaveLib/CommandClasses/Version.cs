@@ -17,6 +17,7 @@
 
 /*
 *     Author: https://github.com/mdave
+*     Author: https://github.com/bounz
 *     Project Homepage: https://github.com/genielabs/zwave-lib-dotnet
 */
 using System;
@@ -35,6 +36,19 @@ namespace ZWaveLib.CommandClasses
         {
             NodeEvent nodeEvent = null;
             var type = (Command)message[1];
+
+            if (type == Command.VersionReport)
+            {
+                var nodeVersion = new NodeVersion {
+                    LibraryType = message[2],
+                    ProtocolVersion = message[3],
+                    ProtocolSubVersion = message[4],
+                    ApplicationVersion = message[5],
+                    ApplicationSubVersion = message[6]
+                };
+                node.Version = nodeVersion;
+                nodeEvent = new NodeEvent(node, EventParameter.VersionCommandClass, nodeVersion, 0);
+            }
 
             if (type == Command.VersionCommandClassReport)
             {
@@ -64,6 +78,14 @@ namespace ZWaveLib.CommandClasses
                 (byte)CommandClass.Version, 
                 (byte)Command.VersionCommandClassGet,
                 (byte)cmdClass
+            });
+        }
+
+        public static ZWaveMessage Report(ZWaveNode node)
+        {
+            return node.SendDataRequest(new byte[] { 
+                (byte)CommandClass.Version, 
+                (byte)Command.VersionGet,
             });
         }
     }

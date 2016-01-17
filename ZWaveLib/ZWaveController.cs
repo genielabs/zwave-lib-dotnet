@@ -444,7 +444,10 @@ namespace ZWaveLib
 
                     // Manufacturer Specific, if cached just return the cached value
                     if (String.IsNullOrWhiteSpace(zn.ManufacturerSpecific.ManufacturerId))
+                    {
                         ManufacturerSpecific.Get(zn);
+                        CommandClasses.Version.Report(zn);
+                    }
                     else
                         zn.OnNodeUpdated(new NodeEvent(zn, EventParameter.ManufacturerSpecific, zn.ManufacturerSpecific, 0));
                     // Raise the node updated event
@@ -504,7 +507,7 @@ namespace ZWaveLib
         }
 
         public void GetNodeCcsVersion(ZWaveNode zn)
-        {
+        {            
             // If node support version command class, query each one for its version.
             if (zn.SupportCommandClass(CommandClass.Version))
             {
@@ -878,6 +881,7 @@ namespace ZWaveLib
                         if (addedNode != null)
                         {
                             ManufacturerSpecific.Get(addedNode);
+                            CommandClasses.Version.Report(addedNode);
                             UpdateOperationProgress(addedNode.Id, NodeQueryStatus.NodeAddDone);
                         }
                         else
