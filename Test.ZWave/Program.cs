@@ -148,6 +148,15 @@ namespace Test.ZWave
                     Console.WriteLine("        {0} {1}", nodeCmdClass.CommandClass, versionInfo);
                 }
                 Console.ForegroundColor = ConsoleColor.White;
+                if (node.Version != null)
+                {
+                    Console.WriteLine("    Node Version info:");
+                    Console.WriteLine("        LibraryType {0}", (node.Version.LibraryType));
+                    Console.WriteLine("        ProtocolVersion {0}", (node.Version.ProtocolVersion));
+                    Console.WriteLine("        ProtocolSubVersion {0}", (node.Version.ProtocolSubVersion));
+                    Console.WriteLine("        ApplicationVersion {0}", (node.Version.ApplicationVersion));
+                    Console.WriteLine("        ApplicationSubVersion {0}", (node.Version.ApplicationSubVersion));
+                }
                 if (node.GetData("RoutingInfo") != null)
                 {
                     Console.WriteLine("    Routing Info {0}", BitConverter.ToString((byte[])node.GetData("RoutingInfo").Value));
@@ -289,7 +298,6 @@ namespace Test.ZWave
         static void Controller_DiscoveryProgress(object sender, DiscoveryProgressEventArgs args)
         {
             Console.WriteLine("DiscoveryProgress {0}", args.Status);
-            var controller = (sender as ZWaveController);
             switch (args.Status)
             {
             case DiscoveryStatus.DiscoveryStart:

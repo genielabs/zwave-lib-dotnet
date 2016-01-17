@@ -113,6 +113,8 @@ namespace ZWaveLib
         WakeUpIntervalCapabilitiesGet = 0x09,
         WakeUpIntervalCapabilitiesReport = 0x0A,
         //
+        VersionGet=0x11,
+        VersionReport=0x12,
         VersionCommandClassGet = 0x13,
         VersionCommandClassReport = 0x14,
         //
