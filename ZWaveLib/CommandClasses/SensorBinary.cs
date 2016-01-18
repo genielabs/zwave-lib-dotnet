@@ -59,7 +59,8 @@ namespace ZWaveLib.CommandClasses
             byte cmdType = message[1];
             if (cmdType == (byte)Command.SensorBinaryReport)
             {
-                int version = node.GetCommandClass(GetClassId()).Version;
+                var cc = node.GetCommandClass(GetClassId());
+                int version = (cc != null ? cc.Version : 0);
 
                 if (version == 1 || message.Length <= 3)
                 {
