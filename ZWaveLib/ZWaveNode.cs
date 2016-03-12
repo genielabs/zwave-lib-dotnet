@@ -110,7 +110,8 @@ namespace ZWaveLib
 
         public override string ToString()
         {
-            return string.Format("LibraryType={0}, ProtocolVersion={1}, ProtocolSubVersion={2}, ApplicationVersion={3}, ApplicationSubVersion={4}", LibraryType, ProtocolVersion, ProtocolSubVersion, ApplicationVersion, ApplicationSubVersion);
+            return string.Format("{{\"LibraryType\":{0}, \"ProtocolVersion\":{1}, \"ProtocolSubVersion\":{2}, \"ApplicationVersion\":{3}, \"ApplicationSubVersion\":{4}}}", 
+                LibraryType, ProtocolVersion, ProtocolSubVersion, ApplicationVersion, ApplicationSubVersion);
         }
     }
 
