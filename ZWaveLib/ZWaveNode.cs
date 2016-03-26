@@ -210,7 +210,7 @@ namespace ZWaveLib
 
         public NodeCapabilities ProtocolInfo { get; /*internal*/ set; }
 
-        public NodeVersion Version { get; internal set; }
+        public NodeVersion Version { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets or sets the node information frame.
