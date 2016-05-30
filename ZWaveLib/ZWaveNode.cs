@@ -75,31 +75,31 @@ namespace ZWaveLib
         /// Gets or sets the Z-Wave Library Type.
         /// </summary>
         /// <value>Z-Wave Library Type.</value>
-        public byte LibraryType { get; internal set; }
+        public byte LibraryType { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets or sets the Z-Wave Protocol Version.
         /// </summary>
         /// <value>Z-Wave Protocol Version.</value>
-        public byte ProtocolVersion { get; internal set; }
+        public byte ProtocolVersion { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets or sets the Z-Wave Protocol Sub Version.
         /// </summary>
         /// <value>Z-Wave Protocol Sub Version.</value>
-        public byte ProtocolSubVersion { get; internal set; }
+        public byte ProtocolSubVersion { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets or sets the Application Version.
         /// </summary>
         /// <value>Application Version.</value>
-        public byte ApplicationVersion { get; internal set; }
+        public byte ApplicationVersion { get; /*internal*/ set; }
 
         /// <summary>
         /// Gets or sets the Application Sub Version.
         /// </summary>
         /// <value>Application Sub Version.</value>
-        public byte ApplicationSubVersion { get; internal set; }
+        public byte ApplicationSubVersion { get; /*internal*/ set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ZWaveLib.NodeVersion"/> class.
