@@ -402,7 +402,13 @@ namespace ZWaveLib
                 Array.Copy(rawMessage, 7, message, 0, commandLength);
                 try
                 {
-                    messageEvent = cc.GetEvent(this, message);
+                    if (cc != null)
+                    {
+                        messageEvent = cc.GetEvent(this, message);
+                    }else
+                    {
+                        Utility.logger.Debug("CommandClass {0} not supported yet", commandClass);
+                    }
                 }
                 catch (Exception ex)
                 {
