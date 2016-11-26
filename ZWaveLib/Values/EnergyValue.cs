@@ -56,7 +56,7 @@ namespace ZWaveLib.Values
             // Accumulated power consumption kW/h
             case ZWaveEnergyScaleType.kWh:
                 //energy.EventType = EventParameter.MeterKwHour;
-                // TODO: The following is fix for for AeonLabs HEM G2
+                // TODO: The following is fix for AeonLabs HEM G2
                 // TODO: https://github.com/genielabs/ZWaveLib/pull/186
                 // TODO: possibly move this fix to ZWaveValue.ExtractValueFromBytes method
                 if ((message[2] & 0x80) == 0x80)
@@ -70,7 +70,12 @@ namespace ZWaveLib.Values
                 break;
             // Instant power consumption Watt
             case ZWaveEnergyScaleType.Watt:
-                energy.EventType = EventParameter.MeterWatt;
+                // TODO: The following is fix for Qubino Smart Meter
+                // TODO: possibly move this fix to ZWaveValue.ExtractValueFromBytes method
+                if ((message[2] & 0xA1) == 0xA1)
+                    energy.EventType = EventParameter.MeterPower;
+                else
+                    energy.EventType = EventParameter.MeterWatt;
                 break;
             // Pulses count
             case ZWaveEnergyScaleType.Pulses:
@@ -89,7 +94,8 @@ namespace ZWaveLib.Values
                 energy.EventType = EventParameter.MeterPower;
                 break;
             default:
-                energy.EventType = EventParameter.MeterWatt;
+                // Unknown value ?
+                energy = null;
                 break;
             }
             return energy;

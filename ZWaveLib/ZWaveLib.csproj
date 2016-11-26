@@ -37,10 +37,10 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.1.0\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.3.9\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="SerialPortLib">
-      <HintPath>..\packages\SerialPortLib.1.0.11\lib\SerialPortLib.dll</HintPath>
+      <HintPath>..\..\serialport-lib-dotnet\SerialPortLib\bin\Debug\SerialPortLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
