@@ -134,7 +134,12 @@ namespace ZWaveLib
         DoorLockReport = 0x03,
         DoorLockConfigurationSet = 0x04,
         DoorLockConfigurationGet = 0x05,
-        DoorLockConfigurationReport = 0x06
+        DoorLockConfigurationReport = 0x06,
+        //
+        ClockVersion = 0x01,
+        ClockGet = 0x05,
+        ClockSet = 0x04,
+        ClockReport = 0x06,
     }
 
 }

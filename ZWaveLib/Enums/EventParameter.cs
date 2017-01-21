@@ -77,7 +77,8 @@ namespace ZWaveLib
         SecurityDecriptedMessage,
         SecurityGeneratedKey,
         DoorLockStatus,
-        RoutingInfo
+        RoutingInfo,
+        Clock
     }
 
 }
