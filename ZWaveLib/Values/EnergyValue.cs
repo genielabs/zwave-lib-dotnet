@@ -45,24 +45,34 @@ namespace ZWaveLib.Values
         public static EnergyValue Parse(byte[] message)
         {
             ZWaveValue zvalue = ZWaveValue.ExtractValueFromBytes(message, 4);
+            //int meterType = (message[1] & 0x1f);
+            //Utility.logger.Warn("METER TYPE ({0})!", meterType);
             EnergyValue energy = new EnergyValue();
             energy.Value = zvalue.Value;
             if (Enum.IsDefined(typeof(ZWaveEnergyScaleType), zvalue.Scale))
             {
                 energy.Parameter = (ZWaveEnergyScaleType)zvalue.Scale;
             }
+            else
+            {
+                Utility.logger.Warn("Undefined Energy Meter Scale Type {0}!", zvalue.Scale);
+            }
+
+
+            // sometimes it appears this odd extra bit 0x80 (128) in message[2] 
+            // when scale type should be power factor it is interpreted as watt
+            // (it happens with Qbino smart meter)
+            // the following is a temporary work-around for that
+            // TODO: find out the meaning of message[2] = 0xA1 (in place of 0x21)
+            if ((message[2] & 0x80) == 0x80 && energy.Parameter == ZWaveEnergyScaleType.Watt)
+                energy.Parameter = ZWaveEnergyScaleType.PowerFactor;
+
+
             switch (energy.Parameter)
             {
             // Accumulated power consumption kW/h
             case ZWaveEnergyScaleType.kWh:
-                //energy.EventType = EventParameter.MeterKwHour;
-                // TODO: The following is fix for AeonLabs HEM G2
-                // TODO: https://github.com/genielabs/ZWaveLib/pull/186
-                // TODO: possibly move this fix to ZWaveValue.ExtractValueFromBytes method
-                if ((message[2] & 0x80) == 0x80)
-                    energy.EventType = EventParameter.MeterAcVolt;
-                else
-                    energy.EventType = EventParameter.MeterKwHour;
+                energy.EventType = EventParameter.MeterKwHour;
                 break;
             // Accumulated power consumption kilo Volt Ampere / hours (kVA/h)
             case ZWaveEnergyScaleType.kVAh:
@@ -70,12 +80,7 @@ namespace ZWaveLib.Values
                 break;
             // Instant power consumption Watt
             case ZWaveEnergyScaleType.Watt:
-                // TODO: The following is fix for Qubino Smart Meter
-                // TODO: possibly move this fix to ZWaveValue.ExtractValueFromBytes method
-                if ((message[2] & 0xA1) == 0xA1)
-                    energy.EventType = EventParameter.MeterPower;
-                else
-                    energy.EventType = EventParameter.MeterWatt;
+                energy.EventType = EventParameter.MeterWatt;
                 break;
             // Pulses count
             case ZWaveEnergyScaleType.Pulses:
