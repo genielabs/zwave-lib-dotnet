@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 
-using NLog;
 
 namespace ZWaveLib
 {
@@ -37,7 +36,7 @@ namespace ZWaveLib
 
     public class Utility
     {
-        internal static Logger logger = LogManager.GetCurrentClassLogger();
+        internal static Logger logger = new Logger();
                 
         //from
         //http://stackoverflow.com/questions/311165/how-do-you-convert-byte-array-to-hexadecimal-string-and-vice-versa
