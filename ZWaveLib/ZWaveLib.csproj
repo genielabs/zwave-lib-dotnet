@@ -95,6 +95,8 @@
     <Compile Include="Values\VersionValue.cs" />
     <Compile Include="Enums\Message.cs" />
     <Compile Include="Values\WakeUpStatus.cs" />
+    <Compile Include="CommandClasses\Clock.cs" />
+    <Compile Include="Values\ClockValue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
