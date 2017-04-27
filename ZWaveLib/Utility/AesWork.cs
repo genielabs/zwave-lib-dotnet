@@ -43,7 +43,7 @@ namespace ZWaveLib.Devices
         {
             if (nc == null)
             {
-                Utility.DebugLog(DebugMessageType.Error, "The used key has not been generated.");
+                Utility.logger.Error("The used key has not been generated.");
                 return zeroIV;
             }
             RijndaelManaged rijndael = new RijndaelManaged();
