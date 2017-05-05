@@ -16,7 +16,7 @@
 */
 
 /*
- *     Author: Generoso Martello <gene@homegenie.it>
+ *     Author: Délano Reijnierse (bluewalk)
  *     Project Homepage: https://github.com/genielabs/zwave-lib-dotnet
  */
 
