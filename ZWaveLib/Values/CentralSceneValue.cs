@@ -30,5 +30,10 @@ namespace ZWaveLib.Values
                 PressType = (CentralScenePressType) message[3]
             };
         }
+
+        public override string ToString()
+        {
+            return $"ButtonNumber: {ButtonNumber}, Level: {Level}, PressType: {PressType}";
+        }
     }
 }
