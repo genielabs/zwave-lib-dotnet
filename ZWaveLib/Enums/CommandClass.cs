@@ -49,6 +49,7 @@ namespace ZWaveLib
         ThermostatSetBack = 0x47,
         //
         Crc16Encapsulated = 0x56,
+        CentralScene = 0x5b,
         //
         MultiInstance = 0x60,
         DoorLock = 0x62,

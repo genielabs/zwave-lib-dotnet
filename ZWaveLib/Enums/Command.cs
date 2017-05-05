@@ -44,6 +44,8 @@ namespace ZWaveLib
         BatteryGet = 0x02,
         BatteryReport = 0x03,
         //
+        CentralSceneReport = 0x03,
+        //
         MeterGet = 0x01,
         MeterReport = 0x02,
         MeterSupportedGet = 0x03,
