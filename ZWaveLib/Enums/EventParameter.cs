@@ -79,7 +79,8 @@ namespace ZWaveLib
         DoorLockStatus,
         RoutingInfo,
         Clock,
-        CentralScene
+        CentralScene,
+        CentralSceneCount
     }
 
 }
