@@ -63,7 +63,7 @@ namespace ZWaveLib.Values
 
         public override string ToString()
         {
-            return $"ButtonNumber: {SceneId}, Level: {Level}, PressType: {PressType}";
+            return $"SceneId: {SceneId}, Level: {Level}, PressType: {PressType}";
         }
     }
 }
