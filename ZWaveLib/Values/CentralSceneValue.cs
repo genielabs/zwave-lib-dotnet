@@ -8,10 +8,10 @@ namespace ZWaveLib.Values
 {
     public enum CentralScenePressType
     {
-        Pressed1time = 0x0,
+        Pressed1times = 0x0,
         Released = 0x1,
         HeldDown = 0x2,
-        KeyPressed2times = 0x3,
+        Pressed2times = 0x3,
         Pressed3times = 0x04,
         Pressed4times = 0x05,
         Pressed5times = 0x06,
