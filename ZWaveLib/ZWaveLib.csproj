@@ -55,7 +55,6 @@
     <Compile Include="CommandClasses\Irrigation\IrrigationValveConfig.cs" />
     <Compile Include="CommandClasses\Irrigation\IrrigationValveErrorStatusMask.cs" />
     <Compile Include="CommandClasses\Irrigation\IrrigationValveInfo.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationValveSensorUsageMask.cs" />
     <Compile Include="CommandClasses\Irrigation\IrrigationValveTable.cs" />
     <Compile Include="CommandClasses\Irrigation\IrrigationValveTableItem.cs" />
     <Compile Include="CommandClasses\Irrigation\IrrigationSystemErrorMask.cs" />

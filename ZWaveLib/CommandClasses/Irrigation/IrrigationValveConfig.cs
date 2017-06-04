@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ZWaveLib.Values;
 
@@ -13,7 +14,7 @@ namespace ZWaveLib.CommandClasses.Irrigation
         /// <summary>
         /// This field is used to indicate the Valve ID to configure.
         /// </summary>
-        public int ValveId { get; set; }
+        public byte ValveId { get; set; }
 
         /// <summary>
         /// This field is used to configure the nominal current high threshold for the actual valve.
@@ -48,20 +49,32 @@ namespace ZWaveLib.CommandClasses.Irrigation
         public double FlowLowThreshold { get; set; }
 
         /// <summary>
-        /// This field is used to configure if the actual valve must turn off / close when the specified sensors are active.
+        /// Use Rain Sensor.
+        /// The valve MUST turn off / close if rain is detected.
+        /// A receiving node having no support for rain sensor MAY ignore this field.
         /// </summary>
-        public IrrigationValveSensorUsageMask SensorUsage { get; set; }
+        public bool UseRainSensor { get; set; }
+
+        /// <summary>
+        /// Use Moisture Sensor.
+        /// The valve MUST turn off / close if moisture is detected.
+        /// A receiving node having no support for moisture sensor MAY ignore this field.
+        /// </summary>
+        public bool UseMoistureSensor { get; set; }
 
         public byte[] ToByteArray()
         {
-            var commandBytes = new List<byte>()
+            var commandBytes = new List<byte>
             {
+                Convert.ToByte(UseMasterValve),
+                UseMasterValve ? (byte)1 : ValveId,
                 NominalCurrentHighThreshold,
                 NominalCurrentLowThreshold
             };
             commandBytes.AddRange(ZWaveValue.GetValueBytes(MaximumFlow, 0x00));
             commandBytes.AddRange(ZWaveValue.GetValueBytes(FlowHighThreshold, 0x00));
             commandBytes.AddRange(ZWaveValue.GetValueBytes(FlowLowThreshold, 0x00));
+            commandBytes.Add((byte) (Convert.ToByte(UseRainSensor) + (Convert.ToByte(UseMoistureSensor) << 1)));
             return commandBytes.ToArray();
         }
 
@@ -88,7 +101,9 @@ namespace ZWaveLib.CommandClasses.Irrigation
             valveConfig.FlowLowThreshold = flowLowThresholdValue.Value;
 
             var sensorUsageOffset = flowLowThresholdValueOffset + 1 + flowLowThresholdValue.Size;
-            valveConfig.SensorUsage = (IrrigationValveSensorUsageMask) message[sensorUsageOffset];
+            var sensors = message[sensorUsageOffset];
+            valveConfig.UseRainSensor = (sensors & 0x01) == 1;
+            valveConfig.UseMoistureSensor = (sensors & 0x02) == 2;
 
             return valveConfig;
         }

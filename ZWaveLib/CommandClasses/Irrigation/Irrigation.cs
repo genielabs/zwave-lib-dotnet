@@ -148,23 +148,15 @@ namespace ZWaveLib.CommandClasses.Irrigation
         /// This command allows an irrigation valve to be configured accordingly.
         /// </summary>
         /// <param name="node"></param>
-        /// <param name="valveId"></param>
         /// <param name="config"></param>
-        /// <param name="useMasterValve"></param>
         /// <returns></returns>
         /// <remarks>SDS13781 4.42.13 Irrigation Valve Config Set Command</remarks>
-        public static ZWaveMessage ValveConfigSet(ZWaveNode node, byte valveId, IrrigationValveConfig config, bool useMasterValve = false)
+        public static ZWaveMessage ValveConfigSet(ZWaveNode node, IrrigationValveConfig config)
         {
-            var masterValveByte = Convert.ToByte(useMasterValve);
-            if (useMasterValve)
-                valveId = 1;
-
             var commandBytes = new List<byte>
             {
                 (byte) CommandClass.Irrigation,
-                (byte) Command.IrrigationValveConfigSet,
-                masterValveByte,
-                valveId
+                (byte) Command.IrrigationValveConfigSet
             };
             commandBytes.AddRange(config.ToByteArray());
 

@@ -93,7 +93,10 @@ namespace ZWaveLib.Values
         {
             // determine desired precision
             var stringValue = value.ToString(CultureInfo.InvariantCulture);
-            var precision = stringValue.Substring(stringValue.IndexOf(CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator, StringComparison.InvariantCulture) + 1).Length;
+            var delimeterPosition = stringValue.IndexOf(CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator, StringComparison.InvariantCulture);
+            var precision = delimeterPosition < 0
+                ? 0
+                : stringValue.Substring(delimeterPosition + 1).Length;
             if(precision > 7) // we have only 3 bits to store precision
                 throw new ArgumentOutOfRangeException();
 

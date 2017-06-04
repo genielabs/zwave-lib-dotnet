@@ -8,7 +8,7 @@ namespace ZWaveLib.CommandClasses.Irrigation
         /// <summary>
         /// This field is used to configure a delay in seconds between turning on the master valve and turning on any “zone” valve.
         /// </summary>
-        public int MasterValveDelay { get; set; }
+        public byte MasterValveDelay { get; set; }
 
         /// <summary>
         /// These field is used to configure the pressure high threshold at the receiving node in kPa.
@@ -30,7 +30,7 @@ namespace ZWaveLib.CommandClasses.Irrigation
 
         public byte[] ToByteArray()
         {
-            var commandBytes = new List<byte>(MasterValveDelay);
+            var commandBytes = new List<byte> {MasterValveDelay};
             commandBytes.AddRange(ZWaveValue.GetValueBytes(PressureHighThreshold, 0x00));
             commandBytes.AddRange(ZWaveValue.GetValueBytes(PressureLowThreshold, 0x00));
             commandBytes.Add((byte) SensorPolarity);

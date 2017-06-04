@@ -34,7 +34,8 @@ namespace ZWaveLib.CommandClasses.Irrigation
         {
             var valveTable = new IrrigationValveTable
             {
-                TableId = message[2]
+                TableId = message[2],
+                Items = new List<IrrigationValveTableItem>()
             };
             int i = 3;
             while (message.Length > i)
