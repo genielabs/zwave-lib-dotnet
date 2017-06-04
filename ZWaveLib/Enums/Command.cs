@@ -140,7 +140,27 @@ namespace ZWaveLib
         ClockGet = 0x05,
         ClockSet = 0x04,
         ClockReport = 0x06,
-    }
+
+        // Irrigation
+        IrrigationSystemInfoGet = 0x01, // IRRIGATION_SYSTEM_INFO_GET
+        IrrigationSystemInfoReport = 0x02, // IRRIGATION_SYSTEM_INFO_REPORT
+        IrrigationSystemStatusGet = 0x03, // IRRIGATION_SYSTEM_STATUS_GET
+        IrrigationSystemStatusReport = 0x04, // IRRIGATION_SYSTEM_STATUS_REPORT
+        IrrigationSystemConfigSet = 0x05, // IRRIGATION_SYSTEM_CONFIG_SET
+        IrrigationSystemConfigGet = 0x06, // IRRIGATION_SYSTEM_CONFIG_GET
+        IrrigationSystemConfigReport = 0x07, // IRRIGATION_SYSTEM_CONFIG_REPORT
+        IrrigationValveInfoGet = 0x08, // IRRIGATION_VALVE_INFO_GET
+        IrrigationValveInfoReport = 0x09, // IRRIGATION_VALVE_INFO_REPORT
+        IrrigationValveConfigSet = 0x0A, // IRRIGATION_VALVE_CONFIG_SET
+        IrrigationValveConfigGet = 0x0B, // IRRIGATION_VALVE_CONFIG_GET
+        IrrigationValveConfigReport = 0x0C, // IRRIGATION_VALVE_CONFIG_REPORT
+        IrrigationValveRun = 0x0D, // IRRIGATION_VALVE_RUN
+        IrrigationValveTableSet = 0x0E, // IRRIGATION_VALVE_TABLE_SET
+        IrrigationValveTableGet = 0x0F, // IRRIGATION_VALVE_TABLE_GET
+        IrrigationValveTableReport = 0x10, // IRRIGATION_VALVE_TABLE_REPORT
+        IrrigationValveTableRun = 0x11, // IRRIGATION_VALVE_TABLE_RUN
+        IrrigationSystemShutoff = 0x12, // IRRIGATION_SYSTEM_SHUTOFF
+}
 
 }
 

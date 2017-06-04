@@ -70,7 +70,9 @@ namespace ZWaveLib
         Security = 0x98,
         //
         SensorAlarm = 0x9C,
-        SilenceAlarm = 0x9D
+        SilenceAlarm = 0x9D,
+
+        Irrigation = 0x6B
     }
 
 }

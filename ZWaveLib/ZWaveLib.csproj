@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -45,6 +45,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandClasses\DoorLock.cs" />
+    <Compile Include="Utility\BitExtensions.cs" />
+    <Compile Include="CommandClasses\Irrigation\Irrigation.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSensorPolarityMask.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSystemConfig.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSystemInfoReport.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSystemSensorStatus.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSystemStatusReport.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationValveConfig.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationValveErrorStatusMask.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationValveInfo.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationValveSensorUsageMask.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationValveTable.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationValveTableItem.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSystemErrorMask.cs" />
     <Compile Include="CommandClasses\Security.cs" />
     <Compile Include="ICommandClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -108,9 +122,7 @@
   </Target>
   -->
   <ItemGroup />
-  <ItemGroup>
-    <Folder Include="Utility\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="..\README.md">
       <Link>README.md</Link>

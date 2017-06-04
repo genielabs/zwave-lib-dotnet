@@ -78,7 +78,17 @@ namespace ZWaveLib
         SecurityGeneratedKey,
         DoorLockStatus,
         RoutingInfo,
-        Clock
+        Clock,
+
+        IrrigationSystemInfoReport,
+        IrrigationSystemStatusReport,
+        IrrigationSystemConfigReport,
+        IrrigationValveInfoReport,
+        IrrigationValveConfigReport,
+        IrrigationValveTableReport,
+
+        WaterFlow,
+        WaterPressure
     }
 
 }
