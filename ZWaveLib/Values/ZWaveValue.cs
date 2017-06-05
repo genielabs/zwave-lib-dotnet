@@ -22,14 +22,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace ZWaveLib.Values
 {
     public class ZWaveValue
     {
-        private static byte sizeMask = 0x07, 
-            scaleMask = 0x18, scaleShift = 0x03, 
-            precisionMask = 0xe0, precisionShift = 0x05;
+        private const byte SizeMask = 0x07, 
+            ScaleMask = 0x18, ScaleShift = 0x03, 
+            PrecisionMask = 0xe0, PrecisionShift = 0x05;
 
         public double Value;
         public int Scale;
@@ -48,22 +49,74 @@ namespace ZWaveLib.Values
             this.Size = size;
         }
 
+        /// <summary>
+        /// Represents given precision, scale and size as one byte value
+        /// </summary>
+        /// <param name="precision"></param>
+        /// <param name="scale"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
         public static byte GetPrecisionScaleSize(int precision, int scale, int size)
         {
-            return (byte)((precision << precisionShift) | (scale << scaleShift) | size);
+            return (byte)((precision << PrecisionShift) | (scale << ScaleShift) | size);
         }
 
-        public static byte[] GetValueBytes(double v, int precision, int scale, int size)
+        /// <summary>
+        /// Get bytes representation of Z-Wave Value used in multilevel sensors.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="precision"></param>
+        /// <param name="scale"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public static byte[] GetValueBytes(double value, int precision, int scale, int size)
         {
             List<byte> valueBytes = new List<byte>();
             valueBytes.Add(GetPrecisionScaleSize(precision, scale, size));
-            int intValue = (int)(v * Math.Pow(10D, precision));
+            int intValue = (int)(value * Math.Pow(10D, precision));
             int shift = (size - 1) << 3;
             for (int i = size; i > 0; --i, shift -= 8)
             {
                 valueBytes.Add((byte)(intValue >> shift));
             }
             return valueBytes.ToArray();
+        }
+
+        /// <summary>
+        /// Get bytes representation of Z-Wave Value used in multilevel sensors.
+        /// Tries to guess the size and precision based on passed value.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="scale"></param>
+        /// <returns>PrecisionScaleSize byte and value bytes</returns>
+        public static byte[] GetValueBytes(double value, byte scale)
+        {
+            // determine desired precision
+            var stringValue = value.ToString(CultureInfo.InvariantCulture);
+            var delimeterPosition = stringValue.IndexOf(CultureInfo.InvariantCulture.NumberFormat.NumberDecimalSeparator, StringComparison.InvariantCulture);
+            var precision = delimeterPosition < 0
+                ? 0
+                : stringValue.Substring(delimeterPosition + 1).Length;
+            if(precision > 7) // we have only 3 bits to store precision
+                throw new ArgumentOutOfRangeException();
+
+            // determine desired size
+            // handle cases when size is more than 4 bytes
+            var doubleValue = value * Math.Pow(10D, precision);
+            if (doubleValue > int.MaxValue)
+                throw new ArgumentOutOfRangeException();
+
+            var size = 4;
+            if (doubleValue <= short.MaxValue)
+                size = 2;
+            if (doubleValue <= byte.MaxValue)
+                size = 1;
+
+            var pss = GetPrecisionScaleSize(precision, scale, size);
+            var valueBytes = GetValueBytes(value, precision, scale, size);
+            var msg = new List<byte>(pss);
+            msg.AddRange(valueBytes);
+            return msg.ToArray();
         }
 
         // adapted from:
@@ -73,14 +126,14 @@ namespace ZWaveLib.Values
             ZWaveValue result = new ZWaveValue();
             try
             {
-                byte size = (byte)(message[valueOffset - 1] & sizeMask);
-                byte precision = (byte)((message[valueOffset - 1] & precisionMask) >> precisionShift);
-                int scale = (int)((message[valueOffset - 1] & scaleMask) >> scaleShift);
-                //
+                byte size = (byte)(message[valueOffset - 1] & SizeMask);
+                byte precision = (byte)((message[valueOffset - 1] & PrecisionMask) >> PrecisionShift);
+                int scale = (int)((message[valueOffset - 1] & ScaleMask) >> ScaleShift);
+                
                 result.Size = size;
                 result.Precision = precision;
                 result.Scale = scale;
-                //
+                
                 int value = 0;
                 byte i;
                 for (i = 0; i < size; ++i)
