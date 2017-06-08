@@ -111,6 +111,12 @@
     <Compile Include="Values\WakeUpStatus.cs" />
     <Compile Include="CommandClasses\Clock.cs" />
     <Compile Include="Values\ClockValue.cs" />
+    <Compile Include="CommandClasses\ClimateControlSchedule.cs" />
+    <Compile Include="Values\ClimateControlScheduleValue.cs" />
+    <Compile Include="Values\SwitchpointValue.cs" />
+    <Compile Include="Values\ScheduleStateValue.cs" />
+    <Compile Include="Enums\OverrideType.cs" />
+    <Compile Include="Values\ClimateControlScheduleOverrideValue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
