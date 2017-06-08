@@ -60,7 +60,7 @@ namespace ZWaveLib.CommandClasses
 
             if (!x.SequenceEqual(messageCrc))
             {
-                Utility.DebugLog(DebugMessageType.Warning, String.Format("Bad CRC in message {0}. CRC is {1} but should be {2}", BitConverter.ToString(message), BitConverter.ToString(x), BitConverter.ToString(messageCrc)));
+                Utility.logger.Warn(String.Format("Bad CRC in message {0}. CRC is {1} but should be {2}", BitConverter.ToString(message), BitConverter.ToString(x), BitConverter.ToString(messageCrc)));
                 return null;
             }
 
@@ -72,13 +72,13 @@ namespace ZWaveLib.CommandClasses
 
         private NodeEvent ProcessEncapsulatedMessage(ZWaveNode node, byte[] encapMessage)
         {
-            Utility.DebugLog(DebugMessageType.Information, String.Format("CRC16 encapsulated message: {0}", BitConverter.ToString(encapMessage)));
+            Utility.logger.Debug(String.Format("CRC16 encapsulated message: {0}", BitConverter.ToString(encapMessage)));
             NodeEvent nodeEvent = null;
             byte cmdClass = encapMessage[0];
             var cc = CommandClassFactory.GetCommandClass(cmdClass);
             if (cc == null)
             {
-                Utility.DebugLog(DebugMessageType.Error, String.Format("Can't find CommandClass handler for command class {0}", cmdClass));
+                Utility.logger.Error(String.Format("Can't find CommandClass handler for command class {0}", cmdClass));
             }
             else
             {
