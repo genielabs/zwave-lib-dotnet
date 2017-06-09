@@ -21,47 +21,40 @@
  *     Project Homepage: https://github.com/genielabs/zwave-lib-dotnet
  */
 
-using System;
-
 namespace ZWaveLib
 {
-    public enum Weekday
+    public class SwitchpointValue
     {
-        None = 0,
-        Monday = 1,
-        Tuesday = 2,
-        Wednesday = 3,
-        Thursday = 4,
-        Friday = 5,
-        Saturday = 6,
-        Sunday = 7
-    }
 
-    public class ClockValue
-    {
-        public Weekday Weekday { get; set; }
-        public int Hour { get; set;}
+        public int Hour { get; set; }
+
         public int Minute { get; set; }
 
-        public static ClockValue Parse (byte [] message)
-        {
-            var value = new ClockValue ();
-
-            value.Weekday = (Weekday)(message [2] >> 5);
-            value.Hour = message [2] & 0x1f;
-            value.Minute = message [3];
-
-            return value;
-        }
+        public ScheduleStateValue State { get; set; }
 
         public byte [] GetValueBytes ()
         {
-            return new byte [] { (byte)((int)Weekday << 5 | Hour), (byte)Minute };
+            return new byte [] {
+                (byte)(Hour & 0x1f),
+                (byte)(Minute & 0x3f),
+                State.GetValueByte()
+            };
+        }
+
+        public static SwitchpointValue Parse (byte [] bytes, int offset)
+        {
+            var switchpoint = new SwitchpointValue ();
+
+            switchpoint.Hour = bytes [offset] & 0x1f;
+            switchpoint.Minute = bytes [offset + 1] & 0x3f;
+            switchpoint.State = ScheduleStateValue.Parse(bytes[offset + 2]);
+
+            return switchpoint;
         }
 
         public override string ToString ()
         {
-            return string.Format ("[ClockValue: Weekday={0}, Hour={1}, Minute={2}]", Weekday, Hour, Minute);
+            return string.Format ("[SwitchpointValue: Hour={0}, Minute={1}, State={2}]", Hour, Minute, State);
         }
     }
 }

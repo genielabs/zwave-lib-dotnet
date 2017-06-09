@@ -160,7 +160,16 @@ namespace ZWaveLib
         IrrigationValveTableReport = 0x10, // IRRIGATION_VALVE_TABLE_REPORT
         IrrigationValveTableRun = 0x11, // IRRIGATION_VALVE_TABLE_RUN
         IrrigationSystemShutoff = 0x12, // IRRIGATION_SYSTEM_SHUTOFF
-}
 
+        // Climate Control Schedule command class commands
+        ScheduleSet = 0x01,
+        ScheduleGet = 0x02,
+        ScheduleReport = 0x03,
+        ScheduleChangedGet = 0x04,
+        ScheduleChangedReport = 0x05,
+        ScheduleOverrideSet = 0x06,
+        ScheduleOverrideGet = 0x07,
+        ScheduleOverrideReport = 0x08
+    }
 }
 
