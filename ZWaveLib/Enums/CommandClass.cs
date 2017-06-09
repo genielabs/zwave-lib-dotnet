@@ -50,6 +50,8 @@ namespace ZWaveLib
         //
         Crc16Encapsulated = 0x56,
         //
+        CentralScene = 0x58,
+        //
         MultiInstance = 0x60,
         DoorLock = 0x62,
         UserCode = 0x63,

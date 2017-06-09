@@ -111,6 +111,8 @@
     <Compile Include="Values\WakeUpStatus.cs" />
     <Compile Include="CommandClasses\Clock.cs" />
     <Compile Include="Values\ClockValue.cs" />
+    <Compile Include="CommandClasses\CentralScene.cs" />
+    <Compile Include="Values\SceneNotification.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
