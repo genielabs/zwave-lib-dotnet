@@ -88,7 +88,10 @@ namespace ZWaveLib
         IrrigationValveTableReport,
 
         WaterFlow,
-        WaterPressure
+        WaterPressure,
+             
+        SupportedScenes,
+        SceneNotification
     }
 
 }
