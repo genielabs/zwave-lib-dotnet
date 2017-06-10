@@ -1,4 +1,4 @@
-﻿/*
+/*
     This file is part of ZWaveLib Project source code.
 
     ZWaveLib is free software: you can redistribute it and/or modify
@@ -88,7 +88,11 @@ namespace ZWaveLib
         IrrigationValveTableReport,
 
         WaterFlow,
-        WaterPressure
+        WaterPressure,
+
+        ClimateControlSchedule,
+        ClimateControlScheduleChanged,
+        ClimateControlScheduleOverride
     }
 
 }

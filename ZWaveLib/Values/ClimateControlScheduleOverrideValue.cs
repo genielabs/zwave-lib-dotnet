@@ -21,47 +21,36 @@
  *     Project Homepage: https://github.com/genielabs/zwave-lib-dotnet
  */
 
-using System;
-
 namespace ZWaveLib
 {
-    public enum Weekday
+    public class ClimateControlScheduleOverrideValue
     {
-        None = 0,
-        Monday = 1,
-        Tuesday = 2,
-        Wednesday = 3,
-        Thursday = 4,
-        Friday = 5,
-        Saturday = 6,
-        Sunday = 7
-    }
 
-    public class ClockValue
-    {
-        public Weekday Weekday { get; set; }
-        public int Hour { get; set;}
-        public int Minute { get; set; }
+        public OverrideType OverrideType { get; set; }
 
-        public static ClockValue Parse (byte [] message)
+        public ScheduleStateValue ScheduleState { get; set; }
+
+        public static ClimateControlScheduleOverrideValue Parse (byte [] bytes)
         {
-            var value = new ClockValue ();
+            var result = new ClimateControlScheduleOverrideValue ();
 
-            value.Weekday = (Weekday)(message [2] >> 5);
-            value.Hour = message [2] & 0x1f;
-            value.Minute = message [3];
+            result.OverrideType = (OverrideType)bytes [2];
+            result.ScheduleState = ScheduleStateValue.Parse (bytes [3]);
 
-            return value;
+            return result;
         }
 
         public byte [] GetValueBytes ()
         {
-            return new byte [] { (byte)((int)Weekday << 5 | Hour), (byte)Minute };
+            return new byte [] {
+                (byte)OverrideType,
+                ScheduleState.GetValueByte()
+            };
         }
 
         public override string ToString ()
         {
-            return string.Format ("[ClockValue: Weekday={0}, Hour={1}, Minute={2}]", Weekday, Hour, Minute);
+            return string.Format ("[ClimateControlScheduleOverrideValue: OverrideType={0}, ScheduleState={1}]", OverrideType, ScheduleState);
         }
     }
 }
