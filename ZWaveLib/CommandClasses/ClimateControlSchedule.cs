@@ -49,7 +49,7 @@ namespace ZWaveLib.CommandClasses
                 return new NodeEvent (node, EventParameter.ClimateControlScheduleChanged, message[2], 0);
             }
 
-            if (cmdType == (byte)Command.ScheduleChangedReport) {
+            if (cmdType == (byte)Command.ScheduleOverrideReport) {
                 var climateControlScheduleOverrideValue = ClimateControlScheduleOverrideValue.Parse (message);
                 return new NodeEvent (node, EventParameter.ClimateControlScheduleOverride, climateControlScheduleOverrideValue, 0);
             }
