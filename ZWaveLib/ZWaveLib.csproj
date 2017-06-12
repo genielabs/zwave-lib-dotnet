@@ -44,6 +44,19 @@
   <ItemGroup>
     <Compile Include="CommandClasses\DoorLock.cs" />
     <Compile Include="CommandClasses\CentralScene.cs" />
+    <Compile Include="Utility\BitExtensions.cs" />
+    <Compile Include="CommandClasses\Irrigation\Irrigation.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSensorPolarityMask.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSystemConfig.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSystemInfoReport.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSystemSensorStatus.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSystemStatusReport.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationValveConfig.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationValveErrorStatusMask.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationValveInfo.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationValveTable.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationValveTableItem.cs" />
+    <Compile Include="CommandClasses\Irrigation\IrrigationSystemErrorMask.cs" />
     <Compile Include="CommandClasses\Security.cs" />
     <Compile Include="ICommandClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -99,6 +112,12 @@
     <Compile Include="Values\WakeUpStatus.cs" />
     <Compile Include="CommandClasses\Clock.cs" />
     <Compile Include="Values\ClockValue.cs" />
+    <Compile Include="CommandClasses\ClimateControlSchedule.cs" />
+    <Compile Include="Values\ClimateControlScheduleValue.cs" />
+    <Compile Include="Values\SwitchpointValue.cs" />
+    <Compile Include="Values\ScheduleStateValue.cs" />
+    <Compile Include="Enums\OverrideType.cs" />
+    <Compile Include="Values\ClimateControlScheduleOverrideValue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

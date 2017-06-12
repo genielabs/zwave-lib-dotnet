@@ -46,6 +46,7 @@ namespace ZWaveLib
         ThermostatSetPoint = 0x43,
         ThermostatFanMode = 0x44,
         ThermostatFanState = 0x45,
+        ClimateControlSchedule = 0x46,
         ThermostatSetBack = 0x47,
         //
         Crc16Encapsulated = 0x56,
@@ -71,7 +72,9 @@ namespace ZWaveLib
         Security = 0x98,
         //
         SensorAlarm = 0x9C,
-        SilenceAlarm = 0x9D
+        SilenceAlarm = 0x9D,
+
+        Irrigation = 0x6B
     }
 
 }

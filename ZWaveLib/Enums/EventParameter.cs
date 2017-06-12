@@ -1,4 +1,4 @@
-﻿/*
+/*
     This file is part of ZWaveLib Project source code.
 
     ZWaveLib is free software: you can redistribute it and/or modify
@@ -81,6 +81,20 @@ namespace ZWaveLib
         Clock,
         CentralScene,
         CentralSceneCount
+
+        IrrigationSystemInfoReport,
+        IrrigationSystemStatusReport,
+        IrrigationSystemConfigReport,
+        IrrigationValveInfoReport,
+        IrrigationValveConfigReport,
+        IrrigationValveTableReport,
+
+        WaterFlow,
+        WaterPressure,
+
+        ClimateControlSchedule,
+        ClimateControlScheduleChanged,
+        ClimateControlScheduleOverride
     }
 
 }
