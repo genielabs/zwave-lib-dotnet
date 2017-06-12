@@ -32,7 +32,7 @@ namespace ZWaveLib
         public ControllerStatusEventArgs(ControllerStatus status)
         {
             Status = status;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
@@ -51,7 +51,7 @@ namespace ZWaveLib
             Parameter = eventType;
             Value = eventValue;
             Instance = instance;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
@@ -65,7 +65,7 @@ namespace ZWaveLib
         {
             NodeId = nodeId;
             Status = status;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
@@ -79,7 +79,7 @@ namespace ZWaveLib
         {
             NodeId = nodeId;
             Event = evt;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
@@ -91,7 +91,7 @@ namespace ZWaveLib
         public DiscoveryProgressEventArgs(DiscoveryStatus status)
         {
             Status = status;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
@@ -103,7 +103,7 @@ namespace ZWaveLib
         public HealProgressEventArgs(HealStatus status)
         {
             Status = status;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
@@ -115,7 +115,7 @@ namespace ZWaveLib
         public MessageReceivedEventArgs(ZWaveMessage message)
         {
             Message = message;
-            Timestamp = DateTime.Now;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
