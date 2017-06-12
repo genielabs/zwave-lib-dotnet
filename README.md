@@ -1,5 +1,9 @@
 ﻿# Z-Wave Home Automation library for .NET
 
+## About this fork
+I've forked this to remove NLog as the project I am using this library in doesn't use NLog thus adding more libraries seem useless.
+This fork also contains WIP's for adding new commandclasses to the library when I stumble upon one that's missing.
+
 ## Features
 
 - Works with most Z-Wave serial controllers

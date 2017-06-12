@@ -32,19 +32,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SerialPortLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SerialPortLib.1.0.12\lib\SerialPortLib.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
-    <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.1.0\lib\net45\NLog.dll</HintPath>
-    </Reference>
-    <Reference Include="SerialPortLib">
-      <HintPath>..\packages\SerialPortLib.1.0.12\lib\SerialPortLib.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandClasses\DoorLock.cs" />
+    <Compile Include="CommandClasses\CentralScene.cs" />
     <Compile Include="Utility\BitExtensions.cs" />
     <Compile Include="CommandClasses\Irrigation\Irrigation.cs" />
     <Compile Include="CommandClasses\Irrigation\IrrigationSensorPolarityMask.cs" />
@@ -61,6 +60,8 @@
     <Compile Include="CommandClasses\Security.cs" />
     <Compile Include="ICommandClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utility\Logger.cs" />
+    <Compile Include="Values\CentralSceneValue.cs" />
     <Compile Include="ZWaveMessage.cs" />
     <Compile Include="ZWaveNode.cs" />
     <Compile Include="Values\AlarmValue.cs" />

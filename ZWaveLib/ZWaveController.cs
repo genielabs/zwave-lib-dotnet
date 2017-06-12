@@ -229,6 +229,18 @@ namespace ZWaveLib
             get { return controllerStatus; }
         }
 
+        /// <summary>
+        /// Gets the logger.
+        /// </summary>
+        /// <value>The logger.</value>
+        public Logger Logger
+        {
+            get
+            {
+                return Utility.logger;
+            }
+        }
+
         #region Controller commands
 
         /// <summary>
