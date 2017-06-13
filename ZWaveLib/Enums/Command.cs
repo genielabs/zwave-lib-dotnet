@@ -142,9 +142,9 @@ namespace ZWaveLib
         ClockReport = 0x06,
 
         // CentralScene
-        CentralSceneCapabilityGet = 0x01,
-        CentralSceneCapabilityReport = 0x02,
-        CentralSceneSet = 0x03,
+        CentralSceneSupportedGet = 0x01,
+        CentralSceneSupportedReport = 0x02,
+        CentralSceneNotification = 0x03,
 
         // Irrigation
         IrrigationSystemInfoGet = 0x01, // IRRIGATION_SYSTEM_INFO_GET

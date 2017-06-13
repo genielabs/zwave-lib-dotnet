@@ -79,8 +79,8 @@ namespace ZWaveLib
         DoorLockStatus,
         RoutingInfo,
         Clock,
-        CentralScene,
-        CentralSceneCount,
+        CentralSceneNotification,
+        CentralSceneSupportedReport,
 
         IrrigationSystemInfoReport,
         IrrigationSystemStatusReport,

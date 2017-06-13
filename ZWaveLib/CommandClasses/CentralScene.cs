@@ -38,35 +38,25 @@ namespace ZWaveLib.CommandClasses
 
             switch ((Command)message[1])
             {
-                case Command.CentralSceneSet:
+                case Command.CentralSceneNotification:
                     var value = CentralSceneValue.Parse(message);
-                    nodeEvent = new NodeEvent(node, EventParameter.CentralScene, value, 0);
+                    nodeEvent = new NodeEvent(node, EventParameter.CentralSceneNotification, value, 0);
                     break;
 
-                case Command.CentralSceneCapabilityReport:
-                    nodeEvent = new NodeEvent(node, EventParameter.CentralSceneCount, (int)message[2], 0);
+                case Command.CentralSceneSupportedReport:
+                    nodeEvent = new NodeEvent(node, EventParameter.CentralSceneSupportedReport, (int)message[2], 0);
                     break;
             }
 
             return nodeEvent;
         }
 
-        public static ZWaveMessage Get(ZWaveNode node)
+        public static ZWaveMessage SupportedGet(ZWaveNode node)
         {
             return node.SendDataRequest(new byte[] {
                 (byte)CommandClass.CentralScene,
-                (byte)Command.CentralSceneCapabilityGet
-            });
-        }
-
-        public static ZWaveMessage Report(ZWaveNode node)
-        {
-            return node.SendDataRequest(new byte[] {
-                (byte)CommandClass.CentralScene,
-                (byte)Command.CentralSceneCapabilityReport,
+                (byte)Command.CentralSceneSupportedGet
             });
         }
     }
 }
-
-
