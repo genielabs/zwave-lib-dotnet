@@ -27,26 +27,26 @@ using System.Reflection;
 
 namespace ZWaveLib.CommandClasses
 {
-    class CommandClassFactory
+    internal class CommandClassFactory
     {
-        private static readonly object syncLock = new object();
-        private static Dictionary<byte, Type> commandClasses;
+        private static readonly object SyncLock = new object();
+        private static Dictionary<byte, Type> _commandClasses;
 
         public static ICommandClass GetCommandClass(byte id)
         {
-            if (commandClasses == null)
+            if (_commandClasses == null)
             {
-                lock (syncLock)
+                lock (SyncLock)
                 {
-                    if (commandClasses == null)
+                    if (_commandClasses == null)
                     {
-                        commandClasses = CollectCommandClasses();
+                        _commandClasses = CollectCommandClasses();
                     }
                 }
             }
 
             Type type;
-            if (!commandClasses.TryGetValue(id, out type))
+            if (!_commandClasses.TryGetValue(id, out type))
                 return null;
 
             return (ICommandClass)Activator.CreateInstance(type);

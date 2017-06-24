@@ -55,11 +55,20 @@ namespace ZWaveLib.CommandClasses
 
         public static ZWaveMessage Get(ZWaveNode node)
         {
-            return node.SendDataRequest(new byte[] { 
+            return node.SendDataRequest(new[] { 
                 (byte)CommandClass.SensorMultilevel, 
                 (byte)Command.SensorMultilevelGet 
             });
         }
 
+        public static ZWaveMessage Get(ZWaveNode node, ZWaveSensorParameter sensorType, byte scale = 0x00)
+        {
+            return node.SendDataRequest(new[] {
+                (byte)CommandClass.SensorMultilevel,
+                (byte)Command.SensorMultilevelGet,
+                (byte)sensorType,
+                (byte)(scale << 3)
+            });
+        }
     }
 }
