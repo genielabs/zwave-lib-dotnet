@@ -20,14 +20,19 @@
  *     Project Homepage: https://github.com/genielabs/zwave-lib-dotnet
  */
 
+using System;
+
 namespace ZWaveLib
 {
     public class ControllerStatusEventArgs
     {
         public readonly ControllerStatus Status;
+        public readonly DateTime Timestamp;
+
         public ControllerStatusEventArgs(ControllerStatus status)
         {
             Status = status;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
@@ -36,15 +41,17 @@ namespace ZWaveLib
         public readonly ZWaveNode Node;
         public readonly EventParameter Parameter;
         public readonly object Value;
+        public readonly DateTime Timestamp;
         public int Instance { get; internal set; }
         public NodeEvent NestedEvent { get; internal set; }
 
         public NodeEvent(ZWaveNode node, EventParameter eventType, object eventValue, int instance)
         {
-            this.Node = node;
-            this.Parameter = eventType;
-            this.Value = eventValue;
-            this.Instance = instance;
+            Node = node;
+            Parameter = eventType;
+            Value = eventValue;
+            Instance = instance;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
@@ -52,11 +59,13 @@ namespace ZWaveLib
     {
         public readonly byte NodeId;
         public readonly NodeQueryStatus Status;
+        public readonly DateTime Timestamp;
 
         public NodeOperationProgressEventArgs(byte nodeId, NodeQueryStatus status)
         {
-            this.NodeId = nodeId;
-            this.Status = status;
+            NodeId = nodeId;
+            Status = status;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
@@ -64,41 +73,49 @@ namespace ZWaveLib
     {
         public readonly byte NodeId;
         public readonly NodeEvent Event;
+        public readonly DateTime Timestamp;
 
         public NodeUpdatedEventArgs(byte nodeId, NodeEvent evt)
         {
-            this.NodeId = nodeId;
-            this.Event = evt;
+            NodeId = nodeId;
+            Event = evt;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
     public class DiscoveryProgressEventArgs
     {
         public readonly DiscoveryStatus Status;
+        public readonly DateTime Timestamp;
 
         public DiscoveryProgressEventArgs(DiscoveryStatus status)
         {
-            this.Status = status;
+            Status = status;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
     public class HealProgressEventArgs
     {
         public readonly HealStatus Status;
+        public readonly DateTime Timestamp;
 
         public HealProgressEventArgs(HealStatus status)
         {
-            this.Status = status;
+            Status = status;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
     public class MessageReceivedEventArgs
     {
         public readonly ZWaveMessage Message;
+        public readonly DateTime Timestamp;
 
         public MessageReceivedEventArgs(ZWaveMessage message)
         {
             Message = message;
+            Timestamp = DateTime.UtcNow;
         }
     }
 
