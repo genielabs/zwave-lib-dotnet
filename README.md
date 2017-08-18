@@ -33,7 +33,7 @@ controller.NodeUpdated += Controller_NodeUpdated;
 
 var dimmer = controller.GetNode(4);
 // Set dimmer level to 50
-SwitchMultiLevel.Set(dimmer, 50);
+SwitchMultilevel.Set(dimmer, 50);
 
 var thermostat = controller.GetNode(10);
 // Configure the Set Point
