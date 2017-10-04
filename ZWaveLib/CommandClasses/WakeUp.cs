@@ -131,7 +131,11 @@ namespace ZWaveLib.CommandClasses
                     if (queuedCommand.SequenceEqual(command))
                     {
                         Utility.logger.Trace("Removing old message {0}", BitConverter.ToString(wakeUpResendQueue[i]));
-                        wakeUpResendQueue.RemoveAt(i);
+                        try{
+                            wakeUpResendQueue.RemoveAt(i);
+                        }catch(Exception e){
+                             Utility.logger.Trace("Error Removing from Wakeup Queue (but caught)");
+                        }
                     }
                 }
                 Utility.logger.Trace("Adding message {0}", BitConverter.ToString(msg));
