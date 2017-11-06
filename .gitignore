@@ -10,6 +10,7 @@
 *.suo
 *.pidb
 Thumbs.db
+.idea
 
 # Nuget packages
 packages/*

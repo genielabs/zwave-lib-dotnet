@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>ZWaveLib</id>
-        <version>1.0.14</version>
+        <version>1.0.15</version>
         <title>ZWaveLib</title>
         <authors>Generoso Martello</authors>
         <owners>G-Labs</owners>
@@ -21,7 +21,7 @@ Features
 [Source Code and Home Page]
 https://github.com/genielabs/zwave-lib-dotnet</description>
         <summary>Z-Wave library for Home Automation (.NET / Mono)</summary>
-        <releaseNotes>Fixed 'Missing method' error; Integrated pepper1 z-wave db; fixed config serialization issue</releaseNotes>
+        <releaseNotes>Added: UV sensor value, CentralScene, ClimateControlSchedule, Irrigation command classes; various bug fixes</releaseNotes>
         <copyright>G-Labs</copyright>
         <tags>zwave z-wave home automation</tags>
         <dependencies>

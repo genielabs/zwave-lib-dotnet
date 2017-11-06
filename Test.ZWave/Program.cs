@@ -15,9 +15,9 @@ namespace Test.ZWave
 {
     internal class MainClass
     {
-        private static string _serialPortName = "COM3";
-        private static ControllerStatus _controllerStatus = ControllerStatus.Disconnected;
-        private static bool _showDebugOutput = false;
+        private static string serialPortName = "COM3";
+        private static ControllerStatus controllerStatus = ControllerStatus.Disconnected;
+        private static bool showDebugOutput = false;
         private static readonly LoggingRule LoggingRule = LogManager.Configuration.LoggingRules[0];
 
         public static void Main(string[] cargs)
@@ -26,7 +26,7 @@ namespace Test.ZWave
             Console.WriteLine("\nZWaveLib Test Program\n");
             Console.ForegroundColor = ConsoleColor.White;
 
-            var controller = new ZWaveController(_serialPortName);
+            var controller = new ZWaveController(serialPortName);
             // Register controller event handlers
             controller.ControllerStatusChanged += Controller_ControllerStatusChanged;;
             controller.DiscoveryProgress += Controller_DiscoveryProgress;
@@ -45,7 +45,7 @@ namespace Test.ZWave
                 switch (command)
                 {
                     case "0":
-                        ToggleDebug(!_showDebugOutput);
+                        ToggleDebug(!showDebugOutput);
                         break;
                     case "1":
                         ListNodes(controller);
@@ -150,7 +150,7 @@ namespace Test.ZWave
 
         private static void ShowMenu()
         {
-            Console.WriteLine("\n[0] Toggle show debug (ShowDebug={0})", _showDebugOutput);
+            Console.WriteLine("\n[0] Toggle show debug (ShowDebug={0})", showDebugOutput);
             Console.WriteLine("[1] List nodes");
             Console.WriteLine("[2] Add node start");
             Console.WriteLine("[3] Add node stop");
@@ -160,8 +160,8 @@ namespace Test.ZWave
             Console.WriteLine("[7] Run Node Stress Test");
             Console.WriteLine("[8] Dump available ZWaveLib API commands");
             Console.WriteLine("[9] Discovery (query all nodes data)");
-            Console.WriteLine("[?] Change serial port (PortName={0})", _serialPortName);
-            Console.WriteLine("[+] Connect / Reconnect (Status={0})", _controllerStatus);
+            Console.WriteLine("[?] Change serial port (PortName={0})", serialPortName);
+            Console.WriteLine("[+] Connect / Reconnect (Status={0})", controllerStatus);
             Console.WriteLine("[~] Run command");
             Console.WriteLine("[!] Exit");
             Console.WriteLine("\nEnter option and hit [enter]:");
@@ -171,8 +171,8 @@ namespace Test.ZWave
         {
             LogManager.Configuration.LoggingRules.Remove(LoggingRule);
             LogManager.Configuration.Reload();
-            _showDebugOutput = show;
-            if (_showDebugOutput)
+            showDebugOutput = show;
+            if (showDebugOutput)
             {
                 LogManager.Configuration.LoggingRules.Add(LoggingRule);
                 LogManager.Configuration.Reload();
@@ -318,8 +318,8 @@ namespace Test.ZWave
             var port = Console.ReadLine().Trim();
             if (!String.IsNullOrWhiteSpace(port))
             {
-                _serialPortName = port;
-                controller.PortName = _serialPortName;
+                serialPortName = port;
+                controller.PortName = serialPortName;
                 controller.Connect();
             }
         }
@@ -331,8 +331,8 @@ namespace Test.ZWave
             Console.WriteLine("ControllerStatusChange {0}", args.Status);
             ToggleDebug(true);
             var controller = (sender as ZWaveController);
-            _controllerStatus = args.Status;
-            switch (_controllerStatus)
+            controllerStatus = args.Status;
+            switch (controllerStatus)
             {
             case ControllerStatus.Connected:
                 // Initialize the controller and get the node list
