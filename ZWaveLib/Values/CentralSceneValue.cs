@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ZWaveLib.Values
+﻿namespace ZWaveLib.Values
 {
     public enum CentralScenePressType
     {
@@ -40,10 +34,10 @@ namespace ZWaveLib.Values
             };
 
         }
-
+        
         public override string ToString()
         {
-            return $"SceneId: {SceneId}, Level: {Level}, PressType: {PressType}";
+            return $"{{\"SceneId\":{SceneId}, \"Level\":{Level}, \"PressType\":\"{PressType}\"}}";
         }
     }
 }
