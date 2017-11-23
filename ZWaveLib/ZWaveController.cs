@@ -182,7 +182,17 @@ namespace ZWaveLib
         public void Connect()
         {
             LoadNodesConfig();
-            new Thread(() => { serialPort.Connect(); }).Start();
+
+            new Thread(() =>
+            { 
+                if (!serialPort.Connect())
+                {
+                    Utility.logger.Error("Failed to connect to serial port {0}", serialPort);
+                    OnControllerStatusChanged(new ControllerStatusEventArgs(ControllerStatus.Error));
+                } else {
+                    Utility.logger.Trace("Connected to serial port {0}", serialPort);
+                }
+            }).Start();
         }
 
         /// <summary>
@@ -1379,6 +1389,7 @@ namespace ZWaveLib
 
         private void SerialPort_ConnectionStatusChanged(object sender, ConnectionStatusChangedEventArgs args)
         {
+            Utility.logger.Trace("SerialPort_ConnectionStatusChanged {0} Connected {1}", sender, args.Connected);
             var status = args.Connected ? ControllerStatus.Connected : ControllerStatus.Disconnected;
             serialBuffer = null;
             lastMessage = null;
