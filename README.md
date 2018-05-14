@@ -29,6 +29,9 @@ controller.DiscoveryProgress += Controller_DiscoveryProgress;
 controller.NodeOperationProgress += Controller_NodeOperationProgress;
 controller.NodeUpdated += Controller_NodeUpdated;
 
+// Open connection
+controller.Connect();
+
 // Issue some commands on a dimmer and a thermostat node
 
 var dimmer = controller.GetNode(4);
