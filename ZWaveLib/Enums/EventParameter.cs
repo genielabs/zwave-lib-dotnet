@@ -79,6 +79,8 @@ namespace ZWaveLib
         DoorLockStatus,
         RoutingInfo,
         Clock,
+        CentralSceneNotification,
+        CentralSceneSupportedReport,
 
         IrrigationSystemInfoReport,
         IrrigationSystemStatusReport,
@@ -92,8 +94,9 @@ namespace ZWaveLib
 
         ClimateControlSchedule,
         ClimateControlScheduleChanged,
-        ClimateControlScheduleOverride
+        ClimateControlScheduleOverride,
+
+        Ultraviolet
     }
 
 }
-

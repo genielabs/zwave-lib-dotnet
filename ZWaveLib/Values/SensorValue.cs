@@ -50,8 +50,9 @@ namespace ZWaveLib.Values
         Distance = 20,
         AnglePosition = 21,
 
-        WaterFlow = 56, // 0x38
-        WaterPressure = 57 // 0x39
+        WaterFlow = 56,     // 0x38
+        WaterPressure = 57, // 0x39
+        Ultraviolet = 27    // 0x1B
     }
 
     public enum ZWaveTemperatureScaleType : int
@@ -68,74 +69,72 @@ namespace ZWaveLib.Values
 
         public static SensorValue Parse(byte[] message)
         {
-            SensorValue sensorValue = new SensorValue();
-            //
-            ZWaveValue zvalue = ZWaveValue.ExtractValueFromBytes(message, 4);
-            //
-            byte key = message[2];
-            if (key == (byte)ZWaveSensorParameter.Temperature)
+            var zvalue = ZWaveValue.ExtractValueFromBytes(message, 4);
+            var sensorType = ZWaveSensorParameter.Unknown;
+            if (Enum.IsDefined(typeof(ZWaveSensorParameter), (int)message[2]))
+                sensorType = (ZWaveSensorParameter)message[2];
+
+            var sensorValue = new SensorValue
             {
-                sensorValue.Parameter = ZWaveSensorParameter.Temperature;
-                // convert from Fahrenheit to Celsius if needed
-                sensorValue.Value = (zvalue.Scale == (int)ZWaveTemperatureScaleType.Fahrenheit ? SensorValue.FahrenheitToCelsius(zvalue.Value) : zvalue.Value);
-                sensorValue.EventType = EventParameter.SensorTemperature;
-            }
-            else if (key == (byte)ZWaveSensorParameter.GeneralPurposeValue)
+                Parameter = sensorType,
+                Value = zvalue.Value
+            };
+
+            switch (sensorType)
             {
-                sensorValue.Parameter = ZWaveSensorParameter.GeneralPurposeValue;
-                sensorValue.Value = zvalue.Value;
-                sensorValue.EventType = EventParameter.SensorGeneric;
+                case ZWaveSensorParameter.Temperature:
+                    // convert from Fahrenheit to Celsius if needed
+                    sensorValue.Value = zvalue.Scale == (int)ZWaveTemperatureScaleType.Fahrenheit
+                        ? FahrenheitToCelsius(zvalue.Value)
+                        : zvalue.Value;
+                    sensorValue.EventType = EventParameter.SensorTemperature;
+                    break;
+
+                case ZWaveSensorParameter.GeneralPurposeValue:
+                    sensorValue.EventType = EventParameter.SensorGeneric;
+                    break;
+
+                case ZWaveSensorParameter.Luminance:
+                    sensorValue.EventType = EventParameter.SensorLuminance;
+                    break;
+
+                case ZWaveSensorParameter.RelativeHumidity:
+                    sensorValue.EventType = EventParameter.SensorHumidity;
+                    break;
+
+                case ZWaveSensorParameter.Power:
+                    //sensor.Value = BitConverter.ToUInt16(new byte[2] { message[12], message[11] }, 0) / 10D;
+                    //sensor.Value = ((double)int.Parse(
+                    //    message[12].ToString("X2") + message[13].ToString("X2") + message[14].ToString("X2"),
+                    //    System.Globalization.NumberStyles.HexNumber
+                    //    )) / 1000D;
+                    // TODO: this might be very buggy.... to be tested
+                    EnergyValue energy = EnergyValue.Parse(message);
+                    sensorValue.Value = energy.Value;
+                    sensorValue.EventType = EventParameter.MeterPower;
+                    break;
+
+                case ZWaveSensorParameter.WaterFlow:
+                    sensorValue.EventType = EventParameter.WaterFlow;
+                    break;
+
+                case ZWaveSensorParameter.WaterPressure:
+                    sensorValue.EventType = EventParameter.WaterPressure;
+                    break;
+
+                case ZWaveSensorParameter.Ultraviolet:
+                    sensorValue.EventType = EventParameter.Ultraviolet;
+                    break;
+
+                // TODO: implement other Sensor Types
             }
-            else if (key == (byte)ZWaveSensorParameter.Luminance)
-            {
-                sensorValue.Parameter = ZWaveSensorParameter.Luminance;
-                sensorValue.Value = zvalue.Value;
-                sensorValue.EventType = EventParameter.SensorLuminance;
-            }
-            else if (key == (byte)ZWaveSensorParameter.RelativeHumidity)
-            {
-                sensorValue.Parameter = ZWaveSensorParameter.RelativeHumidity;
-                sensorValue.Value = zvalue.Value;
-                sensorValue.EventType = EventParameter.SensorHumidity;
-            }
-            else if (key == (byte)ZWaveSensorParameter.Power)
-            {
-                //sensor.Value = BitConverter.ToUInt16(new byte[2] { message[12], message[11] }, 0) / 10D;
-                //sensor.Value = ((double)int.Parse(
-                //    message[12].ToString("X2") + message[13].ToString("X2") + message[14].ToString("X2"),
-                //    System.Globalization.NumberStyles.HexNumber
-                //    )) / 1000D;
-                // TODO: this might be very buggy.... to be tested
-                EnergyValue energy = EnergyValue.Parse(message);
-                sensorValue.Parameter = ZWaveSensorParameter.Power;
-                sensorValue.Value = energy.Value;
-                sensorValue.EventType = EventParameter.MeterPower;
-            }
-            else if (key == (byte)ZWaveSensorParameter.WaterFlow) //todo
-            {
-                sensorValue.Parameter = ZWaveSensorParameter.WaterFlow;
-                sensorValue.Value = zvalue.Value;
-                sensorValue.EventType = EventParameter.WaterFlow;
-            }
-            else if (key == (byte)ZWaveSensorParameter.WaterPressure) //todo
-            {
-                sensorValue.Parameter = ZWaveSensorParameter.WaterPressure;
-                sensorValue.Value = zvalue.Value;
-                sensorValue.EventType = EventParameter.WaterPressure;
-            }
-            else
-            {
-                sensorValue.Value = zvalue.Value;
-            }
-            //
+
             return sensorValue;
         }
-
+        
         public static double FahrenheitToCelsius(double temperature)
         {
             return ((5.0 / 9.0) * (temperature - 32.0));
         }
     }
-
 }
-
