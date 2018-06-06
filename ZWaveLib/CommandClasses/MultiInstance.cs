@@ -165,25 +165,25 @@ namespace ZWaveLib.CommandClasses
             });
         }
 
-        private NodeEvent HandleMultiChannelCapabilityReportV2(ZWaveNode node, byte[] message) {
-			if (message.Length < 5)
-			{
-				Utility.logger.Error(String.Format("MultiChannel Capability Report message ERROR: message is too short: {0}", BitConverter.ToString(message)));
-				return null;
-			}
-
-            bool isDynamic = (message[2] & 0x80) != 0;
-            int endPoint = (message[2] & 0x7f);
-            int genericDeviceClass = message[3];
-            int specificDeviceClass = message[4];
-            List<int> commandClasses = new List<int>(); 
-            for (int i = 5; i < message.Length; i++) {
-                commandClasses.Add(message[i]);
+        private NodeEvent HandleMultiChannelCapabilityReportV2 (ZWaveNode node, byte [] message)
+        {
+            if (message.Length < 5) {
+                Utility.logger.Error (String.Format ("MultiChannel Capability Report message ERROR: message is too short: {0}", BitConverter.ToString (message)));
+                return null;
             }
 
-            var report = new CapabilityReport(isDynamic, endPoint, genericDeviceClass, specificDeviceClass, commandClasses.ToArray());
+            bool isDynamic = (message [2] & 0x80) != 0;
+            int endPoint = (message [2] & 0x7f);
+            int genericDeviceClass = message [3];
+            int specificDeviceClass = message [4];
+            List<int> commandClasses = new List<int> ();
+            for (int i = 5; i < message.Length; i++) {
+                commandClasses.Add (message [i]);
+            }
 
-            return new NodeEvent(node, EventParameter.CapabilityReport, report, 0);
+            var report = new CapabilityReport (isDynamic, endPoint, genericDeviceClass, specificDeviceClass, commandClasses.ToArray ());
+
+            return new NodeEvent (node, EventParameter.CapabilityReport, report, 0);
         }
 
         private NodeEvent HandleMultiInstanceEncapReport(ZWaveNode node, byte[] message)

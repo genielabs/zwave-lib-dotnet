@@ -49,7 +49,7 @@ namespace ZWaveLib.Values
 
         public override string ToString()
         {
-            var commandClasses = String.Join(",", CommandClasses.Select(x => x.ToString()).ToArray());
+            var commandClasses = String.Join(",", CommandClasses.Select(x => x.ToString("X2")).ToArray());
 
             return String.Format("CapabilityReport: IsDynamic={0}, EndPoint={1}, GenericDeviceClass={2}, SpecificDeviceClass={3}, CommandClasses={4}",
                                  IsDynamic, EndPoint, GenericDeviceClass, SpecificDeviceClass, commandClasses);

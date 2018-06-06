@@ -70,17 +70,18 @@ namespace ZWaveLib.CommandClasses
             });
         }
 
-        public static ZWaveMessage Set(ZWaveNode node, int channel, Value mode) {
-			return node.SendDataRequest(new byte[] {
-		        (byte)CommandClass.MultiInstance,
+        public static ZWaveMessage Set (ZWaveNode node, int channel, Value mode)
+        {
+            return node.SendDataRequest (new byte [] {
+                (byte)CommandClass.MultiInstance,
                 (byte)Command.MultiChannelEncapsulated,
                 0,
                 (byte)channel,
                 (byte)CommandClass.ThermostatMode,
-				(byte)Command.BasicSet,
-				(byte)mode
-			});
+                (byte)Command.BasicSet,
+                (byte)mode
+            });
 
-		}
+        }
     }
 }
