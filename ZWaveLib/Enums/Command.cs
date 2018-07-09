@@ -88,7 +88,10 @@ namespace ZWaveLib
         /// 0x06
         /// </summary>
         MultiInstanceEncapsulated = 0x06,
-        //
+        /// <summary>
+        /// 0x0A
+        /// </summary>
+        MultiChannelCapabilityReportV2 = 0x0a,
         /// <summary>
         /// 0x0D
         /// </summary>

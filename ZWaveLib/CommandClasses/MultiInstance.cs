@@ -21,6 +21,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using ZWaveLib.Values;
 
 namespace ZWaveLib.CommandClasses
@@ -42,6 +43,10 @@ namespace ZWaveLib.CommandClasses
 
             switch (cmdType)
             {
+                case (byte)Command.MultiChannelCapabilityReportV2:
+                    nodeEvent = HandleMultiChannelCapabilityReportV2(node, message);
+                    break;
+
             case (byte)Command.MultiInstanceEncapsulated:
                 nodeEvent = HandleMultiInstanceEncapReport(node, message);
                 break;
@@ -158,6 +163,27 @@ namespace ZWaveLib.CommandClasses
                 (byte)CommandClass.SensorMultilevel,
                 0x04 //
             });
+        }
+
+        private NodeEvent HandleMultiChannelCapabilityReportV2 (ZWaveNode node, byte [] message)
+        {
+            if (message.Length < 5) {
+                Utility.logger.Error (String.Format ("MultiChannel Capability Report message ERROR: message is too short: {0}", BitConverter.ToString (message)));
+                return null;
+            }
+
+            bool isDynamic = (message [2] & 0x80) != 0;
+            int endPoint = (message [2] & 0x7f);
+            int genericDeviceClass = message [3];
+            int specificDeviceClass = message [4];
+            List<int> commandClasses = new List<int> ();
+            for (int i = 5; i < message.Length; i++) {
+                commandClasses.Add (message [i]);
+            }
+
+            var report = new CapabilityReport (isDynamic, endPoint, genericDeviceClass, specificDeviceClass, commandClasses.ToArray ());
+
+            return new NodeEvent (node, EventParameter.CapabilityReport, report, 0);
         }
 
         private NodeEvent HandleMultiInstanceEncapReport(ZWaveNode node, byte[] message)
