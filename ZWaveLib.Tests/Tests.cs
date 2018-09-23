@@ -1,4 +1,4 @@
-/*
+﻿/*
   This file is part of ZWaveLib (https://github.com/genielabs/zwave-lib-dotnet)
 
   Copyright (2012-2018) G-Labs (https://github.com/genielabs)
@@ -17,25 +17,17 @@
 */
 
 using System;
+using NUnit.Framework;
 
-namespace ZWaveLib
+namespace ZWaveLib.Tests
 {
-    internal static class BitExtensions
+    [TestFixture]
+    public class Tests
     {
-        internal static byte[] ToBigEndianBytes(this ushort value)
+        [Test]
+        public void Test1()
         {
-            var valueBytes = BitConverter.GetBytes(value);
-            if (BitConverter.IsLittleEndian)
-                valueBytes = new[] { valueBytes[1], valueBytes[0] };
-            return valueBytes;
-        }
-
-        internal static ushort FromBigEndianBytes(byte[] bytes)
-        {
-            if (BitConverter.IsLittleEndian)
-                bytes = new[] {bytes[1], bytes[0]};
-
-            return BitConverter.ToUInt16(bytes, 0);
+            Assert.True(true);
         }
     }
 }
