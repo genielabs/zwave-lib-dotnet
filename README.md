@@ -1,3 +1,6 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/9x2lxm4b1x4bmru9?svg=true)](https://ci.appveyor.com/project/genemars/zwave-lib-dotnet)
+[![NuGet](https://img.shields.io/nuget/v/ZWaveLib.svg)](https://www.nuget.org/packages/ZWaveLib/)
+
 ﻿# Z-Wave Home Automation library for .NET
 
 ## Features
