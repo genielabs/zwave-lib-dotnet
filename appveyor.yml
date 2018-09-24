@@ -1,0 +1,37 @@
+version: 1.0.{build}
+image: Visual Studio 2015
+configuration: Debug
+before_build:
+  - nuget restore
+build:
+  project: .\ZWaveLib.sln
+  verbosity: minimal
+test:
+  assemblies:
+    only:
+      - ZWaveLib.Tests/bin/Debug/ZWaveLib.Tests.dll
+after_test:
+  - ps: .\ZWaveLib\nuget_pack.ps1
+artifacts:
+  - path: .\ZWaveLib\bin\Debug\ZWaveLib.dll
+    name: ZWaveLib
+    type: File
+  - path: '*.nupkg'
+    name: ZWaveLib nupkg
+    type: NuGetPackage
+deploy:
+  - provider: GitHub
+    auth_token:
+      secure:  1aMBEFi1qBAoV4H+LYx7hoVLgXJfndGoQ8I8qjLsoxXNA1zS+zgQHi2zVlRrmw1v
+    draft: false
+    prerelease: false    
+    on:
+      appveyor_repo_tag: true
+  - provider: NuGet
+    api_key:
+      secure: nFeqkA4BfbPz0Fpqo0Q5+/Y1ISiQ/lGEj3oqH07+XUo9S3FrixM0ENcd2hj3UARu
+    skip_symbols: false
+    artifact: /.*\.nupkg/
+    on:
+      appveyor_repo_tag: true
+

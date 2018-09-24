@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>ZWaveLib</id>
-        <version>1.0.15</version>
+        <version>$version$</version>
         <title>ZWaveLib</title>
         <authors>Generoso Martello</authors>
         <owners>G-Labs</owners>
@@ -21,17 +21,16 @@ Features
 [Source Code and Home Page]
 https://github.com/genielabs/zwave-lib-dotnet</description>
         <summary>Z-Wave library for Home Automation (.NET / Mono)</summary>
-        <releaseNotes>Added: UV sensor value, CentralScene, ClimateControlSchedule, Irrigation command classes; various bug fixes</releaseNotes>
+        <releaseNotes></releaseNotes>
         <copyright>G-Labs</copyright>
         <tags>zwave z-wave home automation</tags>
         <dependencies>
-            <dependency id="SerialPortLib" version="1.0.12" />
-            <dependency id="NLog" version="4.1.0" />
+            <dependency id="SerialPortLib" version="1.0.15" />
+            <dependency id="NLog" version="4.5.7" />
         </dependencies>
     </metadata>
     <files>
         <file src="bin\Debug\ZWaveLib.dll" target="lib\ZWaveLib.dll" />
-        <file src="bin\Debug\ZWaveLib.dll.mdb" target="lib\ZWaveLib.dll.mdb" />
         <file src="bin\Debug\ZWaveLib.xml" target="lib\ZWaveLib.xml" />
     </files>
 </package>
