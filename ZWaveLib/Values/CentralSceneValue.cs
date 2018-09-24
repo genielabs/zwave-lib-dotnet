@@ -1,4 +1,4 @@
-﻿/*
+/*
   This file is part of ZWaveLib (https://github.com/genielabs/zwave-lib-dotnet)
 
   Copyright (2012-2018) G-Labs (https://github.com/genielabs)
@@ -58,10 +58,10 @@ namespace ZWaveLib.Values
             };
 
         }
-
+        
         public override string ToString()
         {
-            return $"SceneId: {SceneId}, Level: {Level}, PressType: {PressType}";
+            return $"{{\"SceneId\":{SceneId}, \"Level\":{Level}, \"PressType\":\"{PressType}\"}}";
         }
     }
 }

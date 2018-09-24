@@ -191,7 +191,7 @@ namespace ZWaveLib
         /// </summary>
         public void Disconnect()
         {
-            new Thread(() => { serialPort.Disconnect(); }).Start();
+            serialPort.Disconnect();
         }
 
         /// <summary>

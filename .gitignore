@@ -16,5 +16,6 @@ Thumbs.db
 packages/*
 !packages/repositories.config
 
+\.vs/
 # VisualStudio For Mac
 .vs/**/*
