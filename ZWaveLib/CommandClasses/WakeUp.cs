@@ -137,7 +137,7 @@ namespace ZWaveLib.CommandClasses
                         }
                         catch (Exception e)
                         {
-                            Utility.logger.Warning("Error removing message from WakeUp queue: {0}", e.Message);
+                            Utility.logger.Warn("Error removing message from WakeUp queue: {0}", e.Message);
                         }
                     }
                 }
