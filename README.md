@@ -102,5 +102,7 @@ void Controller_NodeUpdated(object sender, NodeUpdatedEventArgs args)
 
 ```
 
-A test program is also shipped with the ZWaveLib source code:
-https://github.com/genielabs/zwave-lib-dotnet/blob/master/Test.ZWave/Program.cs
+## Who's using this library?
+
+- [HomeGenie Server](http://github.com/genielabs/HomeGenie): smart home automation server
+- [MIG.HomeAuto](https://github.com/genielabs/mig-homeauto): home automation API
