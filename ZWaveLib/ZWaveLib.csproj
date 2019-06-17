@@ -37,7 +37,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="SerialPortLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\SerialPortLib.1.0.16\lib\SerialPortLib.dll</HintPath>
+      <HintPath>..\packages\SerialPortLib.1.0.18\lib\SerialPortLib.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
