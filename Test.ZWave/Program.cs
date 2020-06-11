@@ -33,7 +33,7 @@ namespace Test.ZWave
 {
     internal class MainClass
     {
-        private static string serialPortName = "COM3";
+        private static string serialPortName = "COM3"; // "/dev/ttyACM0";
         private static ControllerStatus controllerStatus = ControllerStatus.Disconnected;
         private static bool showDebugOutput = false;
         private static readonly LoggingRule LoggingRule = LogManager.Configuration.LoggingRules[0];
@@ -163,7 +163,7 @@ namespace Test.ZWave
             {
                 Console.WriteLine(e.Message);
             }
-            
+
         }
 
         private static void ShowMenu()

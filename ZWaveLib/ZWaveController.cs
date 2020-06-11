@@ -42,7 +42,7 @@ namespace ZWaveLib
     /// </summary>
     public class ZWaveController : IDisposable
     {
-        
+
         #region Private fields
 
         private SerialPortInput serialPort;
@@ -270,7 +270,7 @@ namespace ZWaveLib
         /// <param name="message">Message.</param>
         public bool SendMessage(ZWaveMessage message)
         {
-            #region Debug 
+            #region Debug
             Utility.logger.Trace("[[[ BEGIN REQUEST ]]]");
             var stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -297,7 +297,7 @@ namespace ZWaveLib
                 Utility.logger.Warn("Controller status error (Node={0}, CallbackId={0}, Function={1}, CommandClass={2})", pendingRequest.NodeId, pendingRequest.CallbackId.ToString("X2"), pendingRequest.Function, pendingRequest.CommandClass);
             }
             pendingRequest = null;
-            #region Debug 
+            #region Debug
             stopWatch.Stop();
             Utility.logger.Trace("[[[ END REQUEST ]]] took {0} ms", stopWatch.ElapsedMilliseconds);
             #endregion
@@ -410,7 +410,8 @@ namespace ZWaveLib
                 OnDiscoveryProgress(new DiscoveryProgressEventArgs(DiscoveryStatus.DiscoveryStart));
                 discoveryRunning = true;
                 // First pass, we get protocol info for all nodes
-                foreach (ZWaveNode zn in nodeList)
+                var nodeListCopy = new List<ZWaveNode>(nodeList);
+                foreach (ZWaveNode zn in nodeListCopy)
                 {
                     if (controllerStatus != ControllerStatus.Ready || !serialPort.IsConnected)
                     {
@@ -423,7 +424,7 @@ namespace ZWaveLib
                         GetNodeProtocolInfo(zn.Id);
                 }
                 // Second pass, we query additional node informations
-                foreach (ZWaveNode zn in nodeList)
+                foreach (ZWaveNode zn in nodeListCopy)
                 {
                     if (controllerStatus != ControllerStatus.Ready || !serialPort.IsConnected)
                     {
@@ -439,7 +440,7 @@ namespace ZWaveLib
                         GetNodeInformationFrame(zn.Id).Wait();
                     else
                         OnNodeUpdated(new NodeUpdatedEventArgs(zn.Id, new NodeEvent(zn, EventParameter.NodeInfo, BitConverter.ToString(zn.NodeInformationFrame).Replace("-", " "), 0)));
-                    
+
                     // For nodes that support version command class, query each one for its version.
                     GetNodeCcsVersion(zn);
 
@@ -508,7 +509,7 @@ namespace ZWaveLib
         }
 
         public void GetNodeCcsVersion(ZWaveNode zn)
-        {            
+        {
             // If node support version command class, query each one for its version.
             if (zn.SupportCommandClass(CommandClass.Version))
             {
@@ -724,7 +725,7 @@ namespace ZWaveLib
                 (byte)ZWaveFunction.RequestNodeNeighborsUpdate,
                 nodeId,
                 0x00,
-                0x00    
+                0x00
             };
             return QueueMessage(new ZWaveMessage(msg, MessageDirection.Outbound, true)).Wait();
         }
@@ -746,7 +747,7 @@ namespace ZWaveLib
                 0x00,
                 0x00,
                 0x03,
-                0x00    
+                0x00
             };
             return QueueMessage(new ZWaveMessage(msg, MessageDirection.Outbound, false));
         }
@@ -777,7 +778,7 @@ namespace ZWaveLib
                             Thread.Sleep(commandRetryDelay);
                         }
                         msg.sentAck.Set();
-                    
+
                         if (msg.ResendCount == ZWaveMessage.ResendAttemptsMax)
                         {
                             Utility.logger.Warn("Delivery of message to Node {0} failed (CallbackId={1}).", msg.NodeId, msg.CallbackId.ToString("X2"));
@@ -822,9 +823,6 @@ namespace ZWaveLib
 
             case MessageType.Request:
 
-                if (nodeList.Count == 0)
-                    break;
-
                 switch (msg.Function)
                 {
 
@@ -832,33 +830,41 @@ namespace ZWaveLib
                     break;
 
                 case ZWaveFunction.NodeAdd:
-                    
+
                     var nodeAddStatus = NodeAddStatus.None;
                     Enum.TryParse(rawData[5].ToString(), out nodeAddStatus);
                     switch (nodeAddStatus)
                     {
 
                     case NodeAddStatus.LearnReady:
-                        
+
                         UpdateOperationProgress(0x01, NodeQueryStatus.NodeAddReady);
                         SetQueryStage(QueryStage.Complete);
                         break;
 
                     case NodeAddStatus.AddingSlave:
-                        
+
                         var newNode = CreateNode(rawData[6], 0x00);
-                        // Extract node information frame
-                        int nodeInfoLength = (int)rawData[7];
-                        byte[] nodeInfo = new byte[nodeInfoLength];
-                        Array.Copy(rawData, 8, nodeInfo, 0, nodeInfoLength);
-                        // Update node properties
-                        newNode.NodeInformationFrame = nodeInfo;
-                        newNode.ProtocolInfo.BasicType = rawData[8];
-                        newNode.ProtocolInfo.GenericType = rawData[9];
-                        newNode.ProtocolInfo.SpecificType = rawData[10];
-                        // Add it to the node list and save it
-                        nodeList.Add(newNode);
-                        SaveNodesConfig();
+                        var existingNode = nodeList.Find((n) => n.Id == newNode.Id);
+                        if (existingNode == null)
+                        {
+                            // Extract node information frame
+                            int nodeInfoLength = (int)rawData[7];
+                            byte[] nodeInfo = new byte[nodeInfoLength];
+                            Array.Copy(rawData, 8, nodeInfo, 0, nodeInfoLength);
+                            // Update node properties
+                            newNode.NodeInformationFrame = nodeInfo;
+                            newNode.ProtocolInfo.BasicType = rawData[8];
+                            newNode.ProtocolInfo.GenericType = rawData[9];
+                            newNode.ProtocolInfo.SpecificType = rawData[10];
+                            // Add it to the node list and save it
+                            nodeList.Add(newNode);
+                            SaveNodesConfig();
+                        }
+                        else
+                        {
+                            newNode = existingNode;
+                        }
 
                         UpdateOperationProgress(newNode.Id, NodeQueryStatus.NodeAddStarted);
 
@@ -893,7 +899,7 @@ namespace ZWaveLib
                         break;
 
                     case NodeAddStatus.Done:
-                        
+
                         UpdateOperationProgress(0x01, NodeQueryStatus.NodeAddDone);
                         SetQueryStage(QueryStage.Complete);
                         break;
@@ -915,7 +921,7 @@ namespace ZWaveLib
                     {
 
                     case NodeRemoveStatus.LearnReady:
-                        
+
                         UpdateOperationProgress(0x01, NodeQueryStatus.NodeRemoveReady);
                         SetQueryStage(QueryStage.Complete);
                         break;
@@ -924,7 +930,7 @@ namespace ZWaveLib
 
                         UpdateOperationProgress(rawData[6], NodeQueryStatus.NodeRemoveStarted);
                         break;
-                    
+
                     case NodeRemoveStatus.Done:
 
                         if (rawData[6] != 0x00)
