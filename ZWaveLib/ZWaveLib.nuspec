@@ -25,8 +25,17 @@ https://github.com/genielabs/zwave-lib-dotnet</description>
         <copyright>G-Labs</copyright>
         <tags>zwave z-wave home automation</tags>
         <dependencies>
-            <dependency id="SerialPortLib" version="1.0.15" />
-            <dependency id="NLog" version="4.5.7" />
+            <dependency id="SerialPortLib" version="1.0.20" />
+            <group targetFramework="net40">
+                <dependency id="NLog" version="4.5.10" />
+            </group>
+            <group targetFramework="net461">
+                <dependency id="NLog" version="4.5.10" />
+            </group>
+            <group targetFramework="netstandard2.0">
+                <dependency id="Microsoft.Extensions.DependencyInjection" version="2.2.0" />
+                <dependency id="Microsoft.Extensions.Logging.Abstractions" version="2.2.0" />
+            </group>
         </dependencies>
     </metadata>
     <files>

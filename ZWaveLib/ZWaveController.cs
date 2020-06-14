@@ -29,7 +29,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Xml.Serialization;
-
+#if NETSTANDARD2_0
+using Microsoft.Extensions.DependencyInjection;
+#endif
 using SerialPortLib;
 
 using ZWaveLib.Values;
@@ -46,6 +48,9 @@ namespace ZWaveLib
         #region Private fields
 
         private SerialPortInput serialPort;
+#if NETSTANDARD2_0
+        private ServiceProvider servicesProvider = new ServiceCollection().AddTransient<SerialPortInput>().BuildServiceProvider();
+#endif
         private string portName = "";
         private const int commandDelayMin = 100;
         private const int commandRetryDelay = 200;
@@ -142,7 +147,11 @@ namespace ZWaveLib
             string path = Uri.UnescapeDataString(uri.Path);
             configFolder = Path.GetDirectoryName(path);
             // Setup Serial Port
+#if NET40 || NET461
             serialPort = new SerialPortInput();
+#else
+            serialPort = servicesProvider.GetRequiredService<SerialPortInput>();
+#endif
             serialPort.MessageReceived += SerialPort_MessageReceived;
             serialPort.ConnectionStatusChanged += SerialPort_ConnectionStatusChanged;
             // Setup Queue Manager Task
@@ -169,6 +178,9 @@ namespace ZWaveLib
             queueManager = null;
             // Disconnect the serial port
             Disconnect();
+#if NETSTANDARD2_0
+            servicesProvider.Dispose();
+#endif
             // Update the nodes configuration file
             SaveNodesConfig();
         }
@@ -1159,7 +1171,7 @@ namespace ZWaveLib
         /// <param name="stage">Stage.</param>
         private void SetQueryStage(QueryStage stage)
         {
-            Utility.logger.Trace(stage);
+            Utility.logger.Trace(stage.ToString());
             currentStage = stage;
             // If query stage is complete, unlock SendMessage
             if (stage == QueryStage.Complete || stage == QueryStage.Error)
@@ -1524,7 +1536,7 @@ namespace ZWaveLib
         /// <param name="args">Arguments.</param>
         protected virtual void OnDiscoveryProgress(DiscoveryProgressEventArgs args)
         {
-            Utility.logger.Debug(args.Status);
+            Utility.logger.Debug(args.Status.ToString());
             if (DiscoveryProgress != null)
                 DiscoveryProgress(this, args);
         }
@@ -1535,7 +1547,7 @@ namespace ZWaveLib
         /// <param name="args">Arguments.</param>
         protected virtual void OnHealProgress(HealProgressEventArgs args)
         {
-            Utility.logger.Debug(args.Status);
+            Utility.logger.Debug(args.Status.ToString());
             if (HealProgress != null)
                 HealProgress(this, args);
         }
