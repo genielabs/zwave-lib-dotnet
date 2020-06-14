@@ -23,9 +23,10 @@
 
 using System;
 using System.Collections.Generic;
-
 #if NET40 || NET461
 using NLog;
+#else
+using NLog.Extensions.Logging;
 #endif
 
 #if NETSTANDARD2_0
@@ -36,14 +37,15 @@ namespace ZWaveLib
 {
     public class Utility
     {
-#if NET40 || NET461
-        internal static Logger _logger = LogManager.GetCurrentClassLogger();
-#else
-        private static readonly ILogger<Utility> _logger;
-#endif
 
         internal static class logger
         {
+#if NET40 || NET461
+            internal static Logger _logger = LogManager.GetCurrentClassLogger();
+#else
+            private static readonly ILogger<Utility> _logger = new Logger<Utility>(new NLogLoggerFactory());
+#endif
+
             public static void Info(String message, params object[] args)
             {
 #if NET40 || NET461

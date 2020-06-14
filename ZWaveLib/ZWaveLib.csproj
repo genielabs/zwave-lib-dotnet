@@ -14,20 +14,22 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
     <PackageReference Include="NLog.Extensions.Logging" Version="1.6.1" />
+    <PackageReference Include="NLog" Version="4.6.7" />
   </ItemGroup>
 
   <!-- Conditionally obtain references for the .NET Framework 4.0 target -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <PackageReference Include="NLog" Version="4.5.10" />
+  </ItemGroup>
 
   <!-- Conditionally obtain references for the .NET Framework 4.6.1 target -->
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="1.6.1" />
+    <PackageReference Include="NLog" Version="4.5.10" />
   </ItemGroup>
+
+  <!-- common -->
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="NLog" Version="4.6.7" />
     <PackageReference Include="SerialPortLib" Version="1.0.20" />
   </ItemGroup>
 </Project>

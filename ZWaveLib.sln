@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.ZWave", "Test.ZWave\Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZWaveLib.Tests", "ZWaveLib.Tests\ZWaveLib.Tests.csproj", "{F57D4DE8-291D-4733-A9C0-488708C42ECF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp.NetCore", "TestApp.NetCore\TestApp.NetCore.csproj", "{8ADB4E9B-211A-4075-8E10-D84308855CE4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{F57D4DE8-291D-4733-A9C0-488708C42ECF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F57D4DE8-291D-4733-A9C0-488708C42ECF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F57D4DE8-291D-4733-A9C0-488708C42ECF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ADB4E9B-211A-4075-8E10-D84308855CE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ADB4E9B-211A-4075-8E10-D84308855CE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ADB4E9B-211A-4075-8E10-D84308855CE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ADB4E9B-211A-4075-8E10-D84308855CE4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		Policies = $0
