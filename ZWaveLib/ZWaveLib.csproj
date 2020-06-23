@@ -11,8 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0" />
     <PackageReference Include="NLog.Extensions.Logging" Version="1.6.1" />
     <PackageReference Include="NLog" Version="4.6.7" />
   </ItemGroup>
@@ -30,6 +30,6 @@
   <!-- common -->
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <PackageReference Include="SerialPortLib" Version="1.0.20" />
+    <PackageReference Include="SerialPortLib" Version="1.0.23" />
   </ItemGroup>
 </Project>
