@@ -43,7 +43,6 @@ https://github.com/genielabs/zwave-lib-dotnet</description>
         </dependencies>
     </metadata>
     <files>
-        <file src="bin\Debug\ZWaveLib.dll" target="lib\ZWaveLib.dll" />
-        <file src="bin\Debug\ZWaveLib.xml" target="lib\ZWaveLib.xml" />
+        <file src="bin\Debug\**\ZWaveLib.*" target="lib\" />
     </files>
 </package>
