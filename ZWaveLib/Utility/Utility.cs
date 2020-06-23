@@ -23,15 +23,90 @@
 
 using System;
 using System.Collections.Generic;
-
+#if NET40 || NET461
 using NLog;
+#else
+using NLog.Extensions.Logging;
+#endif
+
+#if NETSTANDARD2_0
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace ZWaveLib
 {
     public class Utility
     {
-        internal static Logger logger = LogManager.GetCurrentClassLogger();
-                
+
+        internal static class logger
+        {
+#if NET40 || NET461
+            internal static Logger _logger = LogManager.GetCurrentClassLogger();
+#else
+            private static readonly ILogger<Utility> _logger = new Logger<Utility>(new NLogLoggerFactory());
+#endif
+
+            public static void Info(String message, params object[] args)
+            {
+#if NET40 || NET461
+                _logger.Info(message, args);
+#else
+                _logger.LogInformation(message, args);
+#endif
+            }
+
+            public static void Warn(String message, params object[] args)
+            {
+#if NET40 || NET461
+                _logger.Warn(message, args);
+#else
+                _logger.LogWarning(message, args);
+#endif
+            }
+
+            public static void Error(String message, params object[] args)
+            {
+#if NET40 || NET461
+                _logger.Error(message, args);
+#else
+                _logger.LogError(message, args);
+#endif
+            }
+
+            public static void Error(Exception exception)
+            {
+#if NET40 || NET461
+                _logger.Error(exception);
+#else
+                _logger.LogError(exception, exception.Message);
+#endif
+            }
+
+            public static void Debug(String message, params object[] args)
+            {
+#if NET40 || NET461
+                _logger.Debug(message, args);
+#else
+                _logger.LogDebug(message, args);
+#endif
+            }
+
+            public static void Trace(String message, params object[] args)
+            {
+#if NET40 || NET461
+                _logger.Trace(message, args);
+#else
+                _logger.LogTrace(message, args);
+#endif
+            }
+
+            public static ILogger GetLogger()
+            {
+                return _logger;
+            }
+
+        }
+
         //from
         //http://stackoverflow.com/questions/311165/how-do-you-convert-byte-array-to-hexadecimal-string-and-vice-versa
         public static string ByteArrayToHexString(byte[] ba)

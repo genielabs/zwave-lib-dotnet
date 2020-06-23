@@ -25,14 +25,20 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Xml.Serialization;
-
+#if NETSTANDARD2_0
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
+using NLog.Config;
+using NLog.Layouts;
+using NLog.Targets;
+#else
+#endif
 using SerialPortLib;
 
-using ZWaveLib.Values;
 using ZWaveLib.CommandClasses;
 
 namespace ZWaveLib
@@ -46,6 +52,30 @@ namespace ZWaveLib
         #region Private fields
 
         private SerialPortInput serialPort;
+#if NETSTANDARD2_0
+        private ServiceProvider servicesProvider = new ServiceCollection()
+            .AddTransient<SerialPortInput>()
+            .AddLogging(loggingBuilder =>
+            {
+                // configure Logging with NLog
+                loggingBuilder.ClearProviders();
+                loggingBuilder.SetMinimumLevel(LogLevel.Trace);
+                loggingBuilder.AddNLog(new LoggingConfiguration
+                {
+                    LoggingRules =
+                    {
+                        new LoggingRule(
+                            "*",
+                            NLog.LogLevel.Debug,
+                            new ConsoleTarget
+                            {
+                                Layout = new SimpleLayout("${longdate} ${callsite} ${level} ${message} ${exception}")
+                            })
+                    }
+                });
+            })
+            .BuildServiceProvider();
+#endif
         private string portName = "";
         private const int commandDelayMin = 100;
         private const int commandRetryDelay = 200;
@@ -142,7 +172,11 @@ namespace ZWaveLib
             string path = Uri.UnescapeDataString(uri.Path);
             configFolder = Path.GetDirectoryName(path);
             // Setup Serial Port
+#if NET40 || NET461
             serialPort = new SerialPortInput();
+#else
+            serialPort = servicesProvider.GetRequiredService<SerialPortInput>();
+#endif
             serialPort.MessageReceived += SerialPort_MessageReceived;
             serialPort.ConnectionStatusChanged += SerialPort_ConnectionStatusChanged;
             // Setup Queue Manager Task
@@ -153,7 +187,7 @@ namespace ZWaveLib
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ZWaveLib.ZWaveController"/> class.
-        /// </summary>
+        /// </summary>https://stackoverflow.com/questions/52921966/unable-to-resolve-ilogger-from-microsoft-extensions-logging
         /// <param name="portName">The serial port name.</param>
         public ZWaveController(string portName) : this()
         {
@@ -169,6 +203,9 @@ namespace ZWaveLib
             queueManager = null;
             // Disconnect the serial port
             Disconnect();
+#if NETSTANDARD2_0
+            servicesProvider.Dispose();
+#endif
             // Update the nodes configuration file
             SaveNodesConfig();
         }
@@ -1159,7 +1196,7 @@ namespace ZWaveLib
         /// <param name="stage">Stage.</param>
         private void SetQueryStage(QueryStage stage)
         {
-            Utility.logger.Trace(stage);
+            Utility.logger.Trace(stage.ToString());
             currentStage = stage;
             // If query stage is complete, unlock SendMessage
             if (stage == QueryStage.Complete || stage == QueryStage.Error)
@@ -1524,7 +1561,7 @@ namespace ZWaveLib
         /// <param name="args">Arguments.</param>
         protected virtual void OnDiscoveryProgress(DiscoveryProgressEventArgs args)
         {
-            Utility.logger.Debug(args.Status);
+            Utility.logger.Debug(args.Status.ToString());
             if (DiscoveryProgress != null)
                 DiscoveryProgress(this, args);
         }
@@ -1535,7 +1572,7 @@ namespace ZWaveLib
         /// <param name="args">Arguments.</param>
         protected virtual void OnHealProgress(HealProgressEventArgs args)
         {
-            Utility.logger.Debug(args.Status);
+            Utility.logger.Debug(args.Status.ToString());
             if (HealProgress != null)
                 HealProgress(this, args);
         }

@@ -1,148 +1,35 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{06995CE8-149B-42FA-B345-FB11C4D6E180}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ZWaveLib</RootNamespace>
-    <AssemblyName>ZWaveLib</AssemblyName>
-    <FileAlignment>512</FileAlignment>
-    <ReleaseVersion>1.0</ReleaseVersion>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworks>netstandard2.0;net40;net461</TargetFrameworks>
+    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\ZWaveLib.xml</DocumentationFile>
-    <NoWarn>1591</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="1.6.1" />
+    <PackageReference Include="NLog" Version="4.6.7" />
+  </ItemGroup>
+
+  <!-- Conditionally obtain references for the .NET Framework 4.0 target -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net40' ">
+    <PackageReference Include="NLog" Version="4.5.10" />
+  </ItemGroup>
+
+  <!-- Conditionally obtain references for the .NET Framework 4.6.1 target -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <PackageReference Include="NLog" Version="4.5.10" />
+  </ItemGroup>
+
+  <!-- common -->
   <ItemGroup>
-    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c">
-      <HintPath>..\packages\NLog.4.5.10\lib\net45\NLog.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="SerialPortLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\SerialPortLib.1.0.18\lib\SerialPortLib.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="CommandClasses\CentralScene.cs" />
-    <Compile Include="CommandClasses\DoorLock.cs" />
-    <Compile Include="Utility\BitExtensions.cs" />
-    <Compile Include="CommandClasses\Irrigation\Irrigation.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationSensorPolarityMask.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationSystemConfig.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationSystemInfoReport.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationSystemSensorStatus.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationSystemStatusReport.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationValveConfig.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationValveErrorStatusMask.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationValveInfo.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationValveTable.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationValveTableItem.cs" />
-    <Compile Include="CommandClasses\Irrigation\IrrigationSystemErrorMask.cs" />
-    <Compile Include="CommandClasses\Security.cs" />
-    <Compile Include="ICommandClass.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Values\CentralSceneValue.cs" />
-    <Compile Include="ZWaveMessage.cs" />
-    <Compile Include="ZWaveNode.cs" />
-    <Compile Include="Values\AlarmValue.cs" />
-    <Compile Include="Values\EnergyValue.cs" />
-    <Compile Include="Values\SensorValue.cs" />
-    <Compile Include="Values\UserCodeValue.cs" />
-    <Compile Include="Values\ZWaveValue.cs" />
-    <Compile Include="CommandClasses\CommandClassFactory.cs" />
-    <Compile Include="CommandClasses\ThermostatFanMode.cs" />
-    <Compile Include="CommandClasses\ThermostatFanState.cs" />
-    <Compile Include="CommandClasses\ThermostatHeating.cs" />
-    <Compile Include="CommandClasses\ThermostatOperatingState.cs" />
-    <Compile Include="CommandClasses\ThermostatSetBack.cs" />
-    <Compile Include="CommandClasses\ThermostatSetPoint.cs" />
-    <Compile Include="CommandClasses\Basic.cs" />
-    <Compile Include="CommandClasses\SwitchBinary.cs" />
-    <Compile Include="CommandClasses\SwitchMultilevel.cs" />
-    <Compile Include="CommandClasses\Alarm.cs" />
-    <Compile Include="CommandClasses\SensorBinary.cs" />
-    <Compile Include="CommandClasses\SensorAlarm.cs" />
-    <Compile Include="CommandClasses\SensorMultilevel.cs" />
-    <Compile Include="CommandClasses\SceneActivation.cs" />
-    <Compile Include="CommandClasses\Meter.cs" />
-    <Compile Include="CommandClasses\Configuration.cs" />
-    <Compile Include="CommandClasses\Association.cs" />
-    <Compile Include="CommandClasses\WakeUp.cs" />
-    <Compile Include="CommandClasses\Battery.cs" />
-    <Compile Include="CommandClasses\MultiInstance.cs" />
-    <Compile Include="CommandClasses\ManufacturerSpecific.cs" />
-    <Compile Include="CommandClasses\UserCode.cs" />
-    <Compile Include="CommandClasses\Crc16Encapsulated.cs" />
-    <Compile Include="CommandClasses\ThermostatMode.cs" />
-    <Compile Include="CommandClasses\MultiCmd.cs" />
-    <Compile Include="Utility\AesWork.cs" />
-    <Compile Include="Utility\Utility.cs" />
-    <Compile Include="Events.cs" />
-    <Compile Include="Enums\Command.cs" />
-    <Compile Include="Enums\CommandClass.cs" />
-    <Compile Include="Enums\Function.cs" />
-    <Compile Include="Enums\GenericType.cs" />
-    <Compile Include="Enums\SecurityCommand.cs" />
-    <Compile Include="Enums\EventParameter.cs" />
-    <Compile Include="Enums\OperationStatus.cs" />
-    <Compile Include="ZWaveController.cs" />
-    <Compile Include="CommandClasses\Version.cs" />
-    <Compile Include="Values\VersionValue.cs" />
-    <Compile Include="Enums\Message.cs" />
-    <Compile Include="Values\WakeUpStatus.cs" />
-    <Compile Include="CommandClasses\Clock.cs" />
-    <Compile Include="Values\ClockValue.cs" />
-    <Compile Include="CommandClasses\ClimateControlSchedule.cs" />
-    <Compile Include="Values\ClimateControlScheduleValue.cs" />
-    <Compile Include="Values\SwitchpointValue.cs" />
-    <Compile Include="Values\ScheduleStateValue.cs" />
-    <Compile Include="Enums\OverrideType.cs" />
-    <Compile Include="Values\ClimateControlScheduleOverrideValue.cs" />
-    <Compile Include="Values\CapabilityReport.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <ItemGroup />
-  <ItemGroup />
-  <ItemGroup>
-    <None Include="..\README.md">
-      <Link>README.md</Link>
-    </None>
-    <None Include="packages.config" />
+    <PackageReference Include="SerialPortLib" Version="1.0.20" />
   </ItemGroup>
 </Project>

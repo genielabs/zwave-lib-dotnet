@@ -22,7 +22,6 @@
  */
 
 using System.Collections.Generic;
-using System.Dynamic;
 
 using ZWaveLib.Values;
 
@@ -61,19 +60,18 @@ namespace ZWaveLib.CommandClasses
             setPoint.Scale = zvalue.Scale;
             setPoint.Size = zvalue.Size;
             setPoint.Value = zvalue.Value;
-            dynamic ptype = new ExpandoObject();
-            ptype.Type = (Value)message[2];
             // convert from Fahrenheit to Celsius if needed
-            ptype.Value = (zvalue.Scale == (int)ZWaveTemperatureScaleType.Fahrenheit
-                ? SensorValue.FahrenheitToCelsius(zvalue.Value)
-                : zvalue.Value);
+            var ptype = new {
+                Type = (Value)message[2],
+                Value = (zvalue.Scale == (int)ZWaveTemperatureScaleType.Fahrenheit ? SensorValue.FahrenheitToCelsius(zvalue.Value) : zvalue.Value)
+            };
             return new NodeEvent(node, EventParameter.ThermostatSetPoint, ptype, 0);
         }
 
         public static ZWaveMessage Get(ZWaveNode node, Value ptype)
         {
-            return node.SendDataRequest(new byte[] { 
-                (byte)CommandClass.ThermostatSetPoint, 
+            return node.SendDataRequest(new byte[] {
+                (byte)CommandClass.ThermostatSetPoint,
                 (byte)Command.ThermostatSetPointGet,
                 (byte)ptype
             });
@@ -82,9 +80,9 @@ namespace ZWaveLib.CommandClasses
         public static ZWaveMessage Set(ZWaveNode node, Value ptype, double temperature)
         {
             List<byte> message = new List<byte>();
-            message.AddRange(new byte[] { 
-                (byte)CommandClass.ThermostatSetPoint, 
-                (byte)Command.ThermostatSetPointSet, 
+            message.AddRange(new byte[] {
+                (byte)CommandClass.ThermostatSetPoint,
+                (byte)Command.ThermostatSetPointSet,
                 (byte)ptype
             });
             var setPoint = ThermostatSetPoint.GetSetPointData(node);
