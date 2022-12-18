@@ -1,6 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
+    <PackageId>ZWaveLib</PackageId>
+    <Version>1.1.0</Version>
+    <Authors>Generoso Martello</Authors>
+    <Company>G-Labs</Company>
+    <Description>Z-Wave Home Automation library for .NET
+      Features
+      - Works with most Z-Wave serial controllers
+      - 100% managed code implementation
+      - Event driven
+      - Hot plug
+      - Automatically restabilish connection on error/disconnect
+      - Compatible with Mono
+
+      [Source Code and Home Page]
+      https://github.com/genielabs/zwave-lib-dotnet</Description>
+    <PackageLicense>./LICENSE</PackageLicense>
+    <PackageProjectUrl>https://github.com/genielabs/zwave-lib-dotnet/</PackageProjectUrl>
+    <PackageTags>zwave z-wave home automation</PackageTags>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
@@ -9,8 +26,6 @@
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
-
-  <!-- common -->
   <ItemGroup>
     <PackageReference Include="SerialPortLib" Version="1.1.0" />
   </ItemGroup>
