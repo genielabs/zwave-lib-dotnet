@@ -1,6 +1,6 @@
-version: 1.0.{build}
-image: Visual Studio 2017
-configuration: Debug
+version: 1.1.{build}
+image: Visual Studio 2022
+configuration: Release
 before_build:
   - nuget restore
 build:
@@ -15,18 +15,17 @@ after_test:
 artifacts:
   - path: '*.nupkg'
     name: ZWaveLib nupkg
-    type: NuGetPackage
 deploy:
   - provider: GitHub
     auth_token:
-      secure:  1aMBEFi1qBAoV4H+LYx7hoVLgXJfndGoQ8I8qjLsoxXNA1zS+zgQHi2zVlRrmw1v
+      secure: q0rRgZDDKmOASUrMCHGUlPh34wIipSYKWJiDeiwftkB7hLH/QyYhNL5MckCyse+1
     draft: false
     prerelease: false
     on:
       appveyor_repo_tag: true
   - provider: NuGet
     api_key:
-      secure: ER771ujBnbfc/o+8QyM3XZInr0JyFfv3GIdDyQZfZtNUuCCkDn4cFEc1ZJGCYkpt
+      secure: xe7KBrpDVPQYOr4XpJNPs2/9vdT5lO/qV5z8Qrv3yXWd6kQScl3UfB5WaF7olbfy
     skip_symbols: false
     artifact: /.*\.nupkg/
     on:

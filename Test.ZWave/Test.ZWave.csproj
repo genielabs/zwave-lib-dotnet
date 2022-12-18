@@ -30,7 +30,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c">
-      <HintPath>..\packages\SerialPortLib.1.0.20\lib\net40\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.6.7\lib\net40-client\NLog.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SerialPortLib, Version=1.0.20.0, Culture=neutral, PublicKeyToken=null">

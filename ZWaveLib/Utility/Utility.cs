@@ -23,86 +23,45 @@
 
 using System;
 using System.Collections.Generic;
-#if NET40 || NET461
 using NLog;
-#else
-using NLog.Extensions.Logging;
-#endif
-
-#if NETSTANDARD2_0
-using Microsoft.Extensions.Logging;
-#endif
 
 namespace ZWaveLib
 {
-    public class Utility
+    public static class Utility
     {
 
-        internal static class logger
+        internal static class Logger
         {
-#if NET40 || NET461
-            internal static Logger _logger = LogManager.GetCurrentClassLogger();
-#else
-            private static readonly ILogger<Utility> _logger = new Logger<Utility>(new NLogLoggerFactory());
-#endif
+            private static readonly NLog.Logger LoggerInstance = LogManager.GetCurrentClassLogger();
 
             public static void Info(String message, params object[] args)
             {
-#if NET40 || NET461
-                _logger.Info(message, args);
-#else
-                _logger.LogInformation(message, args);
-#endif
+                LoggerInstance.Info(message, args);
             }
 
             public static void Warn(String message, params object[] args)
             {
-#if NET40 || NET461
-                _logger.Warn(message, args);
-#else
-                _logger.LogWarning(message, args);
-#endif
+                LoggerInstance.Warn(message, args);
             }
 
             public static void Error(String message, params object[] args)
             {
-#if NET40 || NET461
-                _logger.Error(message, args);
-#else
-                _logger.LogError(message, args);
-#endif
+                LoggerInstance.Error(message, args);
             }
 
             public static void Error(Exception exception)
             {
-#if NET40 || NET461
-                _logger.Error(exception);
-#else
-                _logger.LogError(exception, exception.Message);
-#endif
+                LoggerInstance.Error(exception);
             }
 
             public static void Debug(String message, params object[] args)
             {
-#if NET40 || NET461
-                _logger.Debug(message, args);
-#else
-                _logger.LogDebug(message, args);
-#endif
+                LoggerInstance.Debug(message, args);
             }
 
             public static void Trace(String message, params object[] args)
             {
-#if NET40 || NET461
-                _logger.Trace(message, args);
-#else
-                _logger.LogTrace(message, args);
-#endif
-            }
-
-            public static ILogger GetLogger()
-            {
-                return _logger;
+                LoggerInstance.Trace(message, args);
             }
 
         }

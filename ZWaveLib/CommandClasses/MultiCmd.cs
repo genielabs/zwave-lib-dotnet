@@ -39,7 +39,7 @@ namespace ZWaveLib.CommandClasses
 
             NodeEvent parent = null, child = null;
 
-            Utility.logger.Debug(String.Format("MultiCmd encapsulated message: {0}", BitConverter.ToString(message)));
+            Utility.Logger.Debug(String.Format("MultiCmd encapsulated message: {0}", BitConverter.ToString(message)));
 
             if (message[1] != (byte)1)
             {
@@ -56,7 +56,7 @@ namespace ZWaveLib.CommandClasses
                 // Copy message into new array.
                 var instanceMessage = new byte[length];
                 Array.Copy(message, offset + 1, instanceMessage, 0, length);
-                Utility.logger.Debug(String.Format("Processing message chunk: {0}", BitConverter.ToString(instanceMessage)));
+                Utility.Logger.Debug(String.Format("Processing message chunk: {0}", BitConverter.ToString(instanceMessage)));
 
                 // Move offset to the next encap message
                 offset += (byte)(length + 1);
@@ -65,7 +65,7 @@ namespace ZWaveLib.CommandClasses
                 var cc = CommandClassFactory.GetCommandClass(cmdClass);
                 if (cc == null)
                 {
-                    Utility.logger.Warn(String.Format("Can't find CommandClass handler for command class {0}", cmdClass));
+                    Utility.Logger.Warn(String.Format("Can't find CommandClass handler for command class {0}", cmdClass));
                     continue;
                 }
 

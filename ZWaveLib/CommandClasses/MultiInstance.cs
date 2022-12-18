@@ -169,7 +169,7 @@ namespace ZWaveLib.CommandClasses
         private NodeEvent HandleMultiChannelCapabilityReportV2 (ZWaveNode node, byte [] message)
         {
             if (message.Length < 5) {
-                Utility.logger.Error (String.Format ("MultiChannel Capability Report message ERROR: message is too short: {0}", BitConverter.ToString (message)));
+                Utility.Logger.Error (String.Format ("MultiChannel Capability Report message ERROR: message is too short: {0}", BitConverter.ToString (message)));
                 return null;
             }
 
@@ -191,7 +191,7 @@ namespace ZWaveLib.CommandClasses
         {
             if (message.Length < 5)
             {
-                Utility.logger.Error(String.Format("MultiInstance encapsulated message ERROR: message is too short: {0}", BitConverter.ToString(message)));
+                Utility.Logger.Error(String.Format("MultiInstance encapsulated message ERROR: message is too short: {0}", BitConverter.ToString(message)));
                 return null;
             }
 
@@ -200,12 +200,12 @@ namespace ZWaveLib.CommandClasses
             var instanceMessage = new byte[message.Length - 3]; //TODO:
             Array.Copy(message, 3, instanceMessage, 0, message.Length - 3);
 
-            Utility.logger.Debug(String.Format("MultiInstance encapsulated message: CmdClass: {0}; message: {1}", instanceCmdClass, BitConverter.ToString(instanceMessage)));
+            Utility.Logger.Debug(String.Format("MultiInstance encapsulated message: CmdClass: {0}; message: {1}", instanceCmdClass, BitConverter.ToString(instanceMessage)));
 
             var cc = CommandClassFactory.GetCommandClass(instanceCmdClass);
             if (cc == null)
             {
-                Utility.logger.Error(String.Format("Can't find CommandClass handler for command class {0}", instanceCmdClass));
+                Utility.Logger.Error(String.Format("Can't find CommandClass handler for command class {0}", instanceCmdClass));
                 return null;
             }
             NodeEvent zevent = cc.GetEvent(node, instanceMessage);
@@ -218,7 +218,7 @@ namespace ZWaveLib.CommandClasses
         {
             if (message.Length < 6)
             {
-                Utility.logger.Error(String.Format("MultiChannel encapsulated message ERROR: message is too short: {0}", BitConverter.ToString(message)));
+                Utility.Logger.Error(String.Format("MultiChannel encapsulated message ERROR: message is too short: {0}", BitConverter.ToString(message)));
                 return null;
             }
 
@@ -227,12 +227,12 @@ namespace ZWaveLib.CommandClasses
             var instanceMessage = new byte[message.Length - 4]; //TODO
             Array.Copy(message, 4, instanceMessage, 0, message.Length - 4);
 
-            Utility.logger.Debug(String.Format("MultiChannel encapsulated message: CmdClass: {0}; message: {1}", instanceCmdClass, BitConverter.ToString(instanceMessage)));
+            Utility.Logger.Debug(String.Format("MultiChannel encapsulated message: CmdClass: {0}; message: {1}", instanceCmdClass, BitConverter.ToString(instanceMessage)));
 
             var cc = CommandClassFactory.GetCommandClass(instanceCmdClass);
             if (cc == null)
             {
-                Utility.logger.Error(String.Format("Can't find CommandClass handler for command class {0}", instanceCmdClass));
+                Utility.Logger.Error(String.Format("Can't find CommandClass handler for command class {0}", instanceCmdClass));
                 return null;
             }
             NodeEvent zevent = cc.GetEvent(node, instanceMessage);

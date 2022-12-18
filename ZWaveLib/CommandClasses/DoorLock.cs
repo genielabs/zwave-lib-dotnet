@@ -21,8 +21,6 @@
  *     Project Homepage: https://github.com/genielabs/zwave-lib-dotnet
  */
 
-using ZWaveLib.Values;
-
 namespace ZWaveLib.CommandClasses
 {
     public class DoorLock : ICommandClass

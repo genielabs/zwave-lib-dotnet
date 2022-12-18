@@ -408,12 +408,12 @@ namespace ZWaveLib
                         messageEvent = cc.GetEvent(this, message);
                     }else
                     {
-                        Utility.logger.Debug("CommandClass {0} not supported yet", commandClass);
+                        Utility.Logger.Debug("CommandClass {0} not supported yet", commandClass);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Utility.logger.Error(ex);
+                    Utility.Logger.Error(ex);
                 }
             }
 
@@ -423,7 +423,7 @@ namespace ZWaveLib
             }
             else if (messageLength > 3 && rawMessage[3] != (byte)ZWaveFunction.SendData)
             {
-                Utility.logger.Warn("Unhandled message type: {0}", BitConverter.ToString(rawMessage));
+                Utility.Logger.Warn("Unhandled message type: {0}", BitConverter.ToString(rawMessage));
             }
 
             return false;

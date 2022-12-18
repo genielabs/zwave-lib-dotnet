@@ -22,7 +22,6 @@
  *     Project Homepage: https://github.com/genielabs/zwave-lib-dotnet
  */
 
-using System;
 using ZWaveLib.Values;
 using System.Collections.Generic;
 

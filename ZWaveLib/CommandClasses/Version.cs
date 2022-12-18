@@ -21,7 +21,7 @@
 *     Author: https://github.com/bounz
 *     Project Homepage: https://github.com/genielabs/zwave-lib-dotnet
 */
-using System;
+
 using ZWaveLib.Values;
 
 namespace ZWaveLib.CommandClasses
@@ -66,7 +66,7 @@ namespace ZWaveLib.CommandClasses
                 }
                 else
                 {
-                    Utility.logger.Warn("Command Class {0} ({1}) not supported yet", message[3], message[3].ToString("X2"));
+                    Utility.Logger.Warn("Command Class {0} ({1}) not supported yet", message[3], message[3].ToString("X2"));
                 }
             }
 

@@ -44,7 +44,7 @@ namespace ZWaveLib.CommandClasses
                 {
                     byte key = message[2];
                     nodeEvent = new NodeEvent(node, EventParameter.SensorGeneric, sensor.Value, 0);
-                    Utility.logger.Error("Unhandled sensor parameter type: " + key);
+                    Utility.Logger.Error("Unhandled sensor parameter type: " + key);
                 }
                 else
                 {

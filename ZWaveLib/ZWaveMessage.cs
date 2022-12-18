@@ -220,12 +220,12 @@ namespace ZWaveLib
                 seqNumber = 0;
             Seq = ++seqNumber;
 
-            Utility.logger.Debug("ZWaveMessage (RawData={0})", BitConverter.ToString(RawData));
+            Utility.Logger.Debug("ZWaveMessage (RawData={0})", BitConverter.ToString(RawData));
             if (Direction == MessageDirection.Inbound)
-                Utility.logger.Debug("ZWaveMessage (Direction={0}, Header={1}, NodeId={2}, Type={3}, Function={4}, CommandClass={5})",
+                Utility.Logger.Debug("ZWaveMessage (Direction={0}, Header={1}, NodeId={2}, Type={3}, Function={4}, CommandClass={5})",
                     Direction, Header, NodeId, Type, Function, CommandClass);
             else
-                Utility.logger.Debug("ZWaveMessage (Direction={0}, Header={1}, NodeId={2}, Type={3}, Function={4}, CommandClass={5}, CallbackId={6}, CallbackStatus={7})",
+                Utility.Logger.Debug("ZWaveMessage (Direction={0}, Header={1}, NodeId={2}, Type={3}, Function={4}, CommandClass={5}, CallbackId={6}, CallbackStatus={7})",
                     Direction, Header, NodeId, Type, Function, CommandClass, CallbackId, CallbackStatus);
         }
 
@@ -238,7 +238,7 @@ namespace ZWaveLib
             {
                 sentAck.WaitOne(SendMessageTimeoutMs);
             } catch (Exception e) {
-                Utility.logger.Error(e);
+                Utility.Logger.Error(e);
             }
             return this;
         }

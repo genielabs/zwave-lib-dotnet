@@ -21,8 +21,6 @@
  *     Project Homepage: https://github.com/genielabs/zwave-lib-dotnet
  */
 
-using System;
-
 namespace ZWaveLib.CommandClasses
 {
     public class SwitchBinary : ICommandClass

@@ -21,10 +21,8 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
 
-namespace ZWaveLib.Devices
+namespace ZWaveLib
 {
     public class AesWork
     {
@@ -61,10 +59,10 @@ namespace ZWaveLib.Devices
         {
             if (nc == null)
             {
-                Utility.logger.Error("The used key has not been generated.");
+                Utility.Logger.Error("The used key has not been generated.");
                 return zeroIV;
             }
-            RijndaelManaged rijndael = new RijndaelManaged();
+            var rijndael = Aes.Create("AesManaged");;
             rijndael.Key = nc;
             rijndael.IV = iv;
             rijndael.Mode = cm;

@@ -109,7 +109,7 @@ namespace ZWaveLib.CommandClasses
                 var wakeUpResendQueue = GetResendQueueData(node);
                 for (int m = 0; m < wakeUpResendQueue.Count; m++)
                 {
-                    Utility.logger.Trace("Sending message {0} {1}", m, BitConverter.ToString(wakeUpResendQueue[m]));
+                    Utility.Logger.Trace("Sending message {0} {1}", m, BitConverter.ToString(wakeUpResendQueue[m]));
                     node.SendMessage(wakeUpResendQueue[m]);
                 }
                 wakeUpResendQueue.Clear();
@@ -131,18 +131,18 @@ namespace ZWaveLib.CommandClasses
                     Array.Copy(wakeUpResendQueue[i], 0, queuedCommand, 0, minCommandLength);
                     if (queuedCommand.SequenceEqual(command))
                     {
-                        Utility.logger.Trace("Removing old message {0}", BitConverter.ToString(wakeUpResendQueue[i]));
+                        Utility.Logger.Trace("Removing old message {0}", BitConverter.ToString(wakeUpResendQueue[i]));
                         try
                         {
                             wakeUpResendQueue.RemoveAt(i);
                         }
                         catch (Exception e)
                         {
-                            Utility.logger.Warn("Error removing message from WakeUp queue: {0}", e.Message);
+                            Utility.Logger.Warn("Error removing message from WakeUp queue: {0}", e.Message);
                         }
                     }
                 }
-                Utility.logger.Trace("Adding message {0}", BitConverter.ToString(msg));
+                Utility.Logger.Trace("Adding message {0}", BitConverter.ToString(msg));
                 wakeUpResendQueue.Add(msg);
                 var wakeUpStatus = (WakeUpStatus)node.GetData("WakeUpStatus", new WakeUpStatus()).Value;
                 if (!wakeUpStatus.IsSleeping)
