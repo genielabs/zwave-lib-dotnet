@@ -142,7 +142,10 @@ namespace ZWaveLib
             serialPort.ConnectionStatusChanged += SerialPort_ConnectionStatusChanged;
             // Setup Queue Manager Task
             queuedMessages = new List<ZWaveMessage>();
-            queueManager = new Thread(QueueManagerTask);
+            queueManager = new Thread(QueueManagerTask)
+            {
+                IsBackground = true
+            };
             queueManager.Start();
         }
 

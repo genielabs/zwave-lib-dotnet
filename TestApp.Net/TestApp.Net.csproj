@@ -4,6 +4,7 @@
         <RootNamespace>ConsoleApp1</RootNamespace>
         <LangVersion>10</LangVersion>
         <TargetFrameworks>net472;net6.0;netstandard2.0</TargetFrameworks>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
