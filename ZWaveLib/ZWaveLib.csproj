@@ -27,6 +27,6 @@
     <TargetFrameworks>net6.0;netstandard2.0;net472;net9.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="SerialPortLib" Version="1.2.1" />
+    <PackageReference Include="SerialPortLib" Version="1.2.2" />
   </ItemGroup>
 </Project>
