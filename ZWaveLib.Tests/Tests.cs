@@ -1,7 +1,7 @@
 /*
  This file is part of ZWaveLib (https://github.com/genielabs/zwave-lib-dotnet)
 
- Copyright (2012-2018) G-Labs (https://github.com/genielabs)
+ Copyright (2012-2025) G-Labs (https://github.com/genielabs)
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -25,6 +25,6 @@ public class Tests
     [Test]
     public void Test1()
     {
-        Assert.True(true);
+        Assert.Pass();
     }
 }
