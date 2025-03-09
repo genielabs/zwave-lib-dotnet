@@ -1,7 +1,7 @@
 /*
   This file is part of ZWaveLib (https://github.com/genielabs/zwave-lib-dotnet)
 
-  Copyright (2012-2018) G-Labs (https://github.com/genielabs)
+  Copyright (2012-2025) G-Labs (https://github.com/genielabs)
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@
 
 using System;
 using System.Collections.Generic;
-using NLog;
+using System.Text.Json;
+using SerialPortLib;
 
 namespace ZWaveLib
 {
@@ -32,38 +33,46 @@ namespace ZWaveLib
 
         internal static class Logger
         {
-            private static readonly NLog.Logger LoggerInstance = LogManager.GetCurrentClassLogger();
-
             public static void Info(String message, params object[] args)
             {
-                LoggerInstance.Info(message, args);
+                Logging.LogInfo(message, Stringify(args));
             }
 
             public static void Warn(String message, params object[] args)
             {
-                LoggerInstance.Warn(message, args);
+                Logging.LogWarning(message, Stringify(args));
             }
 
             public static void Error(String message, params object[] args)
             {
-                LoggerInstance.Error(message, args);
+                Logging.LogError(message, Stringify(args));
             }
 
             public static void Error(Exception exception)
             {
-                LoggerInstance.Error(exception);
+                Logging.LogError(exception);
             }
 
             public static void Debug(String message, params object[] args)
             {
-                LoggerInstance.Debug(message, args);
+                Logging.LogDebug(message, Stringify(args));
             }
 
             public static void Trace(String message, params object[] args)
             {
-                LoggerInstance.Trace(message, args);
+                Logging.LogTrace(message, Stringify(args));
             }
 
+        }
+
+        public static string Stringify(object[] args)
+        {
+            var s = "";
+            foreach (var o in args)
+            {
+                s += (o is string ? o : JsonSerializer.Serialize(o)) + "\t";
+            }
+            return s.TrimEnd('\t');
         }
 
         //from
