@@ -23,57 +23,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
-using SerialPortLib;
+using GLabs.Logging;
 
 namespace ZWaveLib
 {
     public static class Utility
     {
-
-        internal static class Logger
-        {
-            public static void Info(String message, params object[] args)
-            {
-                Logging.LogInfo(message, Stringify(args));
-            }
-
-            public static void Warn(String message, params object[] args)
-            {
-                Logging.LogWarning(message, Stringify(args));
-            }
-
-            public static void Error(String message, params object[] args)
-            {
-                Logging.LogError(message, Stringify(args));
-            }
-
-            public static void Error(Exception exception)
-            {
-                Logging.LogError(exception);
-            }
-
-            public static void Debug(String message, params object[] args)
-            {
-                Logging.LogDebug(message, Stringify(args));
-            }
-
-            public static void Trace(String message, params object[] args)
-            {
-                Logging.LogTrace(message, Stringify(args));
-            }
-
-        }
-
-        public static string Stringify(object[] args)
-        {
-            var s = "";
-            foreach (var o in args)
-            {
-                s += (o is string ? o : JsonSerializer.Serialize(o)) + "\t";
-            }
-            return s.TrimEnd('\t');
-        }
+        internal static readonly Logger Logger = LogManager.GetLogger("ZWaveLib");
 
         //from
         //http://stackoverflow.com/questions/311165/how-do-you-convert-byte-array-to-hexadecimal-string-and-vice-versa

@@ -24,9 +24,9 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <TargetFrameworks>net6.0;netstandard2.0;net472;net9.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net472;net6.0;net8.0;net9.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="SerialPortLib" Version="1.2.3" />
+    <PackageReference Include="SerialPortLib" Version="1.3.0" />
   </ItemGroup>
 </Project>

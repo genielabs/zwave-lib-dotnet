@@ -3,12 +3,19 @@
     <PropertyGroup>
         <RootNamespace>ConsoleApp1</RootNamespace>
         <LangVersion>10</LangVersion>
-        <TargetFrameworks>net472;net6.0;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\ZWaveLib\ZWaveLib.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="appsettings.json" />
+      <Content Include="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>
