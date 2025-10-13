@@ -13,6 +13,10 @@
 - 100% managed code implementation
 - Compatible with Mono
 
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/genielabs/zwave-lib-dotnet)
+
+
 ## NuGet Package
 
 ZWaveLib  is available as a [NuGet package](https://www.nuget.org/packages/ZWaveLib).
