@@ -1,0 +1,85 @@
+name: Publish ZWaveLib to NuGet
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing GitHub release tag (for example 1.3.1)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nuget-zwavelib-${{ inputs.release_tag || github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      RELEASE_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}
+    steps:
+      - name: Download the NuGet package from the published release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$RELEASE_TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Expected a release tag such as 1.3.1 or v1.3.1"
+            exit 1
+          fi
+          if [[ "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" != false ]]; then
+            echo "::error::The release must be published before pushing to NuGet"
+            exit 1
+          fi
+          version=${RELEASE_TAG#v}
+          package="ZWaveLib.$version.nupkg"
+          # AppVeyor can publish the release before its asset upload completes.
+          for attempt in {1..12}; do
+            if gh release download "$RELEASE_TAG" --pattern "$package" --output "$package" --clobber; then
+              break
+            fi
+            if [[ $attempt == 12 ]]; then exit 1; fi
+            sleep 10
+          done
+          python3 - "$package" "$version" <<'PY'
+          import sys
+          import xml.etree.ElementTree as ET
+          import zipfile
+
+          filename, version = sys.argv[1:]
+          with zipfile.ZipFile(filename) as package:
+              manifests = [n for n in package.namelist() if "/" not in n and n.endswith(".nuspec")]
+              if len(manifests) != 1:
+                  sys.exit("Expected exactly one package manifest")
+              metadata = ET.fromstring(package.read(manifests[0])).find("{*}metadata")
+              if (metadata is None or metadata.findtext("{*}id") != "ZWaveLib"
+                      or metadata.findtext("{*}version") != version):
+                  sys.exit("The package ID or version does not match the release")
+          PY
+          sha256sum "$package"
+          echo "PACKAGE=$package" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Log in to NuGet using trusted publishing
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: G-Labs
+
+      - name: Publish the release asset to NuGet
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "$PACKAGE" --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY" --skip-duplicate
