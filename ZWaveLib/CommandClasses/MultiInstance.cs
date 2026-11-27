@@ -208,10 +208,7 @@ namespace ZWaveLib.CommandClasses
                 Utility.Logger.Error(String.Format("Can't find CommandClass handler for command class {0}", instanceCmdClass));
                 return null;
             }
-            NodeEvent zevent = cc.GetEvent(node, instanceMessage);
-            zevent.Instance = instanceNumber;
-            zevent.NestedEvent = GetNestedEvent(instanceCmdClass, zevent);
-            return zevent;
+            return SetInstance(cc.GetEvent(node, instanceMessage), instanceCmdClass, instanceNumber);
         }
 
         private NodeEvent HandleMultiChannelEncapReport(ZWaveNode node, byte[] message)
@@ -235,10 +232,23 @@ namespace ZWaveLib.CommandClasses
                 Utility.Logger.Error(String.Format("Can't find CommandClass handler for command class {0}", instanceCmdClass));
                 return null;
             }
-            NodeEvent zevent = cc.GetEvent(node, instanceMessage);
-            zevent.Instance = instanceNumber;
-            zevent.NestedEvent = GetNestedEvent(instanceCmdClass, zevent);
-            return zevent;
+            return SetInstance(cc.GetEvent(node, instanceMessage), instanceCmdClass, instanceNumber);
+        }
+
+        private NodeEvent SetInstance(NodeEvent report, byte commandClass, byte instance)
+        {
+            if (report == null)
+                return null;
+            NodeEvent tail = report;
+            while (true)
+            {
+                tail.Instance = instance;
+                if (tail.NestedEvent == null)
+                    break;
+                tail = tail.NestedEvent;
+            }
+            tail.NestedEvent = GetNestedEvent(commandClass, report);
+            return report;
         }
 
         private NodeEvent GetNestedEvent(byte commandClass, NodeEvent nodeEvent)

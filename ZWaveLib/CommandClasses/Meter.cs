@@ -34,12 +34,26 @@ namespace ZWaveLib.CommandClasses
 
         public NodeEvent GetEvent(ZWaveNode node, byte[] message)
         {
+            if (message == null || message.Length < 2)
+                return null;
+            if (message[1] == (byte)Command.MeterSupportedReport)
+            {
+                int version = node.GetCommandClass(CommandClass.Meter)?.Version ?? -1;
+                var report = MeterSupportedReport.Parse(message, version);
+                return report == null ? null : new NodeEvent(node, EventParameter.MeterSupportedReport, report, 0);
+            }
             NodeEvent nodeEvent = null;
             byte cmdType = message[1];
             if (cmdType == (byte)Command.MeterReport)
             {
+                if (message.Length < 4)
+                    return null;
+                int size = message[3] & 7;
+                if ((size != 1 && size != 2 && size != 4) || message.Length < 4 + size)
+                    return null;
                 EnergyValue energy = EnergyValue.Parse(message);
-                nodeEvent = new NodeEvent(node, energy.EventType, energy.Value, 0);
+                if (energy != null)
+                    nodeEvent = new NodeEvent(node, energy.EventType, energy.Value, 0);
             }
             return nodeEvent;
         }

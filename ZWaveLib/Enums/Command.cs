@@ -65,6 +65,10 @@ namespace ZWaveLib
         SensorAlarmSupportedGet = 0x03,
         SensorAlarmSupportedReport = 0x04,
         //
+        NotificationEventSupportedGet = 0x01,
+        NotificationEventSupportedReport = 0x02,
+        NotificationSupportedGet = 0x07,
+        NotificationSupportedReport = 0x08,
         AlarmGet = 0x04,
         AlarmReport = 0x05,
 

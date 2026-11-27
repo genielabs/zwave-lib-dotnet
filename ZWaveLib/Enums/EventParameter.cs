@@ -99,7 +99,10 @@ namespace ZWaveLib
 
         Ultraviolet,
 
-        CapabilityReport
+        CapabilityReport,
+        MeterSupportedReport,
+        NotificationSupportedReport,
+        NotificationEventSupportedReport
     }
 
 }

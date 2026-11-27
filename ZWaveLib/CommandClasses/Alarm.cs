@@ -34,14 +34,54 @@ namespace ZWaveLib.CommandClasses
 
         public NodeEvent GetEvent(ZWaveNode node, byte[] message)
         {
+            if (message == null || message.Length < 2)
+                return null;
+            if (message[1] == (byte)Command.NotificationSupportedReport)
+            {
+                if (message.Length < 3 || (message[2] & 0x1f) == 0)
+                    return null;
+                var types = NotificationSupportedReport.ReadMask(message, 3, message[2] & 0x1f);
+                if (types == null)
+                    return null;
+                var report = new NotificationSupportedReport { Types = types, SupportsLegacyAlarm = (message[2] & 0x80) != 0 };
+                return new NodeEvent(node, EventParameter.NotificationSupportedReport, report, 0);
+            }
+            if (message[1] == (byte)Command.NotificationEventSupportedReport)
+            {
+                if (message.Length < 4)
+                    return null;
+                var events = NotificationSupportedReport.ReadMask(message, 4, message[3] & 0x1f);
+                if (events == null)
+                    return null;
+                var report = new NotificationEventSupportedReport { Type = message[2], Events = events };
+                return new NodeEvent(node, EventParameter.NotificationEventSupportedReport, report, 0);
+            }
             NodeEvent nodeEvent = null;
             byte cmdType = message[1];
             if (cmdType == (byte)Command.AlarmReport)
             {
                 var alarm = AlarmValue.Parse(message);
+                if (alarm == null)
+                    return null;
                 nodeEvent = new NodeEvent(node, alarm.EventType, alarm.Value, 0);
+                // Without an event parameter, idle applies to every state of this type.
+                if (alarm.Parameter == ZWaveAlarmType.Burglar && alarm.IsTypeIdle)
+                {
+                    nodeEvent.NestedEvent = new NodeEvent(node, EventParameter.SensorMotion, (byte)0, 0);
+                    nodeEvent.NestedEvent.NestedEvent = new NodeEvent(node, EventParameter.AlarmTampered, (byte)0, 0);
+                }
             }
             return nodeEvent;
+        }
+
+        public static ZWaveMessage GetSupported(ZWaveNode node)
+        {
+            return node.SendDataRequest(new[] { (byte)CommandClass.Alarm, (byte)Command.NotificationSupportedGet });
+        }
+
+        public static ZWaveMessage GetSupportedEvents(ZWaveNode node, byte type)
+        {
+            return node.SendDataRequest(new[] { (byte)CommandClass.Alarm, (byte)Command.NotificationEventSupportedGet, type });
         }
     
     }

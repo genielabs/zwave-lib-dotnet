@@ -85,6 +85,8 @@ namespace ZWaveLib.CommandClasses
                     child.NestedEvent = tmp;
                     child = tmp;
                 }
+                while (child.NestedEvent != null)
+                    child = child.NestedEvent;
             }
 
             return parent;

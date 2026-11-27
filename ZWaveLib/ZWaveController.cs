@@ -517,7 +517,9 @@ namespace ZWaveLib
                         break;
                     // if not cached query the node.
                     if (cmdClass.CommandClass != CommandClass.NotSet && cmdClass.Version == -1)
-                        ZWaveLib.CommandClasses.Version.Get(zn, cmdClass.CommandClass).Wait();
+                        ZWaveLib.CommandClasses.Version.Get(zn, cmdClass.CommandClass)?.Wait();
+                    else
+                        RequestSupportedReport(zn, cmdClass.CommandClass, cmdClass.Version);
                 }
             }
         }
@@ -1278,6 +1280,16 @@ namespace ZWaveLib
 
         #region ZWaveNode event handlers
 
+        private static void RequestSupportedReport(ZWaveNode node, CommandClass commandClass, int version)
+        {
+            if (version < 2)
+                return;
+            if (commandClass == CommandClass.Meter)
+                Meter.GetSupported(node);
+            else if (commandClass == CommandClass.Alarm)
+                Alarm.GetSupported(node);
+        }
+
         private void ZWave_NodeUpdated(object sender, NodeEvent eventData)
         {
             ZWaveNode node = (ZWaveNode)sender;
@@ -1300,6 +1312,14 @@ namespace ZWaveLib
                 }
                 // we just send other events and save the node data
                 NodeInformationFrameDone(node);
+            }
+            if (eventData.Instance == 0 && eventData.Parameter == EventParameter.VersionCommandClass && eventData.Value is Values.VersionValue version)
+                RequestSupportedReport(node, version.CmdClass, version.Version);
+            if (eventData.Instance == 0 && eventData.Value is Values.NotificationSupportedReport supported &&
+                node.GetCommandClass(CommandClass.Alarm)?.Version >= 3)
+            {
+                foreach (int type in supported.Types)
+                    Alarm.GetSupportedEvents(node, (byte)type);
             }
             // Route node event
             OnNodeUpdated(new NodeUpdatedEventArgs(eventData.Node.Id, eventData));

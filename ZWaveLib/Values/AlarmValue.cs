@@ -67,9 +67,14 @@ namespace ZWaveLib.Values
         public ZWaveAlarmEvent Event = ZWaveAlarmEvent.Generic;
         public byte Value = 0x00;
 
+        internal bool IsTypeIdle { get; private set; }
+
         public static AlarmValue Parse(byte[] message)
         {
             AlarmValue alarm = new AlarmValue();
+            if (message == null || message.Length < 4)
+                return null;
+            bool idle = false;
             byte cmdClass = message[0];
 
             if (cmdClass == (byte)CommandClass.SensorAlarm)
@@ -79,13 +84,21 @@ namespace ZWaveLib.Values
             }
             else // CommandClass.Alarm
             {
-                // TODO: change this to --> if (node.GetCommandClass(CommandClass.Alarm).Version == 2) ...
-                if (message.Length > 7)
+                if (message.Length > 4 && message.Length < 8)
+                    return null;
+                if (message.Length >= 8 && message[6] != 0)
                 {
-                    // Version 2
-                    alarm.Event = (ZWaveAlarmEvent)Enum.Parse(typeof(ZWaveAlarmEvent), message[7].ToString());
-                    alarm.Parameter = (ZWaveAlarmType)Enum.Parse(typeof(ZWaveAlarmType), message[6].ToString());
-                    alarm.Value = message[5];
+                    int properties = message.Length >= 9 ? message[8] : 0;
+                    int parameterLength = properties & 0x1f;
+                    int sequenceLength = (properties & 0x80) == 0 ? 0 : 1;
+                    if (message.Length >= 9 && message.Length < 9 + parameterLength + sequenceLength)
+                        return null;
+                    idle = message[7] == 0;
+                    alarm.IsTypeIdle = idle && parameterLength == 0;
+                    alarm.Event = (ZWaveAlarmEvent)(idle && parameterLength > 0 ? message[9] : message[7]);
+                    alarm.Parameter = (ZWaveAlarmType)message[6];
+                    // Notification Status describes reporting, not the sensor state.
+                    alarm.Value = idle ? (byte)0 : (byte)0xff;
                 }
                 else
                 {
@@ -139,6 +152,8 @@ namespace ZWaveLib.Values
                 break;
             }
 
+            if (idle)
+                alarm.Value = 0;
             return alarm;
         }
     }

@@ -135,7 +135,7 @@ namespace ZWaveLib.CommandClasses.Irrigation
             return node.SendDataRequest(new[]
             {
                 (byte) CommandClass.Irrigation,
-                (byte) Command.IrrigationSystemStatusGet
+                (byte) Command.IrrigationSystemConfigGet
             });
         }
 
