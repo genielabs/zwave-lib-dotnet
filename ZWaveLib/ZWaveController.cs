@@ -1,4 +1,4 @@
-﻿/*
+/*
   This file is part of ZWaveLib (https://github.com/genielabs/zwave-lib-dotnet)
 
   Copyright (2012-2018) G-Labs (https://github.com/genielabs)
@@ -65,7 +65,7 @@ namespace ZWaveLib
 
         private List<ZWaveNode> nodeList = new List<ZWaveNode>();
 
-        private byte[] serialBuffer = null;
+        private volatile SerialFrameReader serialFrameReader = new SerialFrameReader();
         private byte[] lastMessage = null;
         private DateTime lastMessageTimestamp = DateTime.UtcNow;
 
@@ -1309,83 +1309,22 @@ namespace ZWaveLib
 
         #region Serial Port events and data parsing
 
-        /// <summary>
-        /// Parses the data buffer coming from the serial port.
-        /// </summary>
-        /// <param name="message">raw bytes data.</param>
-        private void ParseSerialData(byte[] message)
+        private void ProcessSerialFrame(byte[] frame)
         {
-            if (serialBuffer != null)
-            {
-                byte[] merged = new byte[serialBuffer.Length + message.Length];
-                Array.Copy(serialBuffer, 0, merged, 0, serialBuffer.Length);
-                Array.Copy(message, 0, merged, serialBuffer.Length, message.Length);
-                message = merged;
-                serialBuffer = null;
-                Utility.Logger.Trace("Merged buffer to message: {0}", BitConverter.ToString(message));
-            }
-
-            // Extract Z-Wave frames from incoming serial port data
-            FrameHeader header = (FrameHeader)((int)message[0]);
-            if (header == FrameHeader.ACK)
-            {
-                if (message.Length > 1)
-                {
-                    byte[] msg = new byte[message.Length - 1];
-                    Array.Copy(message, 1, msg, 0, msg.Length);
-                    ProcessMessage(new ZWaveMessage(msg, MessageDirection.Inbound));
-                }
-                return;
-            }
-
-            int msgLength = 0;
-            byte[] nextMessage = null;
-            if (header == FrameHeader.CAN && message.Length > 1)
-            {
-                nextMessage = new byte[message.Length - 1];
-                Array.Copy(message, 1, nextMessage, 0, nextMessage.Length);
-                message = new byte[] { (byte)header };
-            }
-            else if (message.Length > 1)
-            {
-                msgLength = (int)message[1];
-                if (message.Length > msgLength + 2)
-                {
-                    nextMessage = new byte[message.Length - msgLength - 2];
-                    Array.Copy(message, msgLength + 2, nextMessage, 0, nextMessage.Length);
-                    byte[] tmpmsg = new byte[msgLength + 2];
-                    Array.Copy(message, 0, tmpmsg, 0, msgLength + 2);
-                    message = tmpmsg;
-                }
-                else if (header == FrameHeader.SOF && message.Length < msgLength + 2)
-                {
-                    serialBuffer = new byte[message.Length];
-                    Array.Copy(message, 0, serialBuffer, 0, serialBuffer.Length);
-                    Utility.Logger.Trace("Expected message length is {0}, currently received length is {1}", msgLength + 2, message.Length);
-                    return;
-                }
-            }
-
             try
             {
-                ProcessMessage(new ZWaveMessage(message, MessageDirection.Inbound));
+                ProcessMessage(new ZWaveMessage(frame, MessageDirection.Inbound));
             }
             catch (Exception e)
             {
                 Utility.Logger.Error(e);
-            }
-
-            if (nextMessage != null)
-            {
-                // TODO: Check out possible recursion loops
-                ParseSerialData(nextMessage);
             }
         }
 
         private void SerialPort_ConnectionStatusChanged(object sender, ConnectionStatusChangedEventArgs args)
         {
             var status = args.Connected ? ControllerStatus.Connected : ControllerStatus.Disconnected;
-            serialBuffer = null;
+            serialFrameReader = new SerialFrameReader();
             lastMessage = null;
             Thread.Sleep(1000);
             OnControllerStatusChanged(new ControllerStatusEventArgs(status));
@@ -1396,8 +1335,14 @@ namespace ZWaveLib
             lock (readLock)
             {
                 busyReceiving = true;
-                ParseSerialData(args.Data);
-                busyReceiving = false;
+                try
+                {
+                    serialFrameReader.Read(args.Data, ProcessSerialFrame);
+                }
+                finally
+                {
+                    busyReceiving = false;
+                }
             }
         }
 
